@@ -6,10 +6,10 @@
   "license": "MIT",
   "author": "",
   "packageManager": "pnpm@11.5.2",
-  "homepage": "https://github.com/your-org/glyphnav#readme",
+  "homepage": "https://github.com/z1m1n/glyphnav#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/glyphnav.git"
+    "url": "https://github.com/z1m1n/glyphnav.git"
   },
   "keywords": [
     "navigation",
