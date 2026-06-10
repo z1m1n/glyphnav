@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+demo/dist/
+demo/angular/dist/
+demo/angular/.angular/
+*.local
+*.log
+.DS_Store
+.vite/
+.idea/
+.vscode/

@@ -1,0 +1,304 @@
+# glyphnav
+
+> Animate navigation: watch the URL **decode itself, glyph by glyph**, right in the address bar — then commit the real navigation.
+
+```
+/  →  /x  →  /xy  →  /xyz  →  /xyzw  →  /tyzw  →  /tezw  →  /tesw  →  /test
+      └────────────  grow  ────────────┘└───────────  resolve  ──────────┘
+```
+
+`glyphnav` rewrites `history.replaceState` frame by frame: it fills the destination
+path with random glyphs (the **grow** phase), then resolves the real characters
+left‑to‑right (the **resolve** phase). When the animation finishes it performs the
+actual navigation — a hard reload for plain links, or a hand‑off to your router for SPAs.
+
+- 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
+- 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
+  `glyphnav/react-router`, `glyphnav/tanstack-react-router`, `glyphnav/angular-router`.
+- ⚡ **Navigate‑first mode** (`commit: 'before'`) — the page changes instantly,
+  the animation plays on top; the classic animate‑then‑commit stays the default.
+- 🎞️ **Two effects**: `decode` (grow + resolve left‑to‑right) and `scramble`
+  (full‑length noise at once, characters lock in random order).
+- ⏱️ **`duration`** budgets the *whole* animation — frames auto‑scale to fit.
+- 🪶 **~1 kB** per adapter (gzipped) on top of a ~3 kB core.
+- ♿ Honors `prefers-reduced-motion`, supersedes overlapping navigations, fully cancelable.
+- 🛡️ Writes only rooted same‑origin paths and backs off if the URL changes
+  underneath it (back button mid‑animation) — the address bar can't be corrupted.
+- 🧪 ESM + CJS + types, built with **Vite**, covered by **Vitest**.
+
+---
+
+## Install
+
+```bash
+pnpm add glyphnav
+# npm install glyphnav  ·  yarn add glyphnav
+```
+
+Router adapters use your existing router as a peer dependency — nothing extra to install.
+
+---
+
+## Quick start (no framework)
+
+```ts
+import { install, navigate } from 'glyphnav';
+
+// Hijack same-origin <a> clicks so every navigation animates, then reloads.
+install();
+
+// Animate only programmatic calls, leave links alone:
+install({ intercept: 'none' });
+await navigate('/dashboard');             // animate, then location.assign('/dashboard')
+await navigate('/dashboard', { reload: false }); // animate, then history.pushState (SPA)
+
+// Navigate-first: pushState immediately, decode the bar on top (SPA only —
+// hard reloads fall back to the classic order because the page unloads):
+install({ reload: false, commit: 'before', duration: 250, effect: 'scramble' });
+```
+
+`install()` ignores the things a good link interceptor should: modified clicks
+(⌘/Ctrl/Shift/middle), `target="_blank"`, `download`, `rel="external"`,
+cross‑origin links, and anything marked `data-glyphnav="off"`.
+
+---
+
+## How it works
+
+Given a target like `/test` (query and hash included — they are just part of the
+path), glyphnav splits it into a **fixed prefix** and the **animated text**, then
+generates frames. Two effects:
+
+- **`decode`** (default) —
+  1. **grow**: append one random glyph per frame until the text reaches the
+     target length, producing a random "base" string.
+  2. **resolve**: lock in the real characters left‑to‑right, leaving the
+     unresolved tail at its base glyphs.
+- **`scramble`** — a random string of the target's full length appears
+  immediately, then the real characters lock in at **random positions** while
+  every unresolved slot keeps flickering:
+  `/qqqq → /qeqq → /qesq → /qest → /test`.
+
+By default the real navigation is committed after the last frame. With
+`commit: 'before'` the order flips: the navigation goes out **immediately** —
+the page never waits for the animation — and the bar replays the decode from
+the old path to wherever the navigation landed (router redirects included).
+
+Each frame is written with `history.replaceState` (no new history entries, back button
+untouched, and via `History.prototype` so router‑patched history wrappers never see the
+frames). The starting path is restored right before the real navigation so router
+history stays clean. Safety rails:
+
+- Relative targets are resolved against the current path; only rooted same‑origin
+  paths are animated (cross‑origin targets are committed without animation).
+- If the URL changes externally mid‑animation (back/forward button, another script),
+  the run cancels itself and leaves the new URL alone.
+
+Frame generation is pure and deterministic given an `rng`, which is exactly what the
+test‑suite pins down.
+
+---
+
+## Options
+
+Every entry point accepts the same options object.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `charset` | `string` | url‑safe set | Pool of random glyphs. Non‑URL‑safe glyphs are percent‑encoded in the bar. |
+| `duration` | `number \| null` | `null` | **Total animation time in ms**, spread over all frames (frames auto‑scale, ≥ ~15 ms each). Takes precedence over `stepDuration`. |
+| `stepDuration` | `number` | `40` | Milliseconds per frame, used when no `duration` is set. |
+| `effect` | `'decode' \| 'scramble'` | `'decode'` | `decode` grows then resolves left‑to‑right; `scramble` bursts to full length, then locks characters in random order. |
+| `commit` | `'after' \| 'before'` | `'after'` | `after` animates, then navigates. `before` navigates **immediately** and animates on top of the landed URL. |
+| `growStep` | `number` | `1` | Characters added per grow frame. |
+| `resolveStep` | `number` | `1` | Characters locked per resolve frame. |
+| `maxFrames` | `number` | `120` | Hard cap; steps auto‑scale so long paths never overrun. |
+| `scope` | `'full' \| 'tail'` | `'full'` | `full` animates the whole path; `tail` keeps the common prefix and only animates what differs. |
+| `preserveLeadingSlash` | `boolean` | `true` | Keep the leading `/` fixed (for `scope: 'full'`). |
+| `respectReducedMotion` | `boolean` | `true` | Skip the animation under `prefers-reduced-motion`. |
+| `rng` | `() => number` | `Math.random` | Random source — inject for reproducibility/tests. |
+| `hooks` | `object` | `{}` | `onStart`, `onFrame`, `onCommit`, `onCancel`, `onComplete`. |
+
+### Built‑in charsets
+
+```ts
+import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } from 'glyphnav/core';
+```
+
+`URL_SAFE` is the default and the only one that stays verbatim in the real address bar.
+
+---
+
+## Router adapters
+
+Each subpath is named after the router it wraps. Only the Vue plugin (and vanilla
+`install()`) intercept anything globally — and both can be told not to. The React,
+TanStack and Angular adapters are opt‑in by design: only navigations made through
+their links/hooks animate.
+
+### Vue Router — `glyphnav/vue-router`
+
+```ts
+import { createRouter, createWebHistory } from 'vue-router';
+import { glyphnav } from 'glyphnav/vue-router';
+
+const router = createRouter({ history: createWebHistory(), routes });
+
+app.use(router);
+app.use(glyphnav, { router, duration: 250, commit: 'before' });
+```
+
+The plugin wraps `router.push`/`router.replace`, so every `<router-link>` click and
+programmatic navigation animates first — `await router.push(...)` still resolves to the
+real navigation result. Read the controller anywhere with `useGlyphnav()`, or attach to
+a router manually with `attachGlyphnav(router, options)`.
+
+Prefer to leave the router untouched? Pass `intercept: 'none'` and use the animated
+`push`/`replace` explicitly:
+
+```ts
+app.use(glyphnav, { router, intercept: 'none' });
+
+// in a component:
+const { push } = useGlyphnavRouter();
+await push('/dashboard'); // animated; plain router.push stays native
+```
+
+### React Router — `glyphnav/react-router`
+
+```tsx
+import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/react-router';
+
+<GlyphnavProvider duration={250} effect="scramble" commit="before">
+  <GlyphnavLink to="/about">About</GlyphnavLink>
+</GlyphnavProvider>;
+
+// imperative, drop-in for useNavigate():
+const navigate = useGlyphnavNavigate();
+await navigate('/dashboard');
+```
+
+`GlyphnavLink` is a drop‑in for `<Link>` (basename‑aware via `useHref`), and
+`useGlyphnavNavigate()` mirrors `useNavigate()`. The provider is optional — without it,
+hooks create their own controller.
+
+### TanStack Router — `glyphnav/tanstack-react-router`
+
+```tsx
+import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-react-router';
+
+<GlyphnavProvider duration={250} commit="before">
+  <RouterProvider router={router} />
+</GlyphnavProvider>;
+
+// inside the router tree:
+<GlyphnavLink to="/about">About</GlyphnavLink>;
+
+const navigate = useGlyphnavNavigate();
+await navigate({ to: '/posts' });
+```
+
+`useGlyphnavNavigate()` mirrors TanStack's `useNavigate()` (same `NavigateOptions`
+object) and resolves the basepath‑aware target via `router.buildLocation()`.
+`GlyphnavLink` renders a real `<a href>`; for fully type‑safe links wrap
+`useGlyphnavNavigate()` in your own component.
+
+### Angular Router — `glyphnav/angular-router`
+
+Because glyphnav is built by Vite (not Angular's `ngtsc`), it ships **compiler‑free**
+helpers rather than decorated classes:
+
+```ts
+import { provideGlyphnav, GLYPHNAV } from 'glyphnav/angular-router';
+
+bootstrapApplication(App, {
+  providers: [provideRouter(routes), provideGlyphnav({ duration: 250, commit: 'before' })],
+});
+
+// inject anywhere:
+const nav = inject(GLYPHNAV);
+await nav.navigateByUrl('/about');
+await nav.navigate(['/users', 42]);
+```
+
+The navigator is base‑href aware: `provideGlyphnav` resolves the animated path
+through `Location.prepareExternalUrl`, so apps served under a base href animate
+the URL that really lands in the bar.
+
+For an animated link directive (`[glyphnavLink]`), copy the small directive from
+[`demo/angular-router/glyphnav-link.directive.ts`](demo/angular-router/glyphnav-link.directive.ts)
+into your app, where your own Angular build compiles it. Or wrap a `Router` directly with
+`createGlyphnavNavigator(router, options)`.
+
+---
+
+## Core API — `glyphnav/core`
+
+```ts
+import { createGlyphnav, generateFrames } from 'glyphnav/core';
+
+// Orchestrate it yourself:
+const glyph = createGlyphnav({ duration: 300, effect: 'scramble' });
+await glyph.run('/somewhere', () => myRouter.go('/somewhere'));
+glyph.cancel();
+
+// Or just compute the frames (pure, DOM-free):
+generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
+// → ['/x','/xy','/xyz','/xyzw','/tyzw','/tezw','/tesw','/test']
+```
+
+`createGlyphnav(options, deps)` returns a controller with `run(to, commit, perCall?)`,
+`cancel()`, `update(options)` and an `animating` flag. `deps` lets you inject `history`,
+`getCurrentPath`, a `scheduler` and a reduced‑motion probe (used throughout the tests).
+
+---
+
+## Demos
+
+One Vite playground covers **all five** integrations — vanilla, Vue Router,
+React Router, TanStack Router and Angular Router:
+
+```bash
+pnpm install
+pnpm demo                  # → http://localhost:5173  (picker + every demo)
+```
+
+The Angular demo runs in **JIT mode** inside the same dev server: it imports
+`@angular/compiler` in the browser, so no ngtsc build step (and no second app)
+is needed. The trade‑offs of JIT‑in‑Vite — no AOT template type‑checking, the
+compiler in the bundle, `inject()` instead of constructor DI — are fine for a
+demo; a real app keeps using its own Angular build, which compiles the copied
+directive with AOT as usual.
+
+Every demo shares the same bare, monospace look: a clickable `glyphnav / <router>`
+breadcrumb back to the picker, an in‑page mirror of the address bar, a `docs` tab
+with copy‑paste integration snippets, **deep links with `?query` and `#hash`**
+(they animate like any path), and controls for charset, speed (whole‑animation
+duration 20–1000 ms, slider inverted so full right is fastest), effect
+(`decode`/`scramble`), commit order (`navigate first`/`animate first`) and scope.
+The demos alias `glyphnav` to `src/`, so editing the library updates them live.
+
+---
+
+## Development
+
+The repo is a single [pnpm](https://pnpm.io) **11.5** package
+(`pnpm-workspace.yaml` holds the workspace settings).
+
+```bash
+pnpm test            # Vitest (jsdom) — core, controller, vanilla + all adapters
+pnpm run typecheck   # tsc --noEmit
+pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
+pnpm run coverage    # V8 coverage
+```
+
+The package is built with **Vite 8** in library mode with six entry points
+(`.`, `./core`, `./vue-router`, `./react-router`, `./tanstack-react-router`,
+`./angular-router`); router/framework deps are always externalized. Declarations are
+generated against `tsconfig.build.json` so they land flat in `dist/`.
+
+---
+
+## License
+
+[MIT](LICENSE)

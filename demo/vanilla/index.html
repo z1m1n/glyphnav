@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>glyphnav — vanilla</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <h1><a href="/" data-glyphnav="off">glyphnav</a> <span class="crumb">/ vanilla</span></h1>
+
+    <p class="bar" id="bar">Watch the address bar. Current path: <span class="path" id="path">/</span></p>
+
+    <nav id="nav">
+      <a href="/vanilla/">home</a>
+      <a href="/vanilla/about">about</a>
+      <a href="/vanilla/docs">docs</a>
+      <a href="/vanilla/contact">contact</a>
+    </nav>
+
+    <p class="deep">
+      deep links:
+      <a href="/vanilla/about?ref=deep&page=2">?query</a>
+      <a href="/vanilla/docs#options">#hash</a>
+      <a href="/vanilla/about?q=glyph#results">?query+#hash</a>
+    </p>
+
+    <div class="controls">
+      <label>charset
+        <select id="charset">
+          <option value="url">url-safe</option>
+          <option value="hex">hex</option>
+          <option value="matrix">matrix</option>
+          <option value="symbols">symbols</option>
+        </select>
+      </label>
+      <label>speed
+        <input id="speed" type="range" min="20" max="1000" step="10" value="770" />
+        <span class="ms" id="speedval">250ms</span>
+      </label>
+      <label>effect
+        <select id="effect">
+          <option value="decode">decode</option>
+          <option value="scramble">scramble</option>
+        </select>
+      </label>
+      <label>commit
+        <select id="commit">
+          <option value="before">navigate first</option>
+          <option value="after">animate first</option>
+        </select>
+      </label>
+      <label>scope
+        <select id="scope">
+          <option value="full">full</option>
+          <option value="tail">tail</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="view" id="view"></div>
+
+    <p class="foot">
+      Plain anchors hijacked by <code>install({ reload: false })</code> — navigation commits via
+      <code>pushState</code>. The title link carries <code>data-glyphnav="off"</code>, so it does a
+      normal full page load back to the demo picker.
+    </p>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

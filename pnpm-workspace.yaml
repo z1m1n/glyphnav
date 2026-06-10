@@ -1,0 +1,7 @@
+autoInstallPeers: true
+strictPeerDependencies: false
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  lmdb: true
+  msgpackr-extract: true

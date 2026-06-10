@@ -1,0 +1,89 @@
+/* Bare, classless-ish monospace look: native widgets, default link colors. */
+
+:root {
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  max-width: 44rem;
+  margin: 2.5rem auto;
+  padding: 0 1.25rem;
+  background: #fff;
+  color: #111;
+  font: 15px/1.6 var(--mono);
+}
+
+h1 { font-size: 1.3rem; margin: 0 0 1.25rem; }
+h1 a { color: inherit; }
+h1 .crumb { color: #888; font-weight: 400; }
+
+h2 { font-size: 1rem; margin: 0 0 0.5rem; }
+
+button, select, input { font-family: var(--mono); font-size: 0.9rem; }
+
+/* The in-page mirror of the address bar. */
+.bar { margin: 0 0 1.25rem; }
+.bar .origin { color: #888; }
+.path {
+  background: #f2f2f2;
+  padding: 2px 6px;
+  white-space: pre;
+}
+.resolving .path { background: #e2efe6; }
+
+nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0 0 0.5rem; }
+nav a.active,
+nav a.router-link-exact-active { font-weight: 700; text-decoration: none; color: inherit; }
+
+/* Second nav row: targets with ?query and #hash — they animate like any path. */
+.deep { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0 0 1.25rem; color: #777; font-size: 0.85rem; }
+.deep a { color: #357a5b; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.75rem;
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+}
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #333;
+}
+.controls .ms { min-width: 6ch; display: inline-block; }
+.controls input[type='range'] { width: 7.5rem; }
+
+.view {
+  border: 1px solid #ddd;
+  padding: 1rem 1.25rem;
+  min-height: 7.5rem;
+}
+.view p { margin-bottom: 0; color: #444; }
+
+/* Per-demo docs pages. */
+.view.docs p { margin: 0.75rem 0 0.4rem; }
+.view.docs pre {
+  margin: 0 0 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: #f7f7f7;
+  border: 1px solid #e4e4e4;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+.view.docs pre code { background: none; padding: 0; }
+
+/* Landing page demo picker. */
+.pick { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.5rem 0; padding: 0; list-style: none; }
+.pick li { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: baseline; }
+.pick .hint { color: #777; font-size: 0.85rem; }
+
+.foot { margin-top: 1.5rem; color: #777; font-size: 0.8rem; }
+
+code { background: #f2f2f2; padding: 1px 4px; }

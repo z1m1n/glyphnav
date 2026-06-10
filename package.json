@@ -1,0 +1,134 @@
+{
+  "name": "glyphnav",
+  "version": "0.1.0",
+  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, TanStack Router and Angular Router adapters.",
+  "type": "module",
+  "license": "MIT",
+  "author": "",
+  "packageManager": "pnpm@11.5.2",
+  "homepage": "https://github.com/your-org/glyphnav#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/glyphnav.git"
+  },
+  "keywords": [
+    "navigation",
+    "animation",
+    "url",
+    "address-bar",
+    "router",
+    "scramble",
+    "glitch",
+    "text-effect",
+    "decode",
+    "history",
+    "spa",
+    "vue-router",
+    "react-router",
+    "tanstack-router",
+    "angular-router"
+  ],
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core.js",
+      "require": "./dist/core.cjs"
+    },
+    "./vue-router": {
+      "types": "./dist/vue-router/index.d.ts",
+      "import": "./dist/vue-router.js",
+      "require": "./dist/vue-router.cjs"
+    },
+    "./react-router": {
+      "types": "./dist/react-router/index.d.ts",
+      "import": "./dist/react-router.js",
+      "require": "./dist/react-router.cjs"
+    },
+    "./tanstack-react-router": {
+      "types": "./dist/tanstack-react-router/index.d.ts",
+      "import": "./dist/tanstack-react-router.js",
+      "require": "./dist/tanstack-react-router.cjs"
+    },
+    "./angular-router": {
+      "types": "./dist/angular-router/index.d.ts",
+      "import": "./dist/angular-router.js",
+      "require": "./dist/angular-router.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "demo": "vite --config demo/vite.config.ts",
+    "demo:build": "vite build --config demo/vite.config.ts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=16",
+    "@angular/router": ">=16",
+    "@tanstack/react-router": ">=1",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "react-router-dom": ">=6",
+    "vue": ">=3",
+    "vue-router": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "@angular/core": { "optional": true },
+    "@angular/router": { "optional": true },
+    "@tanstack/react-router": { "optional": true },
+    "react": { "optional": true },
+    "react-dom": { "optional": true },
+    "react-router-dom": { "optional": true },
+    "vue": { "optional": true },
+    "vue-router": { "optional": true }
+  },
+  "devDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/compiler": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "@tanstack/react-router": "^1.170.15",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vitest/coverage-v8": "^4.1.8",
+    "jsdom": "^29.1.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0",
+    "rxjs": "^7.8.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vite-plugin-dts": "^5.0.2",
+    "vitest": "^4.1.8",
+    "vue": "^3.5.35",
+    "vue-router": "^5.1.0",
+    "zone.js": "^0.16.2"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
