@@ -1,6 +1,6 @@
 {
   "name": "glyphnav",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, TanStack Router (React & Solid) and Angular Router adapters.",
   "keywords": [
     "address-bar",
