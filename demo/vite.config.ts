@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
@@ -69,64 +69,38 @@ function baseAwareLinks(): Plugin {
 }
 
 /**
- * GitHub Pages is static — there is no server-side rewrite rule to reach for, so
- * deep-link reloads (e.g. /glyphnav/react-router/docs) hit `<base>/404.html`.
- * This 404 page bounces the request to the matching app's index, encoding the
- * sub-route (and any `?query`/`#hash`) into the URL so the full path survives:
- * `/glyphnav/react-router/docs` → `/glyphnav/react-router/?/docs`. The restore
- * snippet injected by {@link deepLinkRestore} then rewrites the bar back to the
- * real path before the SPA boots, so a reload keeps the exact route instead of
- * resetting to the app's home. Unknown apps fall back to the picker.
+ * GitHub Pages serves only static files: a cold reload of a client route such
+ * as `/react-router/docs` has no matching file and would 404. Each demo has a
+ * fixed, known set of routes, so after the bundle we copy every app's built
+ * `index.html` into a real folder per sub-route (`react-router/docs/index.html`,
+ * …). The reload then serves a real file, the SPA boots, and its router reads
+ * `location` and renders the route — the ordinary SPA path, no redirect/restore
+ * round-trip. `?query`/`#hash` are not part of the file path, so they survive
+ * untouched. The vanilla demo is emitted the same way, so it just works via
+ * real folders too.
  */
-function spaFallback404(): Plugin {
+function staticRoutes(): Plugin {
+  // Sub-routes per app; the "/" home is already the app's own index.html.
+  const ROUTES: Record<string, string[]> = {
+    vanilla: ['about', 'docs', 'contact'],
+    'vue-router': ['about', 'features', 'docs'],
+    'react-router': ['about', 'docs', 'blog'],
+    'tanstack-router': ['about', 'posts', 'docs'],
+    'tanstack-solid-router': ['about', 'posts', 'docs'],
+    'angular-router': ['about', 'docs', 'blog'],
+  };
   return {
-    name: 'demo-spa-fallback-404',
+    name: 'demo-static-routes',
     apply: 'build',
     closeBundle() {
-      const html = `<!doctype html>
-<meta charset="utf-8" />
-<title>glyphnav</title>
-<script>
-  (function () {
-    var base = ${JSON.stringify(base)};
-    var apps = ${JSON.stringify(APPS)};
-    var loc = window.location;
-    var rest = loc.pathname.indexOf(base) === 0 ? loc.pathname.slice(base.length) : '';
-    var app = rest.split('/')[0];
-    if (apps.indexOf(app) === -1) {
-      loc.replace(base);
-      return;
-    }
-    // "&" in the original query is escaped to ~and~ so it survives as a single
-    // value; the restore snippet reverses it. The leading "?/" is the marker.
-    var deep = rest.slice(app.length).replace(/^\\//, '').replace(/&/g, '~and~');
-    var query = loc.search ? '&' + loc.search.slice(1).replace(/&/g, '~and~') : '';
-    loc.replace(base + app + '/?/' + deep + query + loc.hash);
-  })();
-</script>
-`;
-      writeFileSync(r('dist/404.html'), html);
-    },
-  };
-}
-
-/**
- * Injected into every demo page. If GitHub Pages bounced a deep link through
- * {@link spaFallback404}, the URL arrives as `/base/app/?/route&query`; rewrite
- * the bar back to `/base/app/route?query` with `replaceState` before the SPA
- * router (or the vanilla view) reads `location`. A normal `?query` (one that
- * does not start with `?/`) is left untouched, so this is inert on direct loads
- * and in dev, where the fallback never fires.
- */
-function deepLinkRestore(): Plugin {
-  const restore =
-    `(function(l){if(l.search[1]==='/'){` +
-    `var d=l.search.slice(1).split('&').map(function(s){return s.replace(/~and~/g,'&')}).join('?');` +
-    `history.replaceState(null,'',l.pathname.slice(0,-1)+d+l.hash)}})(window.location)`;
-  return {
-    name: 'demo-deep-link-restore',
-    transformIndexHtml() {
-      return [{ tag: 'script', children: restore, injectTo: 'head-prepend' }];
+      for (const [app, routes] of Object.entries(ROUTES)) {
+        const html = readFileSync(r(`dist/${app}/index.html`), 'utf8');
+        for (const route of routes) {
+          const dir = r(`dist/${app}/${route}`);
+          mkdirSync(dir, { recursive: true });
+          writeFileSync(`${dir}/index.html`, html);
+        }
+      }
     },
   };
 }
@@ -180,8 +154,7 @@ export default defineConfig({
     }),
     demoFallback(),
     baseAwareLinks(),
-    deepLinkRestore(),
-    spaFallback404(),
+    staticRoutes(),
   ],
   build: {
     outDir: r('dist'),

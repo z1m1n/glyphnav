@@ -23,9 +23,12 @@ const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
 
 // Build elements without JSX (createComponent + Dynamic), matching the JSX-free
 // adapter — so neither needs the Solid compiler. `mergeProps` (not object
-// spread) keeps `children`/getter props reactive.
+// spread) keeps `children`/getter props reactive. `{ component: tag }` goes last
+// so the typed tag wins: `props` is a `Record<string, unknown>` whose index
+// signature would otherwise widen `component` to `unknown`, which Dynamic (it
+// needs `component: ValidComponent`) rejects.
 const el = (tag: string, props: Record<string, unknown>): JSX.Element =>
-  createComponent(Dynamic, mergeProps({ component: tag }, props));
+  createComponent(Dynamic, mergeProps(props, { component: tag }));
 
 function LocationLabel(): JSX.Element {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

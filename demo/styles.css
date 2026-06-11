@@ -17,6 +17,14 @@ body {
   font: 15px/1.6 var(--mono);
 }
 
+/* Keep visited links the same color as unvisited — no violet fade. #0000ee is
+   the browsers' default unvisited link color, so plain links look identical
+   before and after a visit. Declared before the per-element link rules below so
+   those (h1, nav, .deep) still win and keep their own colors. */
+a:visited {
+  color: #0000ee;
+}
+
 h1 {
   font-size: 1.3rem;
   margin: 0 0 1.25rem;
@@ -48,10 +56,18 @@ input {
 .bar .origin {
   color: #888;
 }
+/* The path sits on its own line and only as wide as its content (capped at the
+   container). Always block, so a long path scrolls in place instead of wrapping
+   onto a new line — the surrounding text never reflows and the page never jumps. */
 .path {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.35rem;
   background: #f2f2f2;
   padding: 2px 6px;
   white-space: pre;
+  overflow: hidden;
 }
 .resolving .path {
   background: #e2efe6;
@@ -136,17 +152,35 @@ nav a.router-link-exact-active {
 
 /* Light-theme syntax highlighting (see demo/highlight.ts). */
 .view.docs .tok-keyword {
-  color: #8959a8;
+  color: #8959a8; /* control / declaration */
+}
+.view.docs .tok-function {
+  color: #2f6fb0; /* calls & definitions */
+}
+.view.docs .tok-type {
+  color: #0e7c86; /* Components / Types */
+}
+.view.docs .tok-constant {
+  color: #a3238e; /* ALL_CAPS values */
+}
+.view.docs .tok-literal {
+  color: #c0392b; /* true / false / null / this */
 }
 .view.docs .tok-string {
   color: #357a5b;
 }
+.view.docs .tok-number {
+  color: #b06d1a;
+}
+.view.docs .tok-property {
+  color: #5b6ea8; /* member after `.` */
+}
+.view.docs .tok-operator {
+  color: #8a8a8a;
+}
 .view.docs .tok-comment {
   color: #9a9a9a;
   font-style: italic;
-}
-.view.docs .tok-number {
-  color: #b06d1a;
 }
 
 /* Landing page demo picker. */
