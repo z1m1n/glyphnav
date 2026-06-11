@@ -7,6 +7,16 @@
       └────────────  grow  ────────────┘└───────────  resolve  ──────────┘
 ```
 
+### ▶ [Live demo — **z1m1n.github.io/glyphnav**](https://z1m1n.github.io/glyphnav/)
+
+Jump straight to an integration:
+[vanilla](https://z1m1n.github.io/glyphnav/vanilla/) ·
+[Vue Router](https://z1m1n.github.io/glyphnav/vue-router/) ·
+[React Router](https://z1m1n.github.io/glyphnav/react-router/) ·
+[TanStack (React)](https://z1m1n.github.io/glyphnav/tanstack-router/) ·
+[TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-solid-router/) ·
+[Angular Router](https://z1m1n.github.io/glyphnav/angular-router/)
+
 `glyphnav` rewrites `history.replaceState` frame by frame: it fills the destination
 path with random glyphs (the **grow** phase), then resolves the real characters
 left‑to‑right (the **resolve** phase). When the animation finishes it performs the
@@ -41,6 +51,8 @@ Router adapters use your existing router as a peer dependency — nothing extra 
 ---
 
 ## Quick start (no framework)
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/vanilla/)**
 
 ```ts
 import { install, navigate } from 'glyphnav';
@@ -143,6 +155,8 @@ their links/hooks animate.
 
 ### Vue Router — `glyphnav/vue-router`
 
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/vue-router/)**
+
 ```ts
 import { createRouter, createWebHistory } from 'vue-router';
 import { glyphnav } from 'glyphnav/vue-router';
@@ -171,6 +185,8 @@ await push('/dashboard'); // animated; plain router.push stays native
 
 ### React Router — `glyphnav/react-router`
 
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/react-router/)**
+
 ```tsx
 import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/react-router';
 
@@ -187,7 +203,9 @@ await navigate('/dashboard');
 `useGlyphnavNavigate()` mirrors `useNavigate()`. The provider is optional — without it,
 hooks create their own controller.
 
-### TanStack Router — `glyphnav/tanstack-react-router`
+### TanStack Router (React) — `glyphnav/tanstack-react-router`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-router/)**
 
 ```tsx
 import {
@@ -212,7 +230,40 @@ object) and resolves the basepath‑aware target via `router.buildLocation()`.
 `GlyphnavLink` renders a real `<a href>`; for fully type‑safe links wrap
 `useGlyphnavNavigate()` in your own component.
 
+### TanStack Router (Solid) — `glyphnav/tanstack-solid-router`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-solid-router/)**
+
+TanStack Router's `buildLocation`/`navigate` come from its framework‑agnostic
+core, so the engine is shared — only the bindings differ. The Solid adapter has
+the **same API** as the React one, with Solid components and hooks (and
+`solid-js` + `@tanstack/solid-router` as peers):
+
+```tsx
+import {
+  GlyphnavProvider,
+  GlyphnavLink,
+  useGlyphnavNavigate,
+} from 'glyphnav/tanstack-solid-router';
+
+<GlyphnavProvider duration={250} commit="before">
+  <RouterProvider router={router} />
+</GlyphnavProvider>;
+
+// inside the router tree:
+<GlyphnavLink to="/about">About</GlyphnavLink>;
+
+const navigate = useGlyphnavNavigate();
+await navigate({ to: '/posts' });
+```
+
+`useGlyphnavNavigate()` mirrors Solid's `useNavigate()`, and `GlyphnavLink`
+renders a real `<a href>` resolved through `router.buildLocation()` — identical
+in spirit to the React adapter above.
+
 ### Angular Router — `glyphnav/angular-router`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/angular-router/)**
 
 Because glyphnav is built by Vite (not Angular's `ngtsc`), it ships **compiler‑free**
 helpers rather than decorated classes:
@@ -264,8 +315,11 @@ generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
 
 ## Demos
 
-One Vite playground covers **all five** integrations — vanilla, Vue Router,
-React Router, TanStack Router and Angular Router:
+**▶ Hosted live at <https://z1m1n.github.io/glyphnav/>** — the same playground,
+deployed to GitHub Pages.
+
+One Vite playground covers **all six** integrations — vanilla, Vue Router,
+React Router, TanStack Router (React **and** Solid) and Angular Router:
 
 ```bash
 pnpm install
@@ -301,9 +355,10 @@ pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
 ```
 
-The package is built with **Vite 8** in library mode with six entry points
+The package is built with **Vite 8** in library mode with seven entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./tanstack-react-router`,
-`./angular-router`); router/framework deps are always externalized. Declarations are
+`./tanstack-solid-router`, `./angular-router`); router/framework deps are always
+externalized. Declarations are
 generated against `tsconfig.build.json` so they land flat in `dist/`.
 
 ---

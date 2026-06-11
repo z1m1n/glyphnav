@@ -14,13 +14,14 @@ export default defineConfig({
         'vue-router': 'src/vue-router/index.ts',
         'react-router': 'src/react-router/index.tsx',
         'tanstack-react-router': 'src/tanstack-react-router/index.tsx',
+        'tanstack-solid-router': 'src/tanstack-solid-router/index.ts',
         'angular-router': 'src/angular-router/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: [/^vue/, /^react/, /^@angular\//, /^@tanstack\//],
+      external: [/^vue/, /^react/, /^solid-js/, /^@angular\//, /^@tanstack\//],
     },
   },
   plugins: [

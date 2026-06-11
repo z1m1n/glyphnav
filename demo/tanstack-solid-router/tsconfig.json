@@ -1,0 +1,30 @@
+{
+  // The Solid demo uses Solid's own JSX runtime (`jsx: preserve` +
+  // `jsxImportSource: solid-js`), so it gets its own config rather than the
+  // react-jsx one in demo/tsconfig.json. Paths resolve `glyphnav/*` to the live
+  // src (matching demo/vite.config.ts) so typecheck sees real types, not dist.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": [],
+    "paths": {
+      "glyphnav": ["../../src/index.ts"],
+      "glyphnav/core": ["../../src/core/index.ts"],
+      "glyphnav/tanstack-solid-router": ["../../src/tanstack-solid-router/index.ts"]
+    }
+  },
+  "include": ["*.tsx", "*.ts", "../highlight.ts", "../vite-env.d.ts"]
+}

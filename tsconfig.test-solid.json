@@ -1,0 +1,14 @@
+{
+  // Isolated program for the TanStack Solid adapter test. Kept apart from the
+  // root program so @tanstack/solid-router's types load without the
+  // @tanstack/react-router augmentations (both extend @tanstack/router-core and
+  // would otherwise collide on the shared route types). Runtime is unaffected —
+  // Vitest strips types — this only scopes `tsc --noEmit`.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["test/tanstack-solid-router.test.ts", "src/tanstack-solid-router/index.ts"],
+  "exclude": ["node_modules", "dist"]
+}

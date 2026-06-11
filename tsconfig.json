@@ -24,5 +24,15 @@
     "types": ["node"]
   },
   "include": ["src", "test"],
-  "exclude": ["node_modules", "dist", "demo", "**/*.config.ts"]
+  // The TanStack Solid test builds a Solid route tree; loading both
+  // @tanstack/react-router and @tanstack/solid-router (each augments the shared
+  // @tanstack/router-core types) in one program clashes. It gets its own
+  // isolated program (tsconfig.test-solid.json), exactly like the demos do.
+  "exclude": [
+    "node_modules",
+    "dist",
+    "demo",
+    "test/tanstack-solid-router.test.ts",
+    "**/*.config.ts"
+  ]
 }

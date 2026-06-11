@@ -4,10 +4,18 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import react from '@vitejs/plugin-react';
+import solid from 'vite-plugin-solid';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 
-const APPS = ['vanilla', 'vue-router', 'react-router', 'tanstack-router', 'angular-router'];
+const APPS = [
+  'vanilla',
+  'vue-router',
+  'react-router',
+  'tanstack-router',
+  'tanstack-solid-router',
+  'angular-router',
+];
 
 /**
  * Served at `/` in dev. The GitHub Pages workflow sets `DEMO_BASE=/glyphnav/`
@@ -61,11 +69,14 @@ function baseAwareLinks(): Plugin {
 }
 
 /**
- * GitHub Pages serves `<base>/404.html` for any path without a matching file.
- * Send a deep-link reload (e.g. /glyphnav/react-router/docs) back to that app's
- * index so its client router can take over; unknown paths fall back to the
- * picker. Only the exact sub-route is lost on a cold reload — in-app clicks
- * (the demo's main flow) never hit this.
+ * GitHub Pages is static — there is no server-side rewrite rule to reach for, so
+ * deep-link reloads (e.g. /glyphnav/react-router/docs) hit `<base>/404.html`.
+ * This 404 page bounces the request to the matching app's index, encoding the
+ * sub-route (and any `?query`/`#hash`) into the URL so the full path survives:
+ * `/glyphnav/react-router/docs` → `/glyphnav/react-router/?/docs`. The restore
+ * snippet injected by {@link deepLinkRestore} then rewrites the bar back to the
+ * real path before the SPA boots, so a reload keeps the exact route instead of
+ * resetting to the app's home. Unknown apps fall back to the picker.
  */
 function spaFallback404(): Plugin {
   return {
@@ -79,14 +90,43 @@ function spaFallback404(): Plugin {
   (function () {
     var base = ${JSON.stringify(base)};
     var apps = ${JSON.stringify(APPS)};
-    var path = location.pathname;
-    var rest = path.indexOf(base) === 0 ? path.slice(base.length) : '';
+    var loc = window.location;
+    var rest = loc.pathname.indexOf(base) === 0 ? loc.pathname.slice(base.length) : '';
     var app = rest.split('/')[0];
-    location.replace(apps.indexOf(app) !== -1 ? base + app + '/' : base);
+    if (apps.indexOf(app) === -1) {
+      loc.replace(base);
+      return;
+    }
+    // "&" in the original query is escaped to ~and~ so it survives as a single
+    // value; the restore snippet reverses it. The leading "?/" is the marker.
+    var deep = rest.slice(app.length).replace(/^\\//, '').replace(/&/g, '~and~');
+    var query = loc.search ? '&' + loc.search.slice(1).replace(/&/g, '~and~') : '';
+    loc.replace(base + app + '/?/' + deep + query + loc.hash);
   })();
 </script>
 `;
       writeFileSync(r('dist/404.html'), html);
+    },
+  };
+}
+
+/**
+ * Injected into every demo page. If GitHub Pages bounced a deep link through
+ * {@link spaFallback404}, the URL arrives as `/base/app/?/route&query`; rewrite
+ * the bar back to `/base/app/route?query` with `replaceState` before the SPA
+ * router (or the vanilla view) reads `location`. A normal `?query` (one that
+ * does not start with `?/`) is left untouched, so this is inert on direct loads
+ * and in dev, where the fallback never fires.
+ */
+function deepLinkRestore(): Plugin {
+  const restore =
+    `(function(l){if(l.search[1]==='/'){` +
+    `var d=l.search.slice(1).split('&').map(function(s){return s.replace(/~and~/g,'&')}).join('?');` +
+    `history.replaceState(null,'',l.pathname.slice(0,-1)+d+l.hash)}})(window.location)`;
+  return {
+    name: 'demo-deep-link-restore',
+    transformIndexHtml() {
+      return [{ tag: 'script', children: restore, injectTo: 'head-prepend' }];
     },
   };
 }
@@ -113,15 +153,34 @@ export default defineConfig({
         find: 'glyphnav/tanstack-react-router',
         replacement: r('../src/tanstack-react-router/index.tsx'),
       },
+      {
+        find: 'glyphnav/tanstack-solid-router',
+        replacement: r('../src/tanstack-solid-router/index.ts'),
+      },
       { find: 'glyphnav/angular-router', replacement: r('../src/angular-router/index.ts') },
       { find: 'glyphnav', replacement: r('../src/index.ts') },
     ],
   },
+  // Don't pre-bundle the Solid router: its `solid`-condition entry is JSX source
+  // that must go through vite-plugin-solid (above), not esbuild's pre-bundler.
+  optimizeDeps: {
+    exclude: ['@tanstack/solid-router'],
+  },
   plugins: [
     vue(),
     react({ include: /demo\/(react-router|tanstack-router)\/.*\.tsx?$/ }),
+    // Solid has its own JSX runtime, so scope its compiler to the Solid demo —
+    // disjoint from the React `include` above (note `tanstack-solid-router` is
+    // not matched by `tanstack-router`). The `solid` resolve condition the plugin
+    // adds makes `@tanstack/solid-router` resolve to its *JSX source*, so that
+    // package's `.jsx` files must be compiled here too (and excluded from
+    // pre-bundling below, so they reach this transform instead of esbuild).
+    solid({
+      include: [/demo\/tanstack-solid-router\/.*\.[tj]sx$/, /@tanstack\/solid-router\/.*\.jsx$/],
+    }),
     demoFallback(),
     baseAwareLinks(),
+    deepLinkRestore(),
     spaFallback404(),
   ],
   build: {
@@ -134,6 +193,7 @@ export default defineConfig({
         'vue-router': r('vue-router/index.html'),
         'react-router': r('react-router/index.html'),
         'tanstack-router': r('tanstack-router/index.html'),
+        'tanstack-solid-router': r('tanstack-solid-router/index.html'),
         'angular-router': r('angular-router/index.html'),
       },
     },
