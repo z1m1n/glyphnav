@@ -10,8 +10,14 @@ describe('generateFrames', () => {
     });
 
     expect(frames.map((f) => f.path)).toEqual([
-      '/x', '/xy', '/xyz', '/xyzw',
-      '/tyzw', '/tezw', '/tesw', '/test',
+      '/x',
+      '/xy',
+      '/xyz',
+      '/xyzw',
+      '/tyzw',
+      '/tezw',
+      '/tesw',
+      '/test',
     ]);
   });
 

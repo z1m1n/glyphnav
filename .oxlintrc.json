@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "react", "vue", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    // jsx is "react-jsx": the automatic runtime needs no React import
+    "react/react-in-jsx-scope": "off",
+    // vi.fn(impl) already infers its type from the implementation
+    "vitest/require-mock-type-parameters": "off",
+    // side-effect imports are intentional (zone.js, @angular/compiler in the Angular demo)
+    "import/no-unassigned-import": "off",
+    // suggests ES2023 toSorted(); tsconfig lib is ES2022
+    "unicorn/no-array-sort": "off",
+    // never mix type and value specifiers: type-only imports use `import type`,
+    // and mixed imports/exports are split into a separate `type` statement
+    "typescript/consistent-type-imports": [
+      "error",
+      { "prefer": "type-imports", "fixStyle": "separate-type-imports" }
+    ],
+    "typescript/consistent-type-exports": [
+      "error",
+      { "fixMixedExportsWithInlineTypeSpecifier": false }
+    ],
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"]
+  },
+  "env": {
+    "builtin": true,
+    "browser": true
+  },
+  "ignorePatterns": ["dist", "demo/dist", "coverage"],
+  "overrides": [
+    {
+      "files": ["test/**"],
+      "rules": {
+        // tests mock Angular DI tokens with empty classes and UrlTree internals (__tree)
+        "typescript/no-extraneous-class": "off",
+        "no-underscore-dangle": "off"
+      }
+    }
+  ]
+}

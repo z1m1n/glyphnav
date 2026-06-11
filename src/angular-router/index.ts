@@ -12,9 +12,12 @@
  * animate.
  */
 import { Location } from '@angular/common';
-import { InjectionToken, type Provider } from '@angular/core';
-import { Router, type NavigationExtras, type UrlTree } from '@angular/router';
-import { GlyphnavController, type GlyphnavOptions, type RunResult } from '../core';
+import { InjectionToken } from '@angular/core';
+import type { Provider } from '@angular/core';
+import { Router } from '@angular/router';
+import type { NavigationExtras, UrlTree } from '@angular/router';
+import { GlyphnavController } from '../core';
+import type { GlyphnavOptions, RunResult } from '../core';
 
 export type AngularGlyphnavOptions = GlyphnavOptions;
 
@@ -36,26 +39,32 @@ export interface GlyphnavNavigator {
  * `Location.prepareExternalUrl` so apps served under a base href animate the
  * full path. Defaults to identity.
  */
-export function createGlyphnavNavigator(
+export const createGlyphnavNavigator = (
   router: Router,
   options: AngularGlyphnavOptions = {},
   prepareUrl: (routerUrl: string) => string = (url) => url,
-): GlyphnavNavigator {
+): GlyphnavNavigator => {
   const controller = new GlyphnavController(options);
 
   return {
     controller,
     navigateByUrl(url, extras) {
       const target = typeof url === 'string' ? url : router.serializeUrl(url);
-      return controller.run(prepareUrl(target), () => router.navigateByUrl(url, extras) as Promise<unknown> as Promise<void>);
+      return controller.run(
+        prepareUrl(target),
+        () => router.navigateByUrl(url, extras) as Promise<unknown> as Promise<void>,
+      );
     },
     navigate(commands, extras) {
       const tree = router.createUrlTree(commands, extras);
       const target = router.serializeUrl(tree);
-      return controller.run(prepareUrl(target), () => router.navigateByUrl(tree, extras) as Promise<unknown> as Promise<void>);
+      return controller.run(
+        prepareUrl(target),
+        () => router.navigateByUrl(tree, extras) as Promise<unknown> as Promise<void>,
+      );
     },
   };
-}
+};
 
 /** Injection token for the shared {@link GlyphnavNavigator}. */
 export const GLYPHNAV = new InjectionToken<GlyphnavNavigator>('glyphnav.navigator');
@@ -69,7 +78,7 @@ export const GLYPHNAV = new InjectionToken<GlyphnavNavigator>('glyphnav.navigato
  *
  * then read it anywhere with `inject(GLYPHNAV)`.
  */
-export function provideGlyphnav(options: AngularGlyphnavOptions = {}): Provider[] {
+export const provideGlyphnav = (options: AngularGlyphnavOptions = {}): Provider[] => {
   return [
     {
       provide: GLYPHNAV,
@@ -78,4 +87,4 @@ export function provideGlyphnav(options: AngularGlyphnavOptions = {}): Provider[
       deps: [Router, Location],
     },
   ];
-}
+};

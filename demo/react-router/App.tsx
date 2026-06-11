@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { GlyphnavLink, useGlyphnavController } from 'glyphnav/react-router';
-import {
-  HEX,
-  MATRIX,
-  SYMBOLS,
-  URL_SAFE,
-  type AnimateScope,
-  type CommitTiming,
-  type GlyphEffect,
-} from 'glyphnav/core';
+import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
+import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
+import { highlight } from '../highlight';
 
-const charsets: Record<string, string> = { url: URL_SAFE, hex: HEX, matrix: MATRIX, symbols: SYMBOLS };
+const charsets: Record<string, string> = {
+  url: URL_SAFE,
+  hex: HEX,
+  matrix: MATRIX,
+  symbols: SYMBOLS,
+};
 
 const currentUrl = () => location.pathname + location.search + location.hash;
 
@@ -44,25 +43,28 @@ function View({ title, body }: { title: string; body: string }) {
   );
 }
 
+/** A syntax-highlighted code block. */
+function Code({ children }: { children: string }) {
+  return (
+    <pre>
+      <code dangerouslySetInnerHTML={{ __html: highlight(children) }} />
+    </pre>
+  );
+}
+
 function Docs() {
   return (
     <div className="view docs">
       <h2>docs</h2>
       <p>Install the package — React Router stays a peer dependency:</p>
-      <pre>
-        <code>{DOCS_INSTALL}</code>
-      </pre>
+      <Code>{DOCS_INSTALL}</Code>
       <p>
         <code>GlyphnavLink</code> is a drop-in for <code>&lt;Link&gt;</code> (basename-aware via{' '}
         <code>useHref</code>); nothing is patched globally:
       </p>
-      <pre>
-        <code>{DOCS_SETUP}</code>
-      </pre>
+      <Code>{DOCS_SETUP}</Code>
       <p id="options">Every entry point accepts the same options object:</p>
-      <pre>
-        <code>{DOCS_OPTIONS}</code>
-      </pre>
+      <Code>{DOCS_OPTIONS}</Code>
     </div>
   );
 }
@@ -109,7 +111,8 @@ export default function App() {
   return (
     <>
       <h1>
-        <a href="/">glyphnav</a> <span className="crumb">/ react-router</span>
+        <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
+        <span className="crumb">/ react-router</span>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>
@@ -176,10 +179,34 @@ export default function App() {
       </div>
 
       <Routes>
-        <Route path="/" element={<View title="home" body="React Router edition. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top." />} />
-        <Route path="/about" element={<View title="about" body="GlyphnavLink is a drop-in for <Link>; useGlyphnavNavigate() is the imperative equivalent of useNavigate(). Deep links with ?query and #hash animate too — they are just part of the path." />} />
+        <Route
+          path="/"
+          element={
+            <View
+              title="home"
+              body="React Router edition. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
+            />
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <View
+              title="about"
+              body="GlyphnavLink is a drop-in for <Link>; useGlyphnavNavigate() is the imperative equivalent of useNavigate(). Deep links with ?query and #hash animate too — they are just part of the path."
+            />
+          }
+        />
         <Route path="/docs" element={<Docs />} />
-        <Route path="/blog" element={<View title="blog" body="The animation rides on history.replaceState; React Router performs the real navigation. Modified clicks (⌘/Ctrl/middle) fall through to the browser, exactly like a normal link." />} />
+        <Route
+          path="/blog"
+          element={
+            <View
+              title="blog"
+              body="The animation rides on history.replaceState; React Router performs the real navigation. Modified clicks (⌘/Ctrl/middle) fall through to the browser, exactly like a normal link."
+            />
+          }
+        />
       </Routes>
 
       <p className="foot">

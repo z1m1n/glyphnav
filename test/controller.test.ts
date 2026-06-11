@@ -38,10 +38,7 @@ describe('GlyphnavController', () => {
     const result = await run;
 
     expect(result).toBe('completed');
-    expect(frames).toEqual([
-      '/x', '/xy', '/xyz', '/xyzw',
-      '/tyzw', '/tezw', '/tesw', '/test',
-    ]);
+    expect(frames).toEqual(['/x', '/xy', '/xyz', '/xyzw', '/tyzw', '/tezw', '/tesw', '/test']);
     expect(started).toBe(1);
     expect(committed).toBe(1);
     expect(commit).toHaveBeenCalledTimes(1);
@@ -81,7 +78,13 @@ describe('GlyphnavController', () => {
   });
 
   it('lets a newer navigation supersede an in-flight one', async () => {
-    const controller = new GlyphnavController({ charset: 'q', rng: () => 0, stepDuration: 10 });
+    // Classic order: the superseded run is cancelled before it commits.
+    const controller = new GlyphnavController({
+      charset: 'q',
+      rng: () => 0,
+      stepDuration: 10,
+      commit: 'after',
+    });
     const commitA = vi.fn(() => window.history.pushState(null, '', '/aaaa'));
     const commitB = vi.fn(() => window.history.pushState(null, '', '/bbbb'));
 
@@ -99,7 +102,13 @@ describe('GlyphnavController', () => {
   });
 
   it('cancel() aborts the run, restores the bar and does not commit', async () => {
-    const controller = new GlyphnavController({ charset: 'q', rng: () => 0, stepDuration: 10 });
+    // Classic order: with navigate-first the commit would already have fired.
+    const controller = new GlyphnavController({
+      charset: 'q',
+      rng: () => 0,
+      stepDuration: 10,
+      commit: 'after',
+    });
     const commit = vi.fn();
 
     const run = controller.run('/abcdef', commit);
@@ -121,6 +130,8 @@ describe('GlyphnavController', () => {
       charset: 'q',
       rng: () => 0,
       stepDuration: 10,
+      // Classic order so the bar restores to the start before the (no-op) commit.
+      commit: 'after',
       hooks: {
         onStart: (ctx) => (ctxTo = ctx.to),
         onFrame: (f) => frames.push(f.path),
@@ -177,6 +188,9 @@ describe('GlyphnavController', () => {
       charset: 'q',
       rng: () => 0,
       stepDuration: 10,
+      // Classic order: with navigate-first the commit would fire before the
+      // external move and the assertions below would not hold.
+      commit: 'after',
       hooks: { onCancel },
     });
     const commit = vi.fn();
@@ -201,6 +215,7 @@ describe('GlyphnavController', () => {
       charset: 'q',
       rng: () => 0,
       duration: 140, // '/test' yields 8 frames → 20 ms apart
+      commit: 'after', // frame-timing test drives the animate-then-commit path
       hooks: { onFrame: (f) => frames.push(f.path) },
     });
 
@@ -220,6 +235,7 @@ describe('GlyphnavController', () => {
       charset: 'q',
       rng: () => 0,
       duration: 45, // → 3-frame budget at ≥15 ms per frame
+      commit: 'after', // frame-timing test drives the animate-then-commit path
       hooks: { onFrame: (f) => frames.push(f.path) },
     });
 
@@ -256,8 +272,14 @@ describe('GlyphnavController', () => {
     // The real navigation fires before any frame is drawn.
     expect(order.slice(0, 3)).toEqual(['commit-hook', 'commit', 'start']);
     expect(order.slice(3)).toEqual([
-      '/x', '/xy', '/xyz', '/xyzw',
-      '/tyzw', '/tezw', '/tesw', '/test',
+      '/x',
+      '/xy',
+      '/xyz',
+      '/xyzw',
+      '/tyzw',
+      '/tezw',
+      '/tesw',
+      '/test',
     ]);
     // The bar ends at the landed URL — no restore back to the start.
     expect(window.location.pathname).toBe('/test');
@@ -378,7 +400,9 @@ describe('GlyphnavController', () => {
       order.push('commit-end');
     });
 
-    const run = controller.run('/ab', commit, { hooks: { onComplete: () => order.push('complete') } });
+    const run = controller.run('/ab', commit, {
+      hooks: { onComplete: () => order.push('complete') },
+    });
     await vi.advanceTimersByTimeAsync(100);
     await run;
 

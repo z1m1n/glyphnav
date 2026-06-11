@@ -33,21 +33,22 @@ export interface Player {
   cancel(): void;
 }
 
-export function createPlayer(scheduler: Scheduler = defaultScheduler): Player {
+export const createPlayer = (scheduler: Scheduler = defaultScheduler): Player => {
   let timer: unknown = null;
   let running = false;
   let settle: ((result: PlayResult) => void) | null = null;
 
-  function finish(result: PlayResult): void {
+  const finish = (result: PlayResult): void => {
     running = false;
     if (timer != null) {
       scheduler.clearTimeout(timer);
       timer = null;
     }
+
     const resolve = settle;
     settle = null;
     if (resolve) resolve(result);
-  }
+  };
 
   return {
     get running(): boolean {
@@ -86,4 +87,4 @@ export function createPlayer(scheduler: Scheduler = defaultScheduler): Player {
       if (running) finish('cancelled');
     },
   };
-}
+};

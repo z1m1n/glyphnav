@@ -1,0 +1,44 @@
+{
+  // Type-checks the demo apps against the live `src/` (mirroring the Vite
+  // aliases in demo/vite.config.ts), so the editor and `pnpm typecheck` see the
+  // same types Vite bundles — never the stale published `dist/`. The Angular
+  // demo has its own config (decorator semantics); .vue templates are checked
+  // by Volar, not plain tsc.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": [],
+    "paths": {
+      "glyphnav": ["../src/index.ts"],
+      "glyphnav/core": ["../src/core/index.ts"],
+      "glyphnav/vue-router": ["../src/vue-router/index.ts"],
+      "glyphnav/react-router": ["../src/react-router/index.tsx"],
+      "glyphnav/tanstack-react-router": ["../src/tanstack-react-router/index.tsx"],
+      "glyphnav/angular-router": ["../src/angular-router/index.ts"]
+    }
+  },
+  "include": [
+    "highlight.ts",
+    "shims-vue.d.ts",
+    "vite-env.d.ts",
+    "react-router/**/*.ts",
+    "react-router/**/*.tsx",
+    "tanstack-router/**/*.ts",
+    "tanstack-router/**/*.tsx",
+    "vue-router/**/*.ts",
+    "vanilla/**/*.ts"
+  ]
+}

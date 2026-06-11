@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useGlyphnav } from 'glyphnav/vue-router';
-import {
-  HEX,
-  MATRIX,
-  SYMBOLS,
-  URL_SAFE,
-  type AnimateScope,
-  type CommitTiming,
-  type FrameInfo,
-  type GlyphEffect,
-} from 'glyphnav/core';
+import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
+import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav/core';
 
 const controller = useGlyphnav();
 
 const currentUrl = () => location.pathname + location.search + location.hash;
 
+// '/' in dev, '/glyphnav/' on the deployed project page.
+const base = import.meta.env.BASE_URL;
+
 const displayPath = ref(currentUrl());
 const resolving = ref(false);
 const duration = ref(250);
 
-const charsets: Record<string, string> = { url: URL_SAFE, hex: HEX, matrix: MATRIX, symbols: SYMBOLS };
+const charsets: Record<string, string> = {
+  url: URL_SAFE,
+  hex: HEX,
+  matrix: MATRIX,
+  symbols: SYMBOLS,
+};
 const state = {
   charset: URL_SAFE,
   duration: 250,
@@ -71,7 +71,7 @@ const onScope = (e: Event) => {
 </script>
 
 <template>
-  <h1><a href="/">glyphnav</a> <span class="crumb">/ vue-router</span></h1>
+  <h1><a :href="base">glyphnav</a> <span class="crumb">/ vue-router</span></h1>
 
   <p class="bar" :class="{ resolving }">
     Watch the address bar. Current path: <span class="path">{{ displayPath }}</span>
@@ -92,7 +92,8 @@ const onScope = (e: Event) => {
   </p>
 
   <div class="controls">
-    <label>charset
+    <label
+      >charset
       <select @change="onCharset">
         <option value="url">url-safe</option>
         <option value="hex">hex</option>
@@ -100,23 +101,27 @@ const onScope = (e: Event) => {
         <option value="symbols">symbols</option>
       </select>
     </label>
-    <label>speed
+    <label
+      >speed
       <input type="range" min="20" max="1000" step="10" :value="1020 - duration" @input="onSpeed" />
       <span class="ms">{{ duration }}ms</span>
     </label>
-    <label>effect
+    <label
+      >effect
       <select @change="onEffect">
         <option value="decode">decode</option>
         <option value="scramble">scramble</option>
       </select>
     </label>
-    <label>commit
+    <label
+      >commit
       <select @change="onCommit">
         <option value="before">navigate first</option>
         <option value="after">animate first</option>
       </select>
     </label>
-    <label>scope
+    <label
+      >scope
       <select @change="onScope">
         <option value="full">full</option>
         <option value="tail">tail</option>

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from 'vue';
-import { createMemoryHistory, createRouter, type Router } from 'vue-router';
+import { createMemoryHistory, createRouter } from 'vue-router';
+import type { Router } from 'vue-router';
 import { attachGlyphnav, glyphnav } from '../src/vue-router';
 
 const routes = [
@@ -26,6 +27,9 @@ describe('vue adapter', () => {
       charset: 'q',
       rng: () => 0,
       stepDuration: 5,
+      // createMemoryHistory never touches window.location, so navigate-first
+      // (the default) has no landed URL to animate to; pin the classic order.
+      commit: 'after',
       hooks: { onFrame: (f) => frames.push(f.path) },
     });
 
@@ -60,6 +64,8 @@ describe('vue adapter', () => {
       charset: 'q',
       rng: () => 0,
       stepDuration: 5,
+      // See above: memory history → pin the classic animate-then-commit order.
+      commit: 'after',
       hooks: { onFrame },
     });
 

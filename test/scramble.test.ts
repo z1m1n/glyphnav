@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { randomGlyph, randomString, scrambleBurst, scrambleFrames, shuffledIndices } from '../src/core/scramble';
+import {
+  randomGlyph,
+  randomString,
+  scrambleBurst,
+  scrambleFrames,
+  shuffledIndices,
+} from '../src/core/scramble';
 import { createRng } from '../src/core/rng';
 import { seqRng, zeroRng } from './helpers';
 
@@ -31,12 +37,24 @@ describe('scrambleFrames', () => {
     const frames = scrambleFrames('test', { ...base, rng });
 
     expect(frames.map((f) => f.text)).toEqual([
-      'x', 'xy', 'xyz', 'xyzw', // grow
-      'tyzw', 'tezw', 'tesw', 'test', // resolve
+      'x',
+      'xy',
+      'xyz',
+      'xyzw', // grow
+      'tyzw',
+      'tezw',
+      'tesw',
+      'test', // resolve
     ]);
     expect(frames.map((f) => f.phase)).toEqual([
-      'grow', 'grow', 'grow', 'grow',
-      'resolve', 'resolve', 'resolve', 'resolve',
+      'grow',
+      'grow',
+      'grow',
+      'grow',
+      'resolve',
+      'resolve',
+      'resolve',
+      'resolve',
     ]);
   });
 
@@ -65,15 +83,17 @@ describe('scrambleFrames', () => {
     });
     // grow by 2: qq, qqqq, then full base qqqqqq
     // resolve by 3: abcqqq, then full abcdef
-    expect(frames.map((f) => f.text)).toEqual([
-      'qq', 'qqqq', 'qqqqqq',
-      'abcqqq', 'abcdef',
-    ]);
+    expect(frames.map((f) => f.text)).toEqual(['qq', 'qqqq', 'qqqqqq', 'abcqqq', 'abcdef']);
   });
 
   it('never exceeds maxFrames, scaling the steps up when needed', () => {
     const target = 'x'.repeat(500);
-    const frames = scrambleFrames(target, { ...base, charset: 'ab', rng: createRng(3), maxFrames: 40 });
+    const frames = scrambleFrames(target, {
+      ...base,
+      charset: 'ab',
+      rng: createRng(3),
+      maxFrames: 40,
+    });
     expect(frames.length).toBeLessThanOrEqual(40);
     expect(frames.at(-1)?.text).toBe(target);
   });
@@ -111,7 +131,11 @@ describe('scrambleBurst', () => {
       'test', // final
     ]);
     expect(frames.map((f) => f.phase)).toEqual([
-      'grow', 'resolve', 'resolve', 'resolve', 'resolve',
+      'grow',
+      'resolve',
+      'resolve',
+      'resolve',
+      'resolve',
     ]);
   });
 
@@ -132,7 +156,12 @@ describe('scrambleBurst', () => {
 
   it('never exceeds maxFrames, scaling resolveStep up when needed', () => {
     const target = 'x'.repeat(500);
-    const frames = scrambleBurst(target, { ...base, charset: 'ab', rng: createRng(3), maxFrames: 40 });
+    const frames = scrambleBurst(target, {
+      ...base,
+      charset: 'ab',
+      rng: createRng(3),
+      maxFrames: 40,
+    });
     expect(frames.length).toBeLessThanOrEqual(40);
     expect(frames.at(-1)?.text).toBe(target);
   });

@@ -1,0 +1,41 @@
+name: Publish to npm
+
+# Publishes the package to npm when a GitHub Release is published. The release
+# tag (e.g. v0.1.1) should match the "version" in package.json. One-time setup
+# (the NPM_TOKEN secret) is documented in .github/PUBLISH_NPM.txt.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm version comes from the "packageManager" field in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Quality gate — never publish a red build.
+      - run: pnpm run typecheck
+      - run: pnpm run lint
+      - run: pnpm test
+
+      # `prepublishOnly` runs the production build before packing. `--provenance`
+      # needs the id-token permission above and a public repo; `--no-git-checks`
+      # keeps pnpm from refusing to publish from the release's detached checkout.
+      - run: pnpm publish --provenance --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

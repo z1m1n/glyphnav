@@ -10,3 +10,6 @@ demo/angular/.angular/
 .vite/
 .idea/
 .vscode/
+.claude/settings.local.json
+.claude/launch.json
+.github/*.txt

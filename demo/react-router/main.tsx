@@ -6,7 +6,7 @@ import App from './App';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename="/react-router">
+    <BrowserRouter basename={import.meta.env.BASE_URL + 'react-router'}>
       <GlyphnavProvider duration={250} commit="before">
         <App />
       </GlyphnavProvider>

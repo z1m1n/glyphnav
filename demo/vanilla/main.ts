@@ -1,21 +1,10 @@
-import {
-  HEX,
-  MATRIX,
-  SYMBOLS,
-  URL_SAFE,
-  install,
-  type AnimateScope,
-  type CommitTiming,
-  type FrameInfo,
-  type GlyphEffect,
-} from 'glyphnav';
+import { HEX, MATRIX, SYMBOLS, URL_SAFE, install } from 'glyphnav';
+import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav';
+import { highlight } from '../highlight';
 
-const BASE = '/vanilla';
+const BASE = import.meta.env.BASE_URL + 'vanilla';
 
-const esc = (code: string): string =>
-  code.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-
-const codeBlock = (code: string): string => `<pre><code>${esc(code)}</code></pre>`;
+const codeBlock = (code: string): string => `<pre><code>${highlight(code)}</code></pre>`;
 
 interface Page {
   title: string;
@@ -70,7 +59,12 @@ const pages: Record<string, Page> = {
   },
 };
 
-const charsets: Record<string, string> = { url: URL_SAFE, hex: HEX, matrix: MATRIX, symbols: SYMBOLS };
+const charsets: Record<string, string> = {
+  url: URL_SAFE,
+  hex: HEX,
+  matrix: MATRIX,
+  symbols: SYMBOLS,
+};
 
 const bar = document.getElementById('bar')!;
 const pathEl = document.getElementById('path')!;

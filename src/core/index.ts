@@ -4,42 +4,44 @@
  * callback. Router adapters build on top of this.
  */
 
-export * from './types';
-export * from './rng';
-export * from './charset';
+export type {
+  AnimateScope,
+  AnimationPhase,
+  GlyphEffect,
+  CommitTiming,
+  RunResult,
+  GlyphnavOptions,
+  AnimationContext,
+  FrameInfo,
+  GlyphnavHooks,
+} from './types';
+export { createRng, defaultRng } from './rng';
+export type { Rng } from './rng';
+export {
+  URL_SAFE,
+  ALPHANUMERIC,
+  LOWER_ALPHA,
+  HEX,
+  SYMBOLS,
+  MATRIX,
+  BINARY,
+  DEFAULT_CHARSET,
+} from './charset';
 export {
   randomGlyph,
   randomString,
   scrambleFrames,
   scrambleBurst,
   shuffledIndices,
-  type ScrambleFrame,
-  type ScrambleConfig,
 } from './scramble';
+export type { ScrambleFrame, ScrambleConfig } from './scramble';
 export { generateFrames, MIN_FRAME_MS } from './frames';
-export {
-  splitTarget,
-  commonPrefixLength,
-  resolvePath,
-  type PathParts,
-  type SplitOptions,
-} from './path';
+export { splitTarget, commonPrefixLength, resolvePath } from './path';
+export type { PathParts, SplitOptions } from './path';
 export { prefersReducedMotion } from './reduced-motion';
-export {
-  createPlayer,
-  defaultScheduler,
-  type Player,
-  type PlayResult,
-  type Scheduler,
-} from './player';
-export {
-  DEFAULT_OPTIONS,
-  resolveOptions,
-  type ResolvedOptions,
-} from './options';
-export {
-  GlyphnavController,
-  createGlyphnav,
-  type CommitFn,
-  type ControllerDeps,
-} from './controller';
+export { createPlayer, defaultScheduler } from './player';
+export type { Player, PlayResult, Scheduler } from './player';
+export { DEFAULT_OPTIONS, resolveOptions } from './options';
+export type { ResolvedOptions } from './options';
+export { GlyphnavController, createGlyphnav } from './controller';
+export type { CommitFn, ControllerDeps } from './controller';

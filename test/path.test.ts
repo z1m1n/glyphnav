@@ -53,9 +53,10 @@ describe('splitTarget', () => {
   });
 
   it('handles tail scope where the target extends the current path', () => {
-    expect(
-      splitTarget('/a/b', { scope: 'tail', preserveLeadingSlash: true, from: '/a' }),
-    ).toEqual({ prefix: '/a', text: '/b' });
+    expect(splitTarget('/a/b', { scope: 'tail', preserveLeadingSlash: true, from: '/a' })).toEqual({
+      prefix: '/a',
+      text: '/b',
+    });
   });
 
   it('falls back to full behaviour in tail scope when from is missing', () => {

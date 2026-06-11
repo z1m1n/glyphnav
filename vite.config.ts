@@ -1,15 +1,10 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
-/**
- * Library build: every entry is emitted as ESM (`.js`) and CJS (`.cjs`) with
- * `.d.ts` declarations mirroring `src/`. Router/framework deps are always
- * externalized.
- */
 export default defineConfig({
   build: {
     target: 'es2020',
-    minify: false,
+    minify: 'esbuild',
     sourcemap: true,
     emptyOutDir: true,
     lib: {
@@ -32,6 +27,7 @@ export default defineConfig({
     dts({
       include: ['src'],
       tsconfigPath: './tsconfig.build.json',
+      bundleTypes: true,
     }),
   ],
 });

@@ -15,11 +15,12 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
   `glyphnav/react-router`, `glyphnav/tanstack-react-router`, `glyphnav/angular-router`.
-- ⚡ **Navigate‑first mode** (`commit: 'before'`) — the page changes instantly,
-  the animation plays on top; the classic animate‑then‑commit stays the default.
+- ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
+  instantly and the animation plays on top; switch to `commit: 'after'` for the
+  classic animate‑then‑commit order.
 - 🎞️ **Two effects**: `decode` (grow + resolve left‑to‑right) and `scramble`
   (full‑length noise at once, characters lock in random order).
-- ⏱️ **`duration`** budgets the *whole* animation — frames auto‑scale to fit.
+- ⏱️ **`duration`** budgets the _whole_ animation — frames auto‑scale to fit.
 - 🪶 **~1 kB** per adapter (gzipped) on top of a ~3 kB core.
 - ♿ Honors `prefers-reduced-motion`, supersedes overlapping navigations, fully cancelable.
 - 🛡️ Writes only rooted same‑origin paths and backs off if the URL changes
@@ -49,12 +50,15 @@ install();
 
 // Animate only programmatic calls, leave links alone:
 install({ intercept: 'none' });
-await navigate('/dashboard');             // animate, then location.assign('/dashboard')
-await navigate('/dashboard', { reload: false }); // animate, then history.pushState (SPA)
+await navigate('/dashboard'); // hard reload: animate, then location.assign('/dashboard')
 
-// Navigate-first: pushState immediately, decode the bar on top (SPA only —
-// hard reloads fall back to the classic order because the page unloads):
-install({ reload: false, commit: 'before', duration: 250, effect: 'scramble' });
+// Navigate-first is the default for SPA navigations: pushState immediately,
+// then decode the bar on top (hard reloads fall back to animate-then-commit
+// because the page unloads):
+await navigate('/dashboard', { reload: false });
+
+// Opt back into the classic animate-then-commit order, per call or per install:
+install({ reload: false, commit: 'after', duration: 250, effect: 'scramble' });
 ```
 
 `install()` ignores the things a good link interceptor should: modified clicks
@@ -79,10 +83,11 @@ generates frames. Two effects:
   every unresolved slot keeps flickering:
   `/qqqq → /qeqq → /qesq → /qest → /test`.
 
-By default the real navigation is committed after the last frame. With
-`commit: 'before'` the order flips: the navigation goes out **immediately** —
-the page never waits for the animation — and the bar replays the decode from
-the old path to wherever the navigation landed (router redirects included).
+By default (`commit: 'before'`) the navigation goes out **immediately** — the
+page never waits for the animation — and the bar replays the decode from the old
+path to wherever the navigation landed (router redirects included). With
+`commit: 'after'` the order flips back to the classic one: the real navigation
+is committed only after the last frame has been drawn.
 
 Each frame is written with `history.replaceState` (no new history entries, back button
 untouched, and via `History.prototype` so router‑patched history wrappers never see the
@@ -103,21 +108,21 @@ test‑suite pins down.
 
 Every entry point accepts the same options object.
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `charset` | `string` | url‑safe set | Pool of random glyphs. Non‑URL‑safe glyphs are percent‑encoded in the bar. |
-| `duration` | `number \| null` | `null` | **Total animation time in ms**, spread over all frames (frames auto‑scale, ≥ ~15 ms each). Takes precedence over `stepDuration`. |
-| `stepDuration` | `number` | `40` | Milliseconds per frame, used when no `duration` is set. |
-| `effect` | `'decode' \| 'scramble'` | `'decode'` | `decode` grows then resolves left‑to‑right; `scramble` bursts to full length, then locks characters in random order. |
-| `commit` | `'after' \| 'before'` | `'after'` | `after` animates, then navigates. `before` navigates **immediately** and animates on top of the landed URL. |
-| `growStep` | `number` | `1` | Characters added per grow frame. |
-| `resolveStep` | `number` | `1` | Characters locked per resolve frame. |
-| `maxFrames` | `number` | `120` | Hard cap; steps auto‑scale so long paths never overrun. |
-| `scope` | `'full' \| 'tail'` | `'full'` | `full` animates the whole path; `tail` keeps the common prefix and only animates what differs. |
-| `preserveLeadingSlash` | `boolean` | `true` | Keep the leading `/` fixed (for `scope: 'full'`). |
-| `respectReducedMotion` | `boolean` | `true` | Skip the animation under `prefers-reduced-motion`. |
-| `rng` | `() => number` | `Math.random` | Random source — inject for reproducibility/tests. |
-| `hooks` | `object` | `{}` | `onStart`, `onFrame`, `onCommit`, `onCancel`, `onComplete`. |
+| Option                 | Type                     | Default       | Description                                                                                                                      |
+| ---------------------- | ------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `charset`              | `string`                 | url‑safe set  | Pool of random glyphs. Non‑URL‑safe glyphs are percent‑encoded in the bar.                                                       |
+| `duration`             | `number \| null`         | `null`        | **Total animation time in ms**, spread over all frames (frames auto‑scale, ≥ ~15 ms each). Takes precedence over `stepDuration`. |
+| `stepDuration`         | `number`                 | `40`          | Milliseconds per frame, used when no `duration` is set.                                                                          |
+| `effect`               | `'decode' \| 'scramble'` | `'decode'`    | `decode` grows then resolves left‑to‑right; `scramble` bursts to full length, then locks characters in random order.             |
+| `commit`               | `'after' \| 'before'`    | `'before'`    | `before` navigates **immediately** and animates on top of the landed URL; `after` animates first, then navigates.                |
+| `growStep`             | `number`                 | `1`           | Characters added per grow frame.                                                                                                 |
+| `resolveStep`          | `number`                 | `1`           | Characters locked per resolve frame.                                                                                             |
+| `maxFrames`            | `number`                 | `120`         | Hard cap; steps auto‑scale so long paths never overrun.                                                                          |
+| `scope`                | `'full' \| 'tail'`       | `'full'`      | `full` animates the whole path; `tail` keeps the common prefix and only animates what differs.                                   |
+| `preserveLeadingSlash` | `boolean`                | `true`        | Keep the leading `/` fixed (for `scope: 'full'`).                                                                                |
+| `respectReducedMotion` | `boolean`                | `true`        | Skip the animation under `prefers-reduced-motion`.                                                                               |
+| `rng`                  | `() => number`           | `Math.random` | Random source — inject for reproducibility/tests.                                                                                |
+| `hooks`                | `object`                 | `{}`          | `onStart`, `onFrame`, `onCommit`, `onCancel`, `onComplete`.                                                                      |
 
 ### Built‑in charsets
 
@@ -185,7 +190,11 @@ hooks create their own controller.
 ### TanStack Router — `glyphnav/tanstack-react-router`
 
 ```tsx
-import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-react-router';
+import {
+  GlyphnavProvider,
+  GlyphnavLink,
+  useGlyphnavNavigate,
+} from 'glyphnav/tanstack-react-router';
 
 <GlyphnavProvider duration={250} commit="before">
   <RouterProvider router={router} />

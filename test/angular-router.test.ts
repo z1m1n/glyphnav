@@ -45,6 +45,9 @@ describe('angular adapter', () => {
       charset: 'q',
       rng: () => 0,
       stepDuration: 5,
+      // The mock Router never updates window.location, so navigate-first (the
+      // default) would have no landed URL to animate; pin the classic order.
+      commit: 'after',
       hooks: { onFrame: (f) => frames.push(f.path) },
     });
 
@@ -59,7 +62,11 @@ describe('angular adapter', () => {
 
   it('navigate builds a UrlTree, animates, then delegates', async () => {
     const router = makeRouter();
-    const nav = createGlyphnavNavigator(router as never, { charset: 'q', rng: () => 0, stepDuration: 5 });
+    const nav = createGlyphnavNavigator(router as never, {
+      charset: 'q',
+      rng: () => 0,
+      stepDuration: 5,
+    });
 
     const run = nav.navigate(['users', 42]);
     await vi.advanceTimersByTimeAsync(200);
@@ -74,7 +81,14 @@ describe('angular adapter', () => {
     const frames: string[] = [];
     const nav = createGlyphnavNavigator(
       router as never,
-      { charset: 'q', rng: () => 0, stepDuration: 5, hooks: { onFrame: (f) => frames.push(f.path) } },
+      {
+        charset: 'q',
+        rng: () => 0,
+        stepDuration: 5,
+        // Mock Router → no window.location update; pin the classic order.
+        commit: 'after',
+        hooks: { onFrame: (f) => frames.push(f.path) },
+      },
       (url) => '/app' + url,
     );
 

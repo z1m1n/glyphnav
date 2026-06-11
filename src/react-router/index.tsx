@@ -8,34 +8,23 @@
  * Nothing is patched globally: only navigations made through these entry
  * points animate.
  */
-import {
-  createContext,
-  createElement,
-  useCallback,
-  useContext,
-  useRef,
-  type MouseEvent,
-  type ReactNode,
-} from 'react';
-import {
-  Link,
-  useHref,
-  useNavigate,
-  type LinkProps,
-  type NavigateOptions,
-  type To,
-} from 'react-router-dom';
-import { GlyphnavController, type GlyphnavOptions, type RunResult } from '../core';
+import { createContext, createElement, useCallback, useContext, useRef } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
+import { Link, useHref, useNavigate } from 'react-router-dom';
+import type { LinkProps, NavigateOptions, To } from 'react-router-dom';
+import { GlyphnavController } from '../core';
+import type { GlyphnavOptions, RunResult } from '../core';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (to: To | number, options?: NavigateOptions) => Promise<RunResult>;
 
 const GlyphnavContext = createContext<GlyphnavController | null>(null);
 
-function toPathString(to: To): string {
+const toPathString = (to: To): string => {
   if (typeof to === 'string') return to;
+
   return (to.pathname ?? '') + (to.search ?? '') + (to.hash ?? '');
-}
+};
 
 export interface GlyphnavProviderProps extends GlyphnavOptions {
   children: ReactNode;
@@ -45,27 +34,29 @@ export interface GlyphnavProviderProps extends GlyphnavOptions {
  * Provide a shared controller (and base options) to the subtree. Optional —
  * the hooks work without it, each creating their own controller.
  */
-export function GlyphnavProvider({ children, ...options }: GlyphnavProviderProps) {
+export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) => {
   const ref = useRef<GlyphnavController | null>(null);
   if (!ref.current) ref.current = new GlyphnavController(options);
   else ref.current.update(options);
+
   return createElement(GlyphnavContext.Provider, { value: ref.current }, children);
-}
+};
 
 /** Get the controller from context, or a stable per-component fallback. */
-export function useGlyphnavController(options?: GlyphnavOptions): GlyphnavController {
+export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavController => {
   const fromContext = useContext(GlyphnavContext);
   const ref = useRef<GlyphnavController | null>(null);
   if (fromContext) return fromContext;
   if (!ref.current) ref.current = new GlyphnavController(options);
+
   return ref.current;
-}
+};
 
 /**
  * A `useNavigate()` replacement that plays the glyph animation before
  * navigating. A numeric `to` (history delta) is passed straight through.
  */
-export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigateFn {
+export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigateFn => {
   const navigate = useNavigate();
   const controller = useGlyphnavController(options);
 
@@ -75,6 +66,7 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
         navigate(to);
         return Promise.resolve<RunResult>('skipped');
       }
+
       const target = toPathString(to);
       return controller.run(target, () => {
         navigate(to, navOptions);
@@ -82,7 +74,7 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
     },
     [navigate, controller],
   );
-}
+};
 
 export interface GlyphnavLinkProps extends LinkProps {
   /** Per-link option overrides. */
@@ -93,7 +85,14 @@ export interface GlyphnavLinkProps extends LinkProps {
  * Drop-in replacement for React Router's `<Link>` that animates on click.
  * Modified clicks (new tab, etc.) fall through to the browser as usual.
  */
-export function GlyphnavLink({ to, onClick, replace, state, glyphOptions, ...rest }: GlyphnavLinkProps) {
+export const GlyphnavLink = ({
+  to,
+  onClick,
+  replace,
+  state,
+  glyphOptions,
+  ...rest
+}: GlyphnavLinkProps) => {
   const navigate = useNavigate();
   const controller = useGlyphnavController(glyphOptions);
   // `useHref` resolves `to` to a basename-aware path, so the animated bar
@@ -103,10 +102,12 @@ export function GlyphnavLink({ to, onClick, replace, state, glyphOptions, ...res
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       onClick?.(event);
+
       if (event.defaultPrevented) return;
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return; // let the browser handle modified clicks
       }
+
       event.preventDefault();
       void controller.run(href, () => {
         navigate(to, { replace, state });
@@ -116,4 +117,4 @@ export function GlyphnavLink({ to, onClick, replace, state, glyphOptions, ...res
   );
 
   return createElement(Link, { to, onClick: handleClick, replace, state, ...rest });
-}
+};

@@ -1,18 +1,16 @@
 import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { GLYPHNAV } from 'glyphnav/angular-router';
-import {
-  HEX,
-  MATRIX,
-  SYMBOLS,
-  URL_SAFE,
-  type AnimateScope,
-  type CommitTiming,
-  type GlyphEffect,
-} from 'glyphnav/core';
+import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
+import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { GlyphnavLinkDirective } from './glyphnav-link.directive';
 
-const charsets: Record<string, string> = { url: URL_SAFE, hex: HEX, matrix: MATRIX, symbols: SYMBOLS };
+const charsets: Record<string, string> = {
+  url: URL_SAFE,
+  hex: HEX,
+  matrix: MATRIX,
+  symbols: SYMBOLS,
+};
 
 function currentUrl(): string {
   return location.pathname + location.search + location.hash;
@@ -23,7 +21,7 @@ function currentUrl(): string {
   imports: [RouterOutlet, GlyphnavLinkDirective],
   template: `
     <h1>
-      <a href="/" data-glyphnav="off">glyphnav</a>
+      <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="crumb">&ngsp;/ angular-router</span>
     </h1>
 
@@ -32,21 +30,30 @@ function currentUrl(): string {
     </p>
 
     <nav>
-      <a href="/angular-router/" glyphnavLink="/" [class.active]="active() === '/'">home</a>
-      <a href="/angular-router/about" glyphnavLink="/about" [class.active]="active() === '/about'">about</a>
-      <a href="/angular-router/docs" glyphnavLink="/docs" [class.active]="active() === '/docs'">docs</a>
-      <a href="/angular-router/blog" glyphnavLink="/blog" [class.active]="active() === '/blog'">blog</a>
+      <a [href]="appBase" glyphnavLink="/" [class.active]="active() === '/'">home</a>
+      <a [href]="appBase + 'about'" glyphnavLink="/about" [class.active]="active() === '/about'"
+        >about</a
+      >
+      <a [href]="appBase + 'docs'" glyphnavLink="/docs" [class.active]="active() === '/docs'"
+        >docs</a
+      >
+      <a [href]="appBase + 'blog'" glyphnavLink="/blog" [class.active]="active() === '/blog'"
+        >blog</a
+      >
     </nav>
 
     <p class="deep">
       deep links:
-      <a href="/angular-router/about?ref=deep&page=2" glyphnavLink="/about?ref=deep&page=2">?query</a>
-      <a href="/angular-router/docs#options" glyphnavLink="/docs#options">#hash</a>
-      <a href="/angular-router/about?q=glyph#results" glyphnavLink="/about?q=glyph#results">?query+#hash</a>
+      <a [href]="appBase + 'about?ref=deep&page=2'" glyphnavLink="/about?ref=deep&page=2">?query</a>
+      <a [href]="appBase + 'docs#options'" glyphnavLink="/docs#options">#hash</a>
+      <a [href]="appBase + 'about?q=glyph#results'" glyphnavLink="/about?q=glyph#results"
+        >?query+#hash</a
+      >
     </p>
 
     <div class="controls">
-      <label>charset
+      <label
+        >charset
         <select (change)="onCharset($event)">
           <option value="url">url-safe</option>
           <option value="hex">hex</option>
@@ -54,23 +61,34 @@ function currentUrl(): string {
           <option value="symbols">symbols</option>
         </select>
       </label>
-      <label>speed
-        <input type="range" min="20" max="1000" step="10" [value]="1020 - duration()" (input)="onSpeed($event)" />
+      <label
+        >speed
+        <input
+          type="range"
+          min="20"
+          max="1000"
+          step="10"
+          [value]="1020 - duration()"
+          (input)="onSpeed($event)"
+        />
         <span class="ms">{{ duration() }}ms</span>
       </label>
-      <label>effect
+      <label
+        >effect
         <select (change)="onEffect($event)">
           <option value="decode">decode</option>
           <option value="scramble">scramble</option>
         </select>
       </label>
-      <label>commit
+      <label
+        >commit
         <select (change)="onCommit($event)">
           <option value="before">navigate first</option>
           <option value="after">animate first</option>
         </select>
       </label>
-      <label>scope
+      <label
+        >scope
         <select (change)="onScope($event)">
           <option value="full">full</option>
           <option value="tail">tail</option>
@@ -81,14 +99,19 @@ function currentUrl(): string {
     <router-outlet></router-outlet>
 
     <p class="foot">
-      The <code>[glyphnavLink]</code> directive is copied from this demo into your app and calls
-      the injected navigator. Compiled with Angular JIT inside the shared playground — the title
-      link is a plain full-page load back to the picker.
+      The <code>[glyphnavLink]</code> directive is copied from this demo into your app and calls the
+      injected navigator. Compiled with Angular JIT inside the shared playground — the title link is
+      a plain full-page load back to the picker.
     </p>
   `,
 })
 export class AppComponent {
   private readonly nav = inject(GLYPHNAV);
+
+  // '/' in dev, '/glyphnav/' on the deployed project page. The glyphnavLink
+  // directive routes base-aware on its own; these drive the visible hrefs.
+  readonly base = import.meta.env.BASE_URL;
+  readonly appBase = `${this.base}angular-router/`;
 
   readonly path = signal(currentUrl());
   readonly resolving = signal(false);

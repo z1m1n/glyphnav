@@ -8,18 +8,12 @@
  * Nothing is patched globally: only navigations made through these entry
  * points animate.
  */
-import {
-  createContext,
-  createElement,
-  useCallback,
-  useContext,
-  useRef,
-  type AnchorHTMLAttributes,
-  type MouseEvent,
-  type ReactNode,
-} from 'react';
-import { useRouter, type NavigateOptions } from '@tanstack/react-router';
-import { GlyphnavController, type GlyphnavOptions, type RunResult } from '../core';
+import { createContext, createElement, useCallback, useContext, useMemo, useRef } from 'react';
+import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
+import { useRouter } from '@tanstack/react-router';
+import type { NavigateOptions } from '@tanstack/react-router';
+import { GlyphnavController } from '../core';
+import type { GlyphnavOptions, RunResult } from '../core';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
@@ -34,27 +28,29 @@ export interface GlyphnavProviderProps extends GlyphnavOptions {
  * Provide a shared controller (and base options) to the subtree. Optional —
  * the hooks work without it, each creating their own controller.
  */
-export function GlyphnavProvider({ children, ...options }: GlyphnavProviderProps) {
+export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) => {
   const ref = useRef<GlyphnavController | null>(null);
   if (!ref.current) ref.current = new GlyphnavController(options);
   else ref.current.update(options);
+
   return createElement(GlyphnavContext.Provider, { value: ref.current }, children);
-}
+};
 
 /** Get the controller from context, or a stable per-component fallback. */
-export function useGlyphnavController(options?: GlyphnavOptions): GlyphnavController {
+export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavController => {
   const fromContext = useContext(GlyphnavContext);
   const ref = useRef<GlyphnavController | null>(null);
   if (fromContext) return fromContext;
   if (!ref.current) ref.current = new GlyphnavController(options);
+
   return ref.current;
-}
+};
 
 /**
  * A `useNavigate()` replacement that plays the glyph animation before handing
  * the navigation to TanStack Router.
  */
-export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigateFn {
+export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigateFn => {
   const router = useRouter();
   const controller = useGlyphnavController(options);
 
@@ -67,10 +63,11 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
     },
     [router, controller],
   );
-}
+};
 
 export interface GlyphnavLinkProps
-  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
+  extends
+    Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
     Pick<NavigateOptions, 'to' | 'params' | 'search' | 'hash' | 'state' | 'replace'> {
   /** Per-link option overrides. */
   glyphOptions?: GlyphnavOptions;
@@ -81,7 +78,7 @@ export interface GlyphnavLinkProps
  * (new tab, etc.) fall through to the browser as usual. For fully type-safe
  * links wrap {@link useGlyphnavNavigate} in your own component instead.
  */
-export function GlyphnavLink({
+export const GlyphnavLink = ({
   to,
   params,
   search,
@@ -92,24 +89,29 @@ export function GlyphnavLink({
   onClick,
   children,
   ...rest
-}: GlyphnavLinkProps) {
+}: GlyphnavLinkProps) => {
   const router = useRouter();
   const controller = useGlyphnavController(glyphOptions);
-  const navOpts = { to, params, search, hash, state, replace } as NavigateOptions;
+  const navOpts = useMemo(
+    () => ({ to, params, search, hash, state, replace }) as NavigateOptions,
+    [to, params, search, hash, state, replace],
+  );
   const href = router.buildLocation(navOpts).href;
 
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       onClick?.(event);
+
       if (event.defaultPrevented) return;
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return; // let the browser handle modified clicks
       }
+
       event.preventDefault();
       void controller.run(href, () => router.navigate(navOpts) as Promise<void>);
     },
-    [onClick, controller, router, href, to, params, search, hash, state, replace],
+    [onClick, controller, router, href, navOpts],
   );
 
   return createElement('a', { href, onClick: handleClick, ...rest }, children);
-}
+};

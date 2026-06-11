@@ -41,9 +41,21 @@ const rootRoute = createRootRoute({
 });
 
 const routeTree = rootRoute.addChildren([
-  createRoute({ getParentRoute: () => rootRoute, path: '/', component: () => <div>home page</div> }),
-  createRoute({ getParentRoute: () => rootRoute, path: '/test', component: () => <div>test page</div> }),
-  createRoute({ getParentRoute: () => rootRoute, path: '/other', component: () => <div>other page</div> }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/',
+    component: () => <div>home page</div>,
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/test',
+    component: () => <div>test page</div>,
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/other',
+    component: () => <div>other page</div>,
+  }),
 ]);
 
 async function renderApp() {

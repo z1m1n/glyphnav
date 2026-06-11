@@ -12,7 +12,14 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "types": []
+    "types": [],
+    // Resolve `glyphnav/*` to the live src (matching demo/vite.config.ts) so the
+    // editor and typecheck see real types, not the published dist build.
+    "paths": {
+      "glyphnav": ["../../src/index.ts"],
+      "glyphnav/core": ["../../src/core/index.ts"],
+      "glyphnav/angular-router": ["../../src/angular-router/index.ts"]
+    }
   },
-  "include": ["*.ts"]
+  "include": ["*.ts", "../highlight.ts", "../vite-env.d.ts"]
 }

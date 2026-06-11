@@ -13,17 +13,16 @@ import {
   GlyphnavProvider,
   useGlyphnavController,
 } from 'glyphnav/tanstack-react-router';
-import {
-  HEX,
-  MATRIX,
-  SYMBOLS,
-  URL_SAFE,
-  type AnimateScope,
-  type CommitTiming,
-  type GlyphEffect,
-} from 'glyphnav/core';
+import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
+import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
+import { highlight } from '../highlight';
 
-const charsets: Record<string, string> = { url: URL_SAFE, hex: HEX, matrix: MATRIX, symbols: SYMBOLS };
+const charsets: Record<string, string> = {
+  url: URL_SAFE,
+  hex: HEX,
+  matrix: MATRIX,
+  symbols: SYMBOLS,
+};
 
 const currentUrl = () => location.pathname + location.search + location.hash;
 
@@ -58,25 +57,28 @@ function View({ title, body }: { title: string; body: string }) {
   );
 }
 
+/** A syntax-highlighted code block. */
+function Code({ children }: { children: string }) {
+  return (
+    <pre>
+      <code dangerouslySetInnerHTML={{ __html: highlight(children) }} />
+    </pre>
+  );
+}
+
 function Docs() {
   return (
     <div className="view docs">
       <h2>docs</h2>
       <p>Install the package — TanStack Router stays a peer dependency:</p>
-      <pre>
-        <code>{DOCS_INSTALL}</code>
-      </pre>
+      <Code>{DOCS_INSTALL}</Code>
       <p>
         The animated path is basepath-aware via <code>router.buildLocation()</code>; nothing is
         patched globally:
       </p>
-      <pre>
-        <code>{DOCS_SETUP}</code>
-      </pre>
+      <Code>{DOCS_SETUP}</Code>
       <p id="options">Every entry point accepts the same options object:</p>
-      <pre>
-        <code>{DOCS_OPTIONS}</code>
-      </pre>
+      <Code>{DOCS_OPTIONS}</Code>
     </div>
   );
 }
@@ -124,7 +126,8 @@ function Layout() {
   return (
     <>
       <h1>
-        <a href="/">glyphnav</a> <span className="crumb">/ tanstack-router</span>
+        <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
+        <span className="crumb">/ tanstack-router</span>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>
@@ -140,9 +143,15 @@ function Layout() {
 
       <p className="deep">
         deep links:
-        <GlyphnavLink to="/about" search={{ ref: 'deep', page: 2 }}>?query</GlyphnavLink>
-        <GlyphnavLink to="/docs" hash="options">#hash</GlyphnavLink>
-        <GlyphnavLink to="/about" search={{ q: 'glyph' }} hash="results">?query+#hash</GlyphnavLink>
+        <GlyphnavLink to="/about" search={{ ref: 'deep', page: 2 }}>
+          ?query
+        </GlyphnavLink>
+        <GlyphnavLink to="/docs" hash="options">
+          #hash
+        </GlyphnavLink>
+        <GlyphnavLink to="/about" search={{ q: 'glyph' }} hash="results">
+          ?query+#hash
+        </GlyphnavLink>
       </p>
 
       <div className="controls">
@@ -207,17 +216,32 @@ const routeTree = rootRoute.addChildren([
   createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
-    component: () => <View title="home" body="TanStack Router edition. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top." />,
+    component: () => (
+      <View
+        title="home"
+        body="TanStack Router edition. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
+      />
+    ),
   }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: '/about',
-    component: () => <View title="about" body="useGlyphnavNavigate() mirrors useNavigate(); GlyphnavLink renders a plain anchor. Deep links with ?search and #hash animate too — they are just part of the path." />,
+    component: () => (
+      <View
+        title="about"
+        body="useGlyphnavNavigate() mirrors useNavigate(); GlyphnavLink renders a plain anchor. Deep links with ?search and #hash animate too — they are just part of the path."
+      />
+    ),
   }),
   createRoute({
     getParentRoute: () => rootRoute,
     path: '/posts',
-    component: () => <View title="posts" body="The animation rides on history.replaceState; TanStack Router performs the real navigation. Try scope: tail — only the part of the path that differs gets scrambled." />,
+    component: () => (
+      <View
+        title="posts"
+        body="The animation rides on history.replaceState; TanStack Router performs the real navigation. Try scope: tail — only the part of the path that differs gets scrambled."
+      />
+    ),
   }),
   createRoute({
     getParentRoute: () => rootRoute,
@@ -226,7 +250,10 @@ const routeTree = rootRoute.addChildren([
   }),
 ]);
 
-const router = createRouter({ routeTree, basepath: '/tanstack-router' });
+const router = createRouter({
+  routeTree,
+  basepath: import.meta.env.BASE_URL + 'tanstack-router',
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

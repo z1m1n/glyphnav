@@ -1,6 +1,8 @@
 import { generateFrames } from './frames';
-import { resolveOptions, type ResolvedOptions } from './options';
-import { createPlayer, defaultScheduler, type Player, type Scheduler } from './player';
+import { resolveOptions } from './options';
+import type { ResolvedOptions } from './options';
+import { createPlayer, defaultScheduler } from './player';
+import type { Player, Scheduler } from './player';
 import { resolvePath } from './path';
 import { prefersReducedMotion as defaultPrefersReducedMotion } from './reduced-motion';
 import type { AnimationContext, FrameInfo, GlyphnavOptions, RunResult } from './types';
@@ -20,34 +22,35 @@ export interface ControllerDeps {
   prefersReducedMotion?: () => boolean;
 }
 
-function resolveHistory(provided: History | null | undefined): History | null {
+const resolveHistory = (provided: History | null | undefined): History | null => {
   if (provided !== undefined) return provided;
-  return typeof window !== 'undefined' && window.history ? window.history : null;
-}
 
-function defaultGetCurrentPath(): string {
+  return typeof window !== 'undefined' && window.history ? window.history : null;
+};
+
+const defaultGetCurrentPath = (): string => {
   if (typeof window === 'undefined' || !window.location) return '/';
+
   const { pathname, search, hash } = window.location;
   return pathname + search + hash;
-}
+};
 
 /** Only rooted same-origin paths may be written to the address bar. */
-function isRootedPath(path: string): boolean {
-  return path.startsWith('/') && !path.startsWith('//');
-}
+const isRootedPath = (path: string): boolean => path.startsWith('/') && !path.startsWith('//');
 
 /** Per-frame delay: an explicit total `duration` is spread over the frames. */
-function frameDelay(opts: ResolvedOptions, count: number): number {
+const frameDelay = (opts: ResolvedOptions, count: number): number => {
   if (opts.duration == null) return opts.stepDuration;
+
   return opts.duration / Math.max(1, count - 1);
-}
+};
 
 /**
- * The framework-agnostic engine: animates the address bar from the current
- * path to a target with the glyph-scramble effect, then commits the real
- * navigation (or, with `commit: 'before'`, commits first and animates on
- * top). Adapters are thin wrappers that supply the right `commit` callback
- * for their router.
+ * The framework-agnostic engine. By default (`commit: 'before'`) it commits
+ * the real navigation first and then plays the glyph-scramble on top of the
+ * landed URL; with `commit: 'after'` it animates the address bar from the
+ * current path to the target and commits at the end. Adapters are thin
+ * wrappers that supply the right `commit` callback for their router.
  */
 export class GlyphnavController {
   private options: GlyphnavOptions;
@@ -87,9 +90,11 @@ export class GlyphnavController {
   }
 
   /**
-   * Animate to `to` and run `commit` to perform the real navigation — in that
-   * order by default, or commit-first with `commit: 'before'`. `perCall`
-   * options override the controller's base options for this run only.
+   * Navigate to `to` (via `commit`) and play the glyph animation. By default
+   * (`commit: 'before'`) the navigation goes out first and the bar animates on
+   * top; with `commit: 'after'` the animation plays first and `commit` runs at
+   * the end. `perCall` options override the controller's base options for this
+   * run only.
    */
   async run(to: string, commit: CommitFn, perCall?: GlyphnavOptions): Promise<RunResult> {
     const myId = ++this.runId;
@@ -193,17 +198,21 @@ export class GlyphnavController {
     hooks.onStart?.(ctx);
 
     let movedExternally = false;
-    const result = await this.player.play(frames.length, frameDelay(opts, frames.length), (index) => {
-      if (this.observedPath != null && this.deps.getCurrentPath() !== this.observedPath) {
-        movedExternally = true;
-        this.player.cancel();
-        return;
-      }
-      const frame = frames[index];
-      this.writePath(frame.path);
-      this.observedPath = this.deps.getCurrentPath();
-      hooks.onFrame?.(frame, ctx);
-    });
+    const result = await this.player.play(
+      frames.length,
+      frameDelay(opts, frames.length),
+      (index) => {
+        if (this.observedPath != null && this.deps.getCurrentPath() !== this.observedPath) {
+          movedExternally = true;
+          this.player.cancel();
+          return;
+        }
+        const frame = frames[index];
+        this.writePath(frame.path);
+        this.observedPath = this.deps.getCurrentPath();
+        hooks.onFrame?.(frame, ctx);
+      },
+    );
 
     // A newer run already restored the bar — stay out of its way.
     if (this.runId !== myId) {
@@ -265,9 +274,9 @@ export class GlyphnavController {
 }
 
 /** Convenience factory mirroring `new GlyphnavController(...)`. */
-export function createGlyphnav(
+export const createGlyphnav = (
   options?: GlyphnavOptions,
   deps?: ControllerDeps,
-): GlyphnavController {
+): GlyphnavController => {
   return new GlyphnavController(options, deps);
-}
+};

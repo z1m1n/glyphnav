@@ -14,7 +14,7 @@ export const DEFAULT_OPTIONS: ResolvedOptions = {
   stepDuration: 40,
   duration: null,
   effect: 'decode',
-  commit: 'after',
+  commit: 'before',
   growStep: 1,
   resolveStep: 1,
   maxFrames: 120,
@@ -24,34 +24,38 @@ export const DEFAULT_OPTIONS: ResolvedOptions = {
   hooks: {},
 };
 
-function positiveInt(value: number | undefined, fallback: number): number {
+const positiveInt = (value: number | undefined, fallback: number): number => {
   if (value == null || !Number.isFinite(value)) return fallback;
+
   const n = Math.floor(value);
   return n >= 1 ? n : fallback;
-}
+};
 
-function nonNegative(value: number | undefined, fallback: number): number {
+const nonNegative = (value: number | undefined, fallback: number): number => {
   if (value == null || !Number.isFinite(value) || value < 0) return fallback;
-  return value;
-}
 
-function optionalNonNegative(value: number | null | undefined): number | null {
-  if (value == null || !Number.isFinite(value) || value < 0) return null;
   return value;
-}
+};
+
+const optionalNonNegative = (value: number | null | undefined): number | null => {
+  if (value == null || !Number.isFinite(value) || value < 0) return null;
+
+  return value;
+};
 
 /**
  * Merge user options over the defaults, validating numeric fields so a stray
  * `0` or `NaN` can never wedge the animation.
  */
-export function resolveOptions(options: GlyphnavOptions = {}): ResolvedOptions {
+export const resolveOptions = (options: GlyphnavOptions = {}): ResolvedOptions => {
   return {
-    charset: options.charset && options.charset.length > 0 ? options.charset : DEFAULT_OPTIONS.charset,
+    charset:
+      options.charset && options.charset.length > 0 ? options.charset : DEFAULT_OPTIONS.charset,
     rng: options.rng ?? DEFAULT_OPTIONS.rng,
     stepDuration: nonNegative(options.stepDuration, DEFAULT_OPTIONS.stepDuration),
     duration: optionalNonNegative(options.duration),
     effect: options.effect === 'scramble' ? 'scramble' : 'decode',
-    commit: options.commit === 'before' ? 'before' : 'after',
+    commit: options.commit === 'after' ? 'after' : 'before',
     growStep: positiveInt(options.growStep, DEFAULT_OPTIONS.growStep),
     resolveStep: positiveInt(options.resolveStep, DEFAULT_OPTIONS.resolveStep),
     maxFrames: positiveInt(options.maxFrames, DEFAULT_OPTIONS.maxFrames),
@@ -60,4 +64,4 @@ export function resolveOptions(options: GlyphnavOptions = {}): ResolvedOptions {
     respectReducedMotion: options.respectReducedMotion ?? DEFAULT_OPTIONS.respectReducedMotion,
     hooks: options.hooks ?? {},
   };
-}
+};

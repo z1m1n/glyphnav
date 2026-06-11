@@ -1,5 +1,8 @@
 autoInstallPeers: true
 strictPeerDependencies: false
+# Pin dependencies to exact versions on `pnpm add` (ranges are reserved for
+# peerDependencies, which are edited by hand).
+saveExact: true
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

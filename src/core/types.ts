@@ -28,11 +28,12 @@ export type GlyphEffect = 'decode' | 'scramble';
 /**
  * When the real navigation happens relative to the animation.
  *
- * - `after` — classic order: play the animation, then commit. The page
- *   changes only once the bar has fully decoded. This is the default.
  * - `before` — commit immediately (the page responds with zero delay), then
  *   play the animation on top, ending at the URL the navigation landed on.
- *   Hard reloads cannot use this (the page unloads) and fall back to `after`.
+ *   This is the default. Hard reloads cannot use this (the page unloads) and
+ *   fall back to `after`.
+ * - `after` — classic order: play the animation, then commit. The page
+ *   changes only once the bar has fully decoded.
  */
 export type CommitTiming = 'after' | 'before';
 
@@ -61,9 +62,9 @@ export interface GlyphnavOptions {
   /** The animation style. Default `'decode'`. See {@link GlyphEffect}. */
   effect?: GlyphEffect;
   /**
-   * `'after'` animates first and commits the real navigation at the end;
    * `'before'` commits immediately and animates on top of the landed URL, so
-   * the page never waits for the animation. Default `'after'`.
+   * the page never waits for the animation; `'after'` animates first and
+   * commits the real navigation at the end. Default `'before'`.
    */
   commit?: CommitTiming;
   /** How many characters are appended per frame during the grow phase. Default `1`. */

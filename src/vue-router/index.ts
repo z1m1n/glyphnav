@@ -8,9 +8,11 @@
  * left untouched and only the animated `push`/`replace` exposed by the adapter
  * animate.
  */
-import { inject, type App, type InjectionKey } from 'vue';
+import { inject } from 'vue';
+import type { App, InjectionKey } from 'vue';
 import type { Router, RouteLocationRaw } from 'vue-router';
-import { GlyphnavController, type GlyphnavOptions } from '../core';
+import { GlyphnavController } from '../core';
+import type { GlyphnavOptions } from '../core';
 
 export interface VueGlyphnavOptions extends GlyphnavOptions {
   /**
@@ -41,7 +43,7 @@ export const GLYPHNAV_ROUTER_KEY: InjectionKey<GlyphnavVueInstance> = Symbol('gl
 
 type PushFn = Router['push'];
 
-function wrap(controller: GlyphnavController, router: Router, original: PushFn): PushFn {
+const wrap = (controller: GlyphnavController, router: Router, original: PushFn): PushFn => {
   return ((to: RouteLocationRaw) => {
     // `.href` is base-aware (matches the real address bar); `.fullPath` is not.
     const target = router.resolve(to).href;
@@ -53,16 +55,16 @@ function wrap(controller: GlyphnavController, router: Router, original: PushFn):
       })
       .then(() => result);
   }) as PushFn;
-}
+};
 
 /**
  * Attach glyphnav to an existing router instance. Returns the controller, the
  * animated `push`/`replace`, and a `detach()` that restores the router.
  */
-export function attachGlyphnav(
+export const attachGlyphnav = (
   router: Router,
   options: VueGlyphnavOptions = {},
-): GlyphnavVueInstance {
+): GlyphnavVueInstance => {
   const { intercept = 'router', ...glyph } = options;
   const controller = new GlyphnavController(glyph);
   const originalPush = router.push.bind(router) as PushFn;
@@ -87,7 +89,7 @@ export function attachGlyphnav(
       controller.cancel();
     },
   };
-}
+};
 
 /**
  * Vue plugin:
@@ -110,26 +112,28 @@ export const glyphnav = {
 };
 
 /** Composable to read the controller provided by the plugin. */
-export function useGlyphnav(): GlyphnavController {
+export const useGlyphnav = (): GlyphnavController => {
   const controller = inject(GLYPHNAV_KEY, null);
   if (!controller) {
     throw new Error(
       '[glyphnav] useGlyphnav() called without installing the plugin (app.use(glyphnav, { router })).',
     );
   }
+
   return controller;
-}
+};
 
 /**
  * Composable to read the animated `push`/`replace`. The main entry point when
  * the plugin is installed with `intercept: 'none'`.
  */
-export function useGlyphnavRouter(): GlyphnavVueInstance {
+export const useGlyphnavRouter = (): GlyphnavVueInstance => {
   const instance = inject(GLYPHNAV_ROUTER_KEY, null);
   if (!instance) {
     throw new Error(
       '[glyphnav] useGlyphnavRouter() called without installing the plugin (app.use(glyphnav, { router })).',
     );
   }
+
   return instance;
-}
+};

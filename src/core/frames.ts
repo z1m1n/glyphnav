@@ -12,10 +12,11 @@ import type { FrameInfo, GlyphnavOptions } from './types';
 export const MIN_FRAME_MS = 15;
 
 /** The frame cap implied by a total `duration`, folded into `maxFrames`. */
-function frameBudget(duration: number | null, maxFrames: number): number {
+const frameBudget = (duration: number | null, maxFrames: number): number => {
   if (duration == null) return maxFrames;
+
   return Math.max(2, Math.min(maxFrames, Math.floor(duration / MIN_FRAME_MS)));
-}
+};
 
 /**
  * Generate the full list of address-bar frames for navigating from `from` to
@@ -23,11 +24,11 @@ function frameBudget(duration: number | null, maxFrames: number): number {
  * (fixed prefix + scrambled text). The current path (`from`) is never emitted
  * as a frame — it is already on screen — and the list always ends with `to`.
  */
-export function generateFrames(
+export const generateFrames = (
   from: string,
   to: string,
   options: GlyphnavOptions = {},
-): FrameInfo[] {
+): FrameInfo[] => {
   const opts = resolveOptions(options);
   const { prefix, text } = splitTarget(to, {
     scope: opts.scope,
@@ -53,4 +54,4 @@ export function generateFrames(
     total,
     phase: frame.phase,
   }));
-}
+};

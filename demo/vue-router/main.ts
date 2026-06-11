@@ -1,12 +1,16 @@
 import { createApp, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { glyphnav } from 'glyphnav/vue-router';
+import { highlight } from '../highlight';
 import App from './App.vue';
 
 /** A view as a render-function component (no runtime template compiler needed). */
 const page = (title: string, body: string) => ({
   render: () => h('div', { class: 'view' }, [h('h2', title), h('p', body)]),
 });
+
+/** A syntax-highlighted code block as a vnode. */
+const codeBlock = (code: string) => h('pre', h('code', { innerHTML: highlight(code) }));
 
 const DOCS_INSTALL = `pnpm add glyphnav`;
 
@@ -37,20 +41,38 @@ const docs = {
     h('div', { class: 'view docs' }, [
       h('h2', 'docs'),
       h('p', 'Install the package — Vue Router stays a peer dependency:'),
-      h('pre', h('code', DOCS_INSTALL)),
+      codeBlock(DOCS_INSTALL),
       h('p', 'The plugin wraps router.push / router.replace:'),
-      h('pre', h('code', DOCS_SETUP)),
+      codeBlock(DOCS_SETUP),
       h('p', { id: 'options' }, 'Every entry point accepts the same options object:'),
-      h('pre', h('code', DOCS_OPTIONS)),
+      codeBlock(DOCS_OPTIONS),
     ]),
 };
 
 const router = createRouter({
-  history: createWebHistory('/vue-router/'),
+  history: createWebHistory(import.meta.env.BASE_URL + 'vue-router/'),
   routes: [
-    { path: '/', component: page('home', 'Vue Router edition. The glyphnav plugin wraps router.push and router.replace, so every <router-link> click animates the address bar. With commit: "navigate first" the route swaps instantly and the bar decodes on top.') },
-    { path: '/about', component: page('about', 'No guards, no boilerplate: app.use(glyphnav, { router }) is the whole integration. Deep links with ?query and #hash animate too — they are just part of the path.') },
-    { path: '/features', component: page('features', 'Switch the charset, speed, effect and commit order in the controls — changes apply to the very next navigation via controller.update().') },
+    {
+      path: '/',
+      component: page(
+        'home',
+        'Vue Router edition. The glyphnav plugin wraps router.push and router.replace, so every <router-link> click animates the address bar. With commit: "navigate first" the route swaps instantly and the bar decodes on top.',
+      ),
+    },
+    {
+      path: '/about',
+      component: page(
+        'about',
+        'No guards, no boilerplate: app.use(glyphnav, { router }) is the whole integration. Deep links with ?query and #hash animate too — they are just part of the path.',
+      ),
+    },
+    {
+      path: '/features',
+      component: page(
+        'features',
+        'Switch the charset, speed, effect and commit order in the controls — changes apply to the very next navigation via controller.update().',
+      ),
+    },
     { path: '/docs', component: docs },
   ],
 });

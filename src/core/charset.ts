@@ -10,12 +10,10 @@
  */
 
 /** Lower + upper case letters, digits, and the URL-safe `-` and `_`. The default. */
-export const URL_SAFE =
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_';
+export const URL_SAFE = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_';
 
 /** Letters and digits only. */
-export const ALPHANUMERIC =
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+export const ALPHANUMERIC = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 /** Lower-case letters only — calm, word-like noise. */
 export const LOWER_ALPHA = 'abcdefghijklmnopqrstuvwxyz';
@@ -24,11 +22,10 @@ export const LOWER_ALPHA = 'abcdefghijklmnopqrstuvwxyz';
 export const HEX = '0123456789abcdef';
 
 /** Punctuation / ASCII symbols — a classic "glitch" feel (gets percent-encoded). */
-export const SYMBOLS = "!@#$%^&*()_+-=[]{};:,.<>?/|~";
+export const SYMBOLS = '!@#$%^&*()_+-=[]{};:,.<>?/|~';
 
 /** Half-width katakana + digits — the "matrix rain" feel (gets percent-encoded). */
-export const MATRIX =
-  'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎ0123456789';
+export const MATRIX = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎ0123456789';
 
 /** Binary — the most reductive option. */
 export const BINARY = '01';
