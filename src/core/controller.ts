@@ -84,7 +84,11 @@ export class GlyphnavController {
     return this.player.running;
   }
 
-  /** Merge new base options over the existing ones. */
+  /**
+   * Merge new base options over the existing ones.
+   *
+   * @param options - Options to shallow-merge over the current base options.
+   */
   update(options: GlyphnavOptions): void {
     this.options = { ...this.options, ...options };
   }
@@ -95,6 +99,11 @@ export class GlyphnavController {
    * top; with `commit: 'after'` the animation plays first and `commit` runs at
    * the end. `perCall` options override the controller's base options for this
    * run only.
+   *
+   * @param to - Destination path, resolved against the current path.
+   * @param commit - Performs the real navigation; may be async.
+   * @param perCall - Options that override the base options for this run only.
+   * @returns Whether the run `completed`, was `cancelled`, or was `skipped`.
    */
   async run(to: string, commit: CommitFn, perCall?: GlyphnavOptions): Promise<RunResult> {
     const myId = ++this.runId;
@@ -273,7 +282,13 @@ export class GlyphnavController {
   }
 }
 
-/** Convenience factory mirroring `new GlyphnavController(...)`. */
+/**
+ * Convenience factory mirroring `new GlyphnavController(...)`.
+ *
+ * @param options - Base options for the controller.
+ * @param deps - Environment hooks (history, timers, …), injectable for tests/SSR.
+ * @returns A new {@link GlyphnavController}.
+ */
 export const createGlyphnav = (
   options?: GlyphnavOptions,
   deps?: ControllerDeps,

@@ -8,7 +8,13 @@ export interface PathParts {
   text: string;
 }
 
-/** Length of the longest common (character-wise) prefix of two strings. */
+/**
+ * Length of the longest common (character-wise) prefix of two strings.
+ *
+ * @param a - First string.
+ * @param b - Second string.
+ * @returns The number of leading characters `a` and `b` share.
+ */
 export const commonPrefixLength = (a: string, b: string): number => {
   const max = Math.min(a.length, b.length);
   let i = 0;
@@ -29,9 +35,15 @@ export interface SplitOptions {
  * returning an absolute `pathname + search + hash`. Targets that point to a
  * different origin (full URLs) are returned untouched.
  *
+ * @remarks
  * Every path handed to `history.replaceState` must be absolute: a relative
  * path is resolved against the *current* URL, which compounds across
  * navigations into stacked garbage like `/vue/features/vue/features/…`.
+ *
+ * @param to - The destination path or URL to resolve.
+ * @param from - The path to resolve against. Defaults to `'/'`.
+ * @returns An absolute `pathname + search + hash`, or `to` unchanged for
+ * cross-origin targets.
  */
 export const resolvePath = (to: string, from = '/'): string => {
   try {
@@ -50,6 +62,10 @@ export const resolvePath = (to: string, from = '/'): string => {
  *
  * - `scope: 'full'` keeps only the leading slash fixed (when enabled).
  * - `scope: 'tail'` keeps the longest common prefix with `from` fixed.
+ *
+ * @param to - The absolute target path to split.
+ * @param opts - How to choose the split point.
+ * @returns The fixed `prefix` and the `text` that will be scrambled.
  */
 export const splitTarget = (to: string, opts: SplitOptions): PathParts => {
   if (opts.scope === 'tail' && opts.from != null) {

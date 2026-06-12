@@ -36,7 +36,13 @@ export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps
   return createElement(GlyphnavContext.Provider, { value: ref.current }, children);
 };
 
-/** Get the controller from context, or a stable per-component fallback. */
+/**
+ * Get the controller from context, or a stable per-component fallback.
+ *
+ * @param options - Base options for the fallback controller (ignored when a
+ * provider is present).
+ * @returns The shared or per-component {@link GlyphnavController}.
+ */
 export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavController => {
   const fromContext = useContext(GlyphnavContext);
   const ref = useRef<GlyphnavController | null>(null);
@@ -49,6 +55,10 @@ export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavContro
 /**
  * A `useNavigate()` replacement that plays the glyph animation before handing
  * the navigation to TanStack Router.
+ *
+ * @param options - Base animation options for navigations made through the
+ * returned function.
+ * @returns An imperative navigate function that animates, then navigates.
  */
 export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigateFn => {
   const router = useRouter();

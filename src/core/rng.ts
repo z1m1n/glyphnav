@@ -11,6 +11,7 @@ export type Rng = () => number;
  * seed you always get the same glyph sequence.
  *
  * @param seed - Any 32-bit-ish integer seed.
+ * @returns A function returning floats in `[0, 1)`, like {@link Math.random}.
  */
 export const createRng = (seed: number): Rng => {
   let a = seed >>> 0;

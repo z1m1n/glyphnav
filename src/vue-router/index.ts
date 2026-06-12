@@ -19,7 +19,7 @@ export interface VueGlyphnavOptions extends GlyphnavOptions {
    * `'router'` patches `router.push`/`router.replace` so all navigations
    * animate. `'none'` patches nothing — only navigations made through the
    * animated `push`/`replace` of {@link GlyphnavVueInstance} animate.
-   * Default `'router'`.
+   * @defaultValue `'router'`
    */
   intercept?: 'router' | 'none';
 }
@@ -58,8 +58,12 @@ const wrap = (controller: GlyphnavController, router: Router, original: PushFn):
 };
 
 /**
- * Attach glyphnav to an existing router instance. Returns the controller, the
- * animated `push`/`replace`, and a `detach()` that restores the router.
+ * Attach glyphnav to an existing router instance.
+ *
+ * @param router - The Vue Router instance to wrap.
+ * @param options - Adapter and animation options.
+ * @returns The controller, the animated `push`/`replace`, and a `detach()`
+ * that restores the router.
  */
 export const attachGlyphnav = (
   router: Router,
@@ -92,12 +96,13 @@ export const attachGlyphnav = (
 };
 
 /**
- * Vue plugin:
+ * Vue plugin. Read the controller with {@link useGlyphnav}, or the animated
+ * navigation functions with {@link useGlyphnavRouter}.
  *
- *   app.use(glyphnav, { router, charset: MATRIX, stepDuration: 30 });
- *
- * Read the controller with {@link useGlyphnav}, or the animated navigation
- * functions with {@link useGlyphnavRouter}.
+ * @example
+ * ```ts
+ * app.use(glyphnav, { router, charset: MATRIX, stepDuration: 30 });
+ * ```
  */
 export const glyphnav = {
   install(app: App, options: VueGlyphnavOptions & { router: Router }): void {
@@ -111,7 +116,12 @@ export const glyphnav = {
   },
 };
 
-/** Composable to read the controller provided by the plugin. */
+/**
+ * Composable to read the controller provided by the plugin.
+ *
+ * @remarks Throws if the plugin has not been installed.
+ * @returns The controller provided by the {@link glyphnav} plugin.
+ */
 export const useGlyphnav = (): GlyphnavController => {
   const controller = inject(GLYPHNAV_KEY, null);
   if (!controller) {
@@ -126,6 +136,9 @@ export const useGlyphnav = (): GlyphnavController => {
 /**
  * Composable to read the animated `push`/`replace`. The main entry point when
  * the plugin is installed with `intercept: 'none'`.
+ *
+ * @remarks Throws if the plugin has not been installed.
+ * @returns The adapter instance exposing the animated `push`/`replace`.
  */
 export const useGlyphnavRouter = (): GlyphnavVueInstance => {
   const instance = inject(GLYPHNAV_ROUTER_KEY, null);

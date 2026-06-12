@@ -19,6 +19,7 @@ import type { NavigationExtras, UrlTree } from '@angular/router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
 
+/** Options for the Angular adapter (same as {@link GlyphnavOptions}). */
 export type AngularGlyphnavOptions = GlyphnavOptions;
 
 /** An Angular-aware navigator that animates before delegating to the Router. */
@@ -34,10 +35,13 @@ export interface GlyphnavNavigator {
 /**
  * Bridge a glyphnav controller to an Angular `Router` instance.
  *
- * `prepareUrl` maps a router-internal URL (no base href) to the URL that
+ * @param router - The Angular `Router` to delegate real navigations to.
+ * @param options - Animation options for the controller.
+ * @param prepareUrl - Maps a router-internal URL (no base href) to the URL that
  * really lands in the address bar — {@link provideGlyphnav} wires it to
  * `Location.prepareExternalUrl` so apps served under a base href animate the
  * full path. Defaults to identity.
+ * @returns A navigator whose `navigate`/`navigateByUrl` animate first.
  */
 export const createGlyphnavNavigator = (
   router: Router,
@@ -70,13 +74,19 @@ export const createGlyphnavNavigator = (
 export const GLYPHNAV = new InjectionToken<GlyphnavNavigator>('glyphnav.navigator');
 
 /**
- * Standalone-friendly provider. Add it to your application providers:
+ * Standalone-friendly provider. Add it to your application providers, then read
+ * it anywhere with `inject(GLYPHNAV)`.
  *
- *   bootstrapApplication(App, {
- *     providers: [provideRouter(routes), provideGlyphnav({ charset: MATRIX })],
- *   });
+ * @param options - Animation options for the shared navigator.
+ * @returns Angular providers exposing a {@link GlyphnavNavigator} via
+ * {@link GLYPHNAV}.
  *
- * then read it anywhere with `inject(GLYPHNAV)`.
+ * @example
+ * ```ts
+ * bootstrapApplication(App, {
+ *   providers: [provideRouter(routes), provideGlyphnav({ charset: MATRIX })],
+ * });
+ * ```
  */
 export const provideGlyphnav = (options: AngularGlyphnavOptions = {}): Provider[] => {
   return [

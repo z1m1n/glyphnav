@@ -7,6 +7,7 @@ export interface ScrambleFrame {
   phase: AnimationPhase;
 }
 
+/** Inputs controlling how scramble frames are generated. */
 export interface ScrambleConfig {
   charset: string;
   rng: Rng;
@@ -15,11 +16,24 @@ export interface ScrambleConfig {
   maxFrames: number;
 }
 
-/** Pick one random glyph from `charset`. */
+/**
+ * Pick one random glyph from `charset`.
+ *
+ * @param charset - Pool of characters to choose from.
+ * @param rng - Random source returning floats in `[0, 1)`.
+ * @returns A single character from `charset`.
+ */
 export const randomGlyph = (charset: string, rng: Rng): string =>
   charset.charAt(Math.floor(rng() * charset.length));
 
-/** Build a string of `length` random glyphs. */
+/**
+ * Build a string of `length` random glyphs.
+ *
+ * @param length - How many glyphs to generate.
+ * @param charset - Pool of characters to choose from.
+ * @param rng - Random source returning floats in `[0, 1)`.
+ * @returns A string of `length` random glyphs from `charset`.
+ */
 export const randomString = (length: number, charset: string, rng: Rng): string => {
   let out = '';
   for (let i = 0; i < length; i++) out += randomGlyph(charset, rng);
@@ -49,6 +63,10 @@ const fitStep = (n: number, configuredStep: number, budget: number): number => {
  *
  * The list never includes the starting (empty) state but always ends with
  * `target` itself.
+ *
+ * @param target - The final string the frames resolve to.
+ * @param config - Charset, RNG, and step/frame budget.
+ * @returns The ordered frames, ending with `target` (the empty start omitted).
  */
 export const scrambleFrames = (target: string, config: ScrambleConfig): ScrambleFrame[] => {
   const n = target.length;
@@ -76,7 +94,13 @@ export const scrambleFrames = (target: string, config: ScrambleConfig): Scramble
   return frames;
 };
 
-/** A uniformly shuffled list of the indices `0 .. n-1` (Fisher–Yates). */
+/**
+ * A uniformly shuffled list of the indices `0 .. n-1` (Fisher–Yates).
+ *
+ * @param n - How many indices to produce.
+ * @param rng - Random source returning floats in `[0, 1)`.
+ * @returns A new array of `0 .. n-1` in random order.
+ */
 export const shuffledIndices = (n: number, rng: Rng): number[] => {
   const order = Array.from({ length: n }, (_, i) => i);
   for (let i = n - 1; i > 0; i--) {
@@ -97,6 +121,10 @@ export const shuffledIndices = (n: number, rng: Rng): number[] => {
  * 2. **resolve** — the real characters lock in at random positions
  *    (`resolveStep` per frame) while every unresolved slot keeps flickering
  *    with fresh glyphs, until the final frame, which is `target` itself.
+ *
+ * @param target - The final string the frames resolve to.
+ * @param config - Charset, RNG, and step/frame budget.
+ * @returns The ordered frames, ending with `target`.
  */
 export const scrambleBurst = (target: string, config: ScrambleConfig): ScrambleFrame[] => {
   const n = target.length;

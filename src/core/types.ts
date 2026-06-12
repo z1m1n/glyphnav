@@ -45,43 +45,73 @@ export type RunResult = 'completed' | 'cancelled' | 'skipped';
  * Every field is optional; sensible defaults are applied via `resolveOptions`.
  */
 export interface GlyphnavOptions {
-  /** Pool of random glyphs used for the "noise" characters. Default {@link DEFAULT_CHARSET}. */
+  /**
+   * Pool of random glyphs used for the "noise" characters.
+   * @defaultValue {@link DEFAULT_CHARSET}
+   */
   charset?: string;
-  /** Random source, injectable for reproducibility/tests. Default {@link Math.random}. */
+  /**
+   * Random source, injectable for reproducibility/tests.
+   * @defaultValue {@link Math.random}
+   */
   rng?: Rng;
-  /** Milliseconds each frame stays on screen. Default `40`. */
+  /**
+   * Milliseconds each frame stays on screen.
+   * @defaultValue `40`
+   */
   stepDuration?: number;
   /**
    * Total animation time in milliseconds for the whole run. When set it takes
    * precedence over `stepDuration`: the per-frame delay becomes
    * `duration / (frameCount - 1)`, and the per-frame steps auto-scale so no
-   * frame would stay on screen for less than ~15 ms. Default `null`
-   * (per-frame `stepDuration` timing).
+   * frame would stay on screen for less than ~15 ms.
+   * @defaultValue `null` (per-frame `stepDuration` timing)
    */
   duration?: number | null;
-  /** The animation style. Default `'decode'`. See {@link GlyphEffect}. */
+  /**
+   * The animation style.
+   * @defaultValue `'decode'`
+   * @see {@link GlyphEffect}
+   */
   effect?: GlyphEffect;
   /**
    * `'before'` commits immediately and animates on top of the landed URL, so
    * the page never waits for the animation; `'after'` animates first and
-   * commits the real navigation at the end. Default `'before'`.
+   * commits the real navigation at the end.
+   * @defaultValue `'before'`
    */
   commit?: CommitTiming;
-  /** How many characters are appended per frame during the grow phase. Default `1`. */
+  /**
+   * How many characters are appended per frame during the grow phase.
+   * @defaultValue `1`
+   */
   growStep?: number;
-  /** How many characters are locked per frame during the resolve phase. Default `1`. */
+  /**
+   * How many characters are locked per frame during the resolve phase.
+   * @defaultValue `1`
+   */
   resolveStep?: number;
   /**
    * Hard cap on the number of frames. If a path is long enough that the grow +
    * resolve phases would exceed this, the per-frame steps are scaled up so the
-   * animation never runs longer than `maxFrames * stepDuration`. Default `120`.
+   * animation never runs longer than `maxFrames * stepDuration`.
+   * @defaultValue `120`
    */
   maxFrames?: number;
-  /** Which part of the path to animate. Default `'full'`. */
+  /**
+   * Which part of the path to animate.
+   * @defaultValue `'full'`
+   */
   scope?: AnimateScope;
-  /** Keep the leading `/` fixed (only relevant for `scope: 'full'`). Default `true`. */
+  /**
+   * Keep the leading `/` fixed (only relevant for `scope: 'full'`).
+   * @defaultValue `true`
+   */
   preserveLeadingSlash?: boolean;
-  /** Skip the animation when the user prefers reduced motion. Default `true`. */
+  /**
+   * Skip the animation when the user prefers reduced motion.
+   * @defaultValue `true`
+   */
   respectReducedMotion?: boolean;
   /** Lifecycle callbacks. */
   hooks?: GlyphnavHooks;

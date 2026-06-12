@@ -10,21 +10,34 @@ import { GlyphnavController } from '../core';
 import type { ControllerDeps, GlyphnavOptions, RunResult } from '../core';
 
 export interface NavigateOptions extends GlyphnavOptions {
-  /** Hard-reload to the destination (classic multi-page sites). Default `true`. */
+  /**
+   * Hard-reload to the destination (classic multi-page sites).
+   * @defaultValue `true`
+   */
   reload?: boolean;
-  /** When not reloading, use `replaceState` instead of `pushState`. Default `false`. */
+  /**
+   * When not reloading, use `replaceState` instead of `pushState`.
+   * @defaultValue `false`
+   */
   replace?: boolean;
 }
 
 export interface InstallOptions extends GlyphnavOptions {
   /**
    * What to intercept. `'links'` hijacks same-origin anchor clicks; `'none'`
-   * animates only programmatic `navigate()` calls. Default `'links'`.
+   * animates only programmatic `navigate()` calls.
+   * @defaultValue `'links'`
    */
   intercept?: 'links' | 'none';
-  /** Element the click listener is attached to. Default `document`. */
+  /**
+   * Element the click listener is attached to.
+   * @defaultValue `document`
+   */
   root?: Document | HTMLElement;
-  /** Reload on navigation (MPA) vs. push a history entry (SPA). Default `true`. */
+  /**
+   * Reload on navigation (MPA) vs. push a history entry (SPA).
+   * @defaultValue `true`
+   */
   reload?: boolean;
   /** Final say on whether a given anchor should be animated. */
   shouldHandle?: (anchor: HTMLAnchorElement, event: MouseEvent) => boolean;
@@ -100,6 +113,10 @@ const commit = (path: string, reload: boolean, replace: boolean): void => {
  * Animate the address bar to `to`, then perform the navigation. Resolves once
  * the navigation has been committed (or skipped, e.g. under reduced motion or
  * for cross-origin destinations).
+ *
+ * @param to - Destination path or URL. Cross-origin targets are not animated.
+ * @param options - Per-call navigation and animation options.
+ * @returns The outcome of the run (`completed`, `cancelled`, or `skipped`).
  */
 export const navigate = (to: string, options: NavigateOptions = {}): Promise<RunResult> => {
   const { reload = true, replace = false, ...glyph } = options;
@@ -121,6 +138,9 @@ export const navigate = (to: string, options: NavigateOptions = {}): Promise<Run
  * return the eligible anchor (or `null`). Skips modified clicks, new-tab and
  * download links, cross-origin links and `data-glyphnav="off"` links — the
  * same rules a good SPA link interceptor uses.
+ *
+ * @param event - The click event to evaluate.
+ * @returns The anchor to animate, or `null` if the click should pass through.
  */
 export const eligibleAnchor = (event: MouseEvent): HTMLAnchorElement | null => {
   if (event.defaultPrevented || event.button !== 0) return null;
@@ -146,6 +166,9 @@ export const eligibleAnchor = (event: MouseEvent): HTMLAnchorElement | null => {
  * Set up the shared controller and (by default) hijack same-origin link clicks
  * so every navigation plays the glyph animation. Pass `intercept: 'none'` to
  * leave links alone and animate only programmatic `navigate()` calls.
+ *
+ * @param options - Interception and animation options.
+ * @returns A handle exposing the controller, `navigate`, and `uninstall`.
  */
 export const install = (options: InstallOptions = {}): GlyphnavHandle => {
   const {

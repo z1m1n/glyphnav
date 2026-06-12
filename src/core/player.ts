@@ -22,17 +22,30 @@ export const defaultScheduler: Scheduler = {
  * before starting/stopping — so only one run is ever live at a time.
  */
 export interface Player {
+  /** True while a run is in flight. */
   readonly running: boolean;
   /**
    * Fire `tick(0..count-1)`, one tick every `stepDuration` ms (the first fires
    * on the next macrotask). Resolves `'completed'` after the last tick or
    * `'cancelled'` if interrupted.
+   *
+   * @param count - Number of ticks to fire.
+   * @param stepDuration - Milliseconds between ticks.
+   * @param tick - Called with the zero-based index of each tick.
+   * @returns `'completed'` after the last tick, or `'cancelled'` if interrupted.
    */
   play(count: number, stepDuration: number, tick: (index: number) => void): Promise<PlayResult>;
   /** Stop the current run (if any), resolving its promise with `'cancelled'`. */
   cancel(): void;
 }
 
+/**
+ * Create a {@link Player} backed by `scheduler`.
+ *
+ * @param scheduler - Timer primitives to drive ticks. Defaults to
+ * {@link defaultScheduler}.
+ * @returns A player that runs one timed sequence of ticks at a time.
+ */
 export const createPlayer = (scheduler: Scheduler = defaultScheduler): Player => {
   let timer: unknown = null;
   let running = false;

@@ -23,6 +23,11 @@ const frameBudget = (duration: number | null, maxFrames: number): number => {
  * `to` — pure and DOM-free. Each frame's `path` is a complete path string
  * (fixed prefix + scrambled text). The current path (`from`) is never emitted
  * as a frame — it is already on screen — and the list always ends with `to`.
+ *
+ * @param from - The path currently shown in the address bar.
+ * @param to - The absolute target path to animate to.
+ * @param options - Animation options; unset fields fall back to the defaults.
+ * @returns The ordered frames to write to the bar, ending with `to`.
  */
 export const generateFrames = (
   from: string,
