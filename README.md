@@ -2,12 +2,14 @@
 
 > Animate navigation: watch the URL **decode itself, glyph by glyph**, right in the address bar — then commit the real navigation.
 
+**[GitHub](https://github.com/z1m1n/glyphnav)** · **[Live demo](https://z1m1n.github.io/glyphnav/)** · **[npm](https://www.npmjs.com/package/glyphnav)**
+
 ```
 /  →  /x  →  /xy  →  /xyz  →  /xyzw  →  /tyzw  →  /tezw  →  /tesw  →  /test
       └────────────  grow  ────────────┘└───────────  resolve  ──────────┘
 ```
 
-### ▶ [Live demo — **z1m1n.github.io/glyphnav**](https://z1m1n.github.io/glyphnav/)
+### ▶ [Live demo](https://z1m1n.github.io/glyphnav/)
 
 Jump straight to an integration:
 [vanilla](https://z1m1n.github.io/glyphnav/vanilla/) ·

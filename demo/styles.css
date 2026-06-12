@@ -209,6 +209,18 @@ nav a.router-link-exact-active {
   font-size: 0.8rem;
 }
 
+/* Shared site footer: GitHub + npm links on every demo page. */
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  color: #777;
+  font-size: 0.8rem;
+}
+
 code {
   background: #f2f2f2;
   padding: 1px 4px;
