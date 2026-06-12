@@ -31,6 +31,7 @@
     }
   },
   "include": [
+    "main.ts",
     "highlight.ts",
     "shims-vue.d.ts",
     "vite-env.d.ts",
