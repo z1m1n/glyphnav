@@ -33,7 +33,7 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - 🎞️ **Two effects**: `decode` (grow + resolve left‑to‑right) and `scramble`
   (full‑length noise at once, characters lock in random order).
 - ⏱️ **`duration`** budgets the _whole_ animation — frames auto‑scale to fit.
-- 🪶 **~1 kB** per adapter (gzipped) on top of a ~3 kB core.
+- 🪶 **<1 kB** per adapter (gzipped) on top of a ~3 kB core.
 - ♿ Honors `prefers-reduced-motion`, supersedes overlapping navigations, fully cancelable.
 - 🛡️ Writes only rooted same‑origin paths and backs off if the URL changes
   underneath it (back button mid‑animation) — the address bar can't be corrupted.
