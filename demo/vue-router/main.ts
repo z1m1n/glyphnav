@@ -2,6 +2,7 @@ import { createApp, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { glyphnav } from 'glyphnav/vue-router';
 import { highlight } from '../highlight';
+import { DOCS_INSTALL } from '../shared/content';
 import App from './App.vue';
 
 /** A view as a render-function component (no runtime template compiler needed). */
@@ -11,8 +12,6 @@ const page = (title: string, body: string) => ({
 
 /** A syntax-highlighted code block as a vnode. */
 const codeBlock = (code: string) => h('pre', h('code', { innerHTML: highlight(code) }));
-
-const DOCS_INSTALL = `pnpm add glyphnav`;
 
 const DOCS_SETUP = `import { glyphnav } from 'glyphnav/vue-router';
 

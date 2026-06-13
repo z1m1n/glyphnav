@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import type { Routes } from '@angular/router';
 import { highlight } from '../highlight';
+import { DOCS_INSTALL } from '../shared/content';
 
 @Component({
   selector: 'app-page',
@@ -35,7 +36,7 @@ export class PageComponent {
   `,
 })
 export class DocsComponent {
-  readonly install = 'pnpm add glyphnav';
+  readonly install = DOCS_INSTALL;
 
   readonly setup = [
     "import { provideGlyphnav, GLYPHNAV } from 'glyphnav/angular-router';",

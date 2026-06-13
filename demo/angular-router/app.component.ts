@@ -1,20 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { GLYPHNAV } from 'glyphnav/angular-router';
-import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { GlyphnavLinkDirective } from './glyphnav-link.directive';
-
-const charsets: Record<string, string> = {
-  url: URL_SAFE,
-  hex: HEX,
-  matrix: MATRIX,
-  symbols: SYMBOLS,
-};
-
-function currentUrl(): string {
-  return location.pathname + location.search + location.hash;
-}
+import { charsets, currentUrl, durationToSlider, sliderToDuration } from '../shared/content';
 
 @Component({
   selector: 'app-root',
@@ -68,7 +57,7 @@ function currentUrl(): string {
           min="20"
           max="1000"
           step="10"
-          [value]="1020 - duration()"
+          [value]="durationToSlider(duration())"
           (input)="onSpeed($event)"
         />
         <span class="ms">{{ duration() }}ms</span>
@@ -118,7 +107,10 @@ export class AppComponent {
   readonly active = signal('/');
   readonly duration = signal(250);
 
-  private charset = URL_SAFE;
+  // Exposed for the template's inverted speed slider.
+  readonly durationToSlider = durationToSlider;
+
+  private charset = charsets.url;
   private effect: GlyphEffect = 'decode';
   private commit: CommitTiming = 'before';
   private scope: AnimateScope = 'full';
@@ -159,7 +151,7 @@ export class AppComponent {
 
   onSpeed(event: Event): void {
     // Slider is inverted: full right = 20 ms (fastest whole animation).
-    this.duration.set(1020 - Number((event.target as HTMLInputElement).value));
+    this.duration.set(sliderToDuration(Number((event.target as HTMLInputElement).value)));
     this.apply();
   }
 

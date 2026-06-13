@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useGlyphnav } from 'glyphnav/vue-router';
-import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
 import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav/core';
+import { charsets, currentUrl, durationToSlider, sliderToDuration } from '../shared/content';
 
 const controller = useGlyphnav();
-
-const currentUrl = () => location.pathname + location.search + location.hash;
 
 // '/' in dev, '/glyphnav/' on the deployed project page.
 const base = import.meta.env.BASE_URL;
@@ -15,14 +13,8 @@ const displayPath = ref(currentUrl());
 const resolving = ref(false);
 const duration = ref(250);
 
-const charsets: Record<string, string> = {
-  url: URL_SAFE,
-  hex: HEX,
-  matrix: MATRIX,
-  symbols: SYMBOLS,
-};
 const state = {
-  charset: URL_SAFE,
+  charset: charsets.url,
   duration: 250,
   effect: 'decode' as GlyphEffect,
   commit: 'before' as CommitTiming,
@@ -52,7 +44,7 @@ const onCharset = (e: Event) => {
 };
 const onSpeed = (e: Event) => {
   // Slider is inverted: full right = 20 ms (fastest whole animation).
-  state.duration = 1020 - Number((e.target as HTMLInputElement).value);
+  state.duration = sliderToDuration(Number((e.target as HTMLInputElement).value));
   duration.value = state.duration;
   apply();
 };
@@ -103,7 +95,14 @@ const onScope = (e: Event) => {
     </label>
     <label
       >speed
-      <input type="range" min="20" max="1000" step="10" :value="1020 - duration" @input="onSpeed" />
+      <input
+        type="range"
+        min="20"
+        max="1000"
+        step="10"
+        :value="durationToSlider(duration)"
+        @input="onSpeed"
+      />
       <span class="ms">{{ duration }}ms</span>
     </label>
     <label

@@ -14,20 +14,15 @@ import {
   GlyphnavProvider,
   useGlyphnavController,
 } from 'glyphnav/tanstack-solid-router';
-import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../highlight';
-
-const charsets: Record<string, string> = {
-  url: URL_SAFE,
-  hex: HEX,
-  matrix: MATRIX,
-  symbols: SYMBOLS,
-};
-
-const currentUrl = (): string => location.pathname + location.search + location.hash;
-
-const DOCS_INSTALL = `pnpm add glyphnav`;
+import {
+  charsets,
+  currentUrl,
+  DOCS_INSTALL,
+  durationToSlider,
+  sliderToDuration,
+} from '../shared/content';
 
 const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-solid-router';
 
@@ -172,8 +167,8 @@ function Layout(): JSX.Element {
             min={20}
             max={1000}
             step={10}
-            value={1020 - duration()}
-            onInput={(e) => setDuration(1020 - Number(e.currentTarget.value))}
+            value={durationToSlider(duration())}
+            onInput={(e) => setDuration(sliderToDuration(Number(e.currentTarget.value)))}
           />
           <span class="ms">{duration()}ms</span>
         </label>

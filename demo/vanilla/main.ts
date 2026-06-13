@@ -1,6 +1,7 @@
-import { HEX, MATRIX, SYMBOLS, URL_SAFE, install } from 'glyphnav';
+import { install } from 'glyphnav';
 import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav';
 import { highlight } from '../highlight';
+import { charsets, currentUrl, DOCS_INSTALL, sliderToDuration } from '../shared/content';
 
 const BASE = import.meta.env.BASE_URL + 'vanilla';
 
@@ -12,8 +13,6 @@ interface Page {
   /** Raw HTML appended after the body paragraph (already escaped). */
   html?: string;
 }
-
-const DOCS_INSTALL = `pnpm add glyphnav`;
 
 const DOCS_SETUP = `import { install, navigate } from 'glyphnav';
 
@@ -59,20 +58,9 @@ const pages: Record<string, Page> = {
   },
 };
 
-const charsets: Record<string, string> = {
-  url: URL_SAFE,
-  hex: HEX,
-  matrix: MATRIX,
-  symbols: SYMBOLS,
-};
-
 const bar = document.getElementById('bar')!;
 const pathEl = document.getElementById('path')!;
 const view = document.getElementById('view')!;
-
-function currentUrl(): string {
-  return location.pathname + location.search + location.hash;
-}
 
 function currentSub(): string {
   const sub = location.pathname.replace(BASE, '').replace(/\/$/, '');
@@ -106,7 +94,7 @@ const hooks = {
 };
 
 const state = {
-  charset: URL_SAFE,
+  charset: charsets.url,
   duration: 250,
   effect: 'decode' as GlyphEffect,
   commit: 'before' as CommitTiming,
@@ -135,7 +123,7 @@ charsetSel.addEventListener('change', () => {
 });
 speed.addEventListener('input', () => {
   // Slider is inverted: full right = 20 ms (fastest whole animation).
-  state.duration = 1020 - Number(speed.value);
+  state.duration = sliderToDuration(Number(speed.value));
   speedVal.textContent = `${state.duration}ms`;
   apply();
 });
