@@ -12,8 +12,8 @@ import { createContext, createElement, useCallback, useContext, useMemo, useRef 
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
-import { GlyphnavController } from '../core';
-import type { GlyphnavOptions, RunResult } from '../core';
+import { GlyphnavController } from '../../core';
+import type { GlyphnavOptions, RunResult } from '../../core';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;

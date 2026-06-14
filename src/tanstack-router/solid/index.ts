@@ -24,8 +24,8 @@ import type { JSX } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { useRouter } from '@tanstack/solid-router';
 import type { NavigateOptions } from '@tanstack/solid-router';
-import { GlyphnavController } from '../core';
-import type { GlyphnavOptions, RunResult } from '../core';
+import { GlyphnavController } from '../../core';
+import type { GlyphnavOptions, RunResult } from '../../core';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;

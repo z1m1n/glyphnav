@@ -62,15 +62,15 @@
       "import": "./dist/react-router.js",
       "require": "./dist/react-router.cjs"
     },
-    "./tanstack-react-router": {
-      "types": "./dist/tanstack-react-router.d.ts",
-      "import": "./dist/tanstack-react-router.js",
-      "require": "./dist/tanstack-react-router.cjs"
+    "./tanstack-router/react": {
+      "types": "./dist/tanstack-router/react.d.ts",
+      "import": "./dist/tanstack-router/react.js",
+      "require": "./dist/tanstack-router/react.cjs"
     },
-    "./tanstack-solid-router": {
-      "types": "./dist/tanstack-solid-router.d.ts",
-      "import": "./dist/tanstack-solid-router.js",
-      "require": "./dist/tanstack-solid-router.cjs"
+    "./tanstack-router/solid": {
+      "types": "./dist/tanstack-router/solid.d.ts",
+      "import": "./dist/tanstack-router/solid.js",
+      "require": "./dist/tanstack-router/solid.cjs"
     },
     "./angular-router": {
       "types": "./dist/angular-router.d.ts",

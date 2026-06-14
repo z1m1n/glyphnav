@@ -157,12 +157,12 @@ export default defineConfig({
       { find: 'glyphnav/vue-router', replacement: r('../src/vue-router/index.ts') },
       { find: 'glyphnav/react-router', replacement: r('../src/react-router/index.tsx') },
       {
-        find: 'glyphnav/tanstack-react-router',
-        replacement: r('../src/tanstack-react-router/index.tsx'),
+        find: 'glyphnav/tanstack-router/react',
+        replacement: r('../src/tanstack-router/react/index.tsx'),
       },
       {
-        find: 'glyphnav/tanstack-solid-router',
-        replacement: r('../src/tanstack-solid-router/index.ts'),
+        find: 'glyphnav/tanstack-router/solid',
+        replacement: r('../src/tanstack-router/solid/index.ts'),
       },
       { find: 'glyphnav/angular-router', replacement: r('../src/angular-router/index.ts') },
       { find: 'glyphnav', replacement: r('../src/index.ts') },

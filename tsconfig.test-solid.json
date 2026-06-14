@@ -9,6 +9,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["test/tanstack-solid-router.test.ts", "src/tanstack-solid-router/index.ts"],
+  "include": ["test/tanstack-solid-router.test.ts", "src/tanstack-router/solid/index.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -28,7 +28,7 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 
 - 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
-  `glyphnav/react-router`, `glyphnav/tanstack-react-router`, `glyphnav/angular-router`,
+  `glyphnav/react-router`, `glyphnav/tanstack-router/react`, `glyphnav/angular-router`,
   `glyphnav/next` (App **and** Pages Router) and `glyphnav/nuxt`.
 - ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
   instantly and the animation plays on top; switch to `commit: 'after'` for the
@@ -208,7 +208,7 @@ await navigate('/dashboard');
 `useGlyphnavNavigate()` mirrors `useNavigate()`. The provider is optional — without it,
 hooks create their own controller.
 
-### TanStack Router (React) — `glyphnav/tanstack-react-router`
+### TanStack Router (React) — `glyphnav/tanstack-router/react`
 
 ▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-router/)**
 
@@ -217,7 +217,7 @@ import {
   GlyphnavProvider,
   GlyphnavLink,
   useGlyphnavNavigate,
-} from 'glyphnav/tanstack-react-router';
+} from 'glyphnav/tanstack-router/react';
 
 <GlyphnavProvider duration={250} commit="before">
   <RouterProvider router={router} />
@@ -235,7 +235,7 @@ object) and resolves the basepath‑aware target via `router.buildLocation()`.
 `GlyphnavLink` renders a real `<a href>`; for fully type‑safe links wrap
 `useGlyphnavNavigate()` in your own component.
 
-### TanStack Router (Solid) — `glyphnav/tanstack-solid-router`
+### TanStack Router (Solid) — `glyphnav/tanstack-router/solid`
 
 ▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-solid-router/)**
 
@@ -249,7 +249,7 @@ import {
   GlyphnavProvider,
   GlyphnavLink,
   useGlyphnavNavigate,
-} from 'glyphnav/tanstack-solid-router';
+} from 'glyphnav/tanstack-router/solid';
 
 <GlyphnavProvider duration={250} commit="before">
   <RouterProvider router={router} />
@@ -435,10 +435,10 @@ pnpm run coverage    # V8 coverage
 ```
 
 The package is built with **Vite 8** in library mode with nine entry points
-(`.`, `./core`, `./vue-router`, `./react-router`, `./tanstack-react-router`,
-`./tanstack-solid-router`, `./angular-router`, `./next`, `./nuxt`); router/framework
+(`.`, `./core`, `./vue-router`, `./react-router`, `./tanstack-router/react`,
+`./tanstack-router/solid`, `./angular-router`, `./next`, `./nuxt`); router/framework
 deps are always externalized. Declarations are
-generated against `tsconfig.build.json` so they land flat in `dist/`.
+generated against `tsconfig.build.json` so they mirror the entry layout in `dist/`.
 
 ---
 

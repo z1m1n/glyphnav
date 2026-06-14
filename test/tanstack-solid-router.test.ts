@@ -12,7 +12,7 @@ import {
   createRouter,
   useRouterState,
 } from '@tanstack/solid-router';
-import { GlyphnavLink, useGlyphnavNavigate } from '../src/tanstack-solid-router';
+import { GlyphnavLink, useGlyphnavNavigate } from '../src/tanstack-router/solid';
 
 // Solid normally calls delegateEvents() from compiled templates; this test
 // builds the tree at runtime (no compiler), so install the click delegate that

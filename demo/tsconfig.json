@@ -26,7 +26,7 @@
       "glyphnav/core": ["../src/core/index.ts"],
       "glyphnav/vue-router": ["../src/vue-router/index.ts"],
       "glyphnav/react-router": ["../src/react-router/index.tsx"],
-      "glyphnav/tanstack-react-router": ["../src/tanstack-react-router/index.tsx"],
+      "glyphnav/tanstack-router/react": ["../src/tanstack-router/react/index.tsx"],
       "glyphnav/angular-router": ["../src/angular-router/index.ts"]
     }
   },

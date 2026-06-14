@@ -12,7 +12,7 @@ import {
   GlyphnavLink,
   GlyphnavProvider,
   useGlyphnavController,
-} from 'glyphnav/tanstack-react-router';
+} from 'glyphnav/tanstack-router/react';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
 import {
@@ -23,7 +23,7 @@ import {
   sliderToDuration,
 } from '../shared/content';
 
-const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-react-router';
+const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-router/react';
 
 <GlyphnavProvider duration={250} commit="before">
   <RouterProvider router={router} />

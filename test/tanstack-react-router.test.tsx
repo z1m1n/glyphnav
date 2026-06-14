@@ -9,7 +9,7 @@ import {
   createRouter,
   useRouterState,
 } from '@tanstack/react-router';
-import { GlyphnavLink, useGlyphnavNavigate } from '../src/tanstack-react-router';
+import { GlyphnavLink, useGlyphnavNavigate } from '../src/tanstack-router/react';
 
 const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
 
