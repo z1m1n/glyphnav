@@ -92,7 +92,7 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test-solid.json && pnpm run typecheck:demo",
-    "typecheck:demo": "tsc --noEmit -p demo/tsconfig.json && tsc --noEmit -p demo/tanstack-solid-router/tsconfig.json && tsc --noEmit -p demo/angular-router/tsconfig.json",
+    "typecheck:demo": "tsc --noEmit -p demo/tsconfig.json && tsc --noEmit -p demo/tanstack-router/solid/tsconfig.json && tsc --noEmit -p demo/angular-router/tsconfig.json",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",

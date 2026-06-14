@@ -38,8 +38,8 @@
     "vite-env.d.ts",
     "react-router/**/*.ts",
     "react-router/**/*.tsx",
-    "tanstack-router/**/*.ts",
-    "tanstack-router/**/*.tsx",
+    "tanstack-router/react/**/*.ts",
+    "tanstack-router/react/**/*.tsx",
     "vue-router/**/*.ts",
     "vanilla/**/*.ts"
   ]

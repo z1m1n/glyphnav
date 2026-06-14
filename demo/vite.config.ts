@@ -45,8 +45,8 @@ const APPS = [
   'vanilla',
   'vue-router',
   'react-router',
-  'tanstack-router',
-  'tanstack-solid-router',
+  'tanstack-router/react',
+  'tanstack-router/solid',
   'angular-router',
 ];
 
@@ -118,8 +118,8 @@ function staticRoutes(): Plugin {
     vanilla: ['about', 'docs', 'contact'],
     'vue-router': ['about', 'features', 'docs'],
     'react-router': ['about', 'docs', 'blog'],
-    'tanstack-router': ['about', 'posts', 'docs'],
-    'tanstack-solid-router': ['about', 'posts', 'docs'],
+    'tanstack-router/react': ['about', 'posts', 'docs'],
+    'tanstack-router/solid': ['about', 'posts', 'docs'],
     'angular-router': ['about', 'docs', 'blog'],
   };
   return {
@@ -200,15 +200,16 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    react({ include: /demo\/(react-router|tanstack-router)\/.*\.tsx?$/ }),
+    react({ include: /demo\/(react-router|tanstack-router\/react)\/.*\.tsx?$/ }),
     // Solid has its own JSX runtime, so scope its compiler to the Solid demo —
-    // disjoint from the React `include` above (note `tanstack-solid-router` is
-    // not matched by `tanstack-router`). The `solid` resolve condition the plugin
-    // adds makes `@tanstack/solid-router` resolve to its *JSX source*, so that
-    // package's `.jsx` files must be compiled here too (and excluded from
-    // pre-bundling below, so they reach this transform instead of esbuild).
+    // disjoint from the React `include` above (the React glob is scoped to
+    // `tanstack-router/react`, so the sibling `tanstack-router/solid` is not
+    // matched). The `solid` resolve condition the plugin adds makes
+    // `@tanstack/solid-router` resolve to its *JSX source*, so that package's
+    // `.jsx` files must be compiled here too (and excluded from pre-bundling
+    // below, so they reach this transform instead of esbuild).
     solid({
-      include: [/demo\/tanstack-solid-router\/.*\.[tj]sx$/, /@tanstack\/solid-router\/.*\.jsx$/],
+      include: [/demo\/tanstack-router\/solid\/.*\.[tj]sx$/, /@tanstack\/solid-router\/.*\.jsx$/],
     }),
     demoFallback(),
     baseAwareLinks(),
@@ -223,8 +224,8 @@ export default defineConfig({
         vanilla: r('vanilla/index.html'),
         'vue-router': r('vue-router/index.html'),
         'react-router': r('react-router/index.html'),
-        'tanstack-router': r('tanstack-router/index.html'),
-        'tanstack-solid-router': r('tanstack-solid-router/index.html'),
+        'tanstack-router/react': r('tanstack-router/react/index.html'),
+        'tanstack-router/solid': r('tanstack-router/solid/index.html'),
         'angular-router': r('angular-router/index.html'),
       },
     },

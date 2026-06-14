@@ -15,8 +15,8 @@ Jump straight to an integration:
 [vanilla](https://z1m1n.github.io/glyphnav/vanilla/) ·
 [Vue Router](https://z1m1n.github.io/glyphnav/vue-router/) ·
 [React Router](https://z1m1n.github.io/glyphnav/react-router/) ·
-[TanStack (React)](https://z1m1n.github.io/glyphnav/tanstack-router/) ·
-[TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-solid-router/) ·
+[TanStack (React)](https://z1m1n.github.io/glyphnav/tanstack-router/react/) ·
+[TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-router/solid/) ·
 [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/) ·
 [Next.js](https://z1m1n.github.io/glyphnav/next/) ·
 [Nuxt](https://z1m1n.github.io/glyphnav/nuxt/)
@@ -210,7 +210,7 @@ hooks create their own controller.
 
 ### TanStack Router (React) — `glyphnav/tanstack-router/react`
 
-▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-router/)**
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-router/react/)**
 
 ```tsx
 import {
@@ -237,7 +237,7 @@ object) and resolves the basepath‑aware target via `router.buildLocation()`.
 
 ### TanStack Router (Solid) — `glyphnav/tanstack-router/solid`
 
-▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-solid-router/)**
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/tanstack-router/solid/)**
 
 TanStack Router's `buildLocation`/`navigate` come from its framework‑agnostic
 core, so the engine is shared — only the bindings differ. The Solid adapter has

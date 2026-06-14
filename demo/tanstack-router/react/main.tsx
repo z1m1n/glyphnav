@@ -14,14 +14,14 @@ import {
   useGlyphnavController,
 } from 'glyphnav/tanstack-router/react';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
-import { highlight } from '../shared/highlight';
+import { highlight } from '../../shared/highlight';
 import {
   charsets,
   currentUrl,
   DOCS_INSTALL,
   durationToSlider,
   sliderToDuration,
-} from '../shared/content';
+} from '../../shared/content';
 
 const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-router/react';
 
@@ -122,7 +122,7 @@ function Layout() {
     <>
       <h1>
         <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
-        <span className="crumb">/ tanstack-router</span>
+        <span className="crumb">/ tanstack-router/react</span>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>
@@ -247,7 +247,7 @@ const routeTree = rootRoute.addChildren([
 
 const router = createRouter({
   routeTree,
-  basepath: import.meta.env.BASE_URL + 'tanstack-router',
+  basepath: import.meta.env.BASE_URL + 'tanstack-router/react',
 });
 
 createRoot(document.getElementById('root')!).render(
