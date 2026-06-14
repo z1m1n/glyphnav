@@ -1,12 +1,45 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
-import type { Plugin } from 'vite';
+import type { Plugin, ProxyOptions } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import react from '@vitejs/plugin-react';
 import solid from 'vite-plugin-solid';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
+
+/**
+ * Dev proxy for a demo that runs on its own server (Next, Nuxt). Forwards the
+ * picker link to that server; if it isn't running, replies with a hint rather
+ * than an opaque error or the silently-wrong SPA-fallback picker.
+ */
+function devProxy(target: string, name: string, command: string): ProxyOptions {
+  return {
+    target,
+    changeOrigin: true,
+    ws: true,
+    configure(proxy) {
+      proxy.on('error', (_err, _req, res) => {
+        if (!('writeHead' in res)) {
+          res.destroy(); // a WebSocket upgrade (Socket), not an HTTP response
+          return;
+        }
+        if (!res.headersSent) res.writeHead(502, { 'content-type': 'text/html' });
+        res.end(
+          `<!doctype html><meta charset="utf-8">` +
+            `<body style="font:15px ui-monospace,monospace;max-width:40rem;margin:3rem auto;padding:0 1.25rem">` +
+            `<h2>/${name} isn't running</h2>` +
+            `<p>This demo has its own dev server. Start it in another terminal:</p>` +
+            `<pre style="background:#f2f2f2;padding:.6rem .9rem">${command}</pre>` +
+            `<p>…then revisit this link, or start everything at once with ` +
+            `<code>pnpm demo</code>. To preview the built site instead:</p>` +
+            `<pre style="background:#f2f2f2;padding:.6rem .9rem">pnpm demo:build && pnpm demo:preview</pre>` +
+            `<p><a href="/">← back to the picker</a></p>`,
+        );
+      });
+    },
+  };
+}
 
 const APPS = [
   'vanilla',
@@ -139,6 +172,31 @@ export default defineConfig({
   // that must go through vite-plugin-solid (above), not esbuild's pre-bundler.
   optimizeDeps: {
     exclude: ['@tanstack/solid-router'],
+  },
+  // `pnpm demo` starts all eight demos at once (`run-p demo:vite demo:next
+  // demo:nuxt`). This Vite server hosts the six Vite-based demos; Next and Nuxt
+  // run on their own dev servers (5174, 5176) and are proxied here so the combined
+  // picker works at one origin. `strictPort` makes a stale 5173 fail loudly rather
+  // than silently moving the picker to another port. The `/next` and `/nuxt`
+  // prefixes are unique to those apps (and their `_next`/`_nuxt` assets), so
+  // nothing else is caught. `pnpm demo:vite` runs just this server.
+  server: {
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      '/next': devProxy('http://localhost:5174', 'next', 'pnpm demo:next'),
+      '/nuxt': devProxy('http://localhost:5176', 'nuxt', 'pnpm demo:nuxt'),
+    },
+  },
+  // `vite preview` serves the built demo/dist, which already contains the
+  // statically-exported next/ and nuxt/ folders (copied in by `demo:build`).
+  // But Vite defaults `preview.proxy` to `server.proxy`, so without this the
+  // preview server would proxy /next and /nuxt to the dev servers on 5174/5176
+  // — not running during a preview — and answer every link with the devProxy
+  // "isn't running" 502 instead of the real static page. Override with an empty
+  // proxy so those paths fall through to the static files.
+  preview: {
+    proxy: {},
   },
   plugins: [
     vue(),

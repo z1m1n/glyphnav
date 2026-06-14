@@ -1,6 +1,6 @@
 import { install } from 'glyphnav';
 import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav';
-import { highlight } from '../highlight';
+import { highlight } from '../shared/highlight';
 import { charsets, currentUrl, DOCS_INSTALL, sliderToDuration } from '../shared/content';
 
 const BASE = import.meta.env.BASE_URL + 'vanilla';

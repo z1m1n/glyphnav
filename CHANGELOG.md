@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Next.js adapter** (`glyphnav/next`): `GlyphnavProvider`, `GlyphnavLink`,
+  `useGlyphnavNavigate` and `useGlyphnavController`. A `routerMode` option drives
+  the real navigation through either the App Router (`next/navigation`) or the
+  Pages Router (`next/compat/router`), so one adapter covers both folder
+  conventions; `basePath` keeps the animated target accurate under a base path.
+- **Nuxt adapter** (`glyphnav/nuxt`): `installGlyphnav` / `attachGlyphnav` wrap
+  Vue Router's `push`/`replace` so every `<NuxtLink>` and `navigateTo()` animates,
+  with `intercept` ('router' | 'none') and `historyMode` ('history' | 'hash')
+  options.
+- Next.js (App Router) and Nuxt demos, added as pnpm workspace projects under
+  `demo/` and statically exported into the combined `demo/dist` by `pnpm demo:build`,
+  so the GitHub Pages deploy publishes all eight integrations from one artifact.
+
 ## [0.1.4] - 2026-06-13
 
 ### Added

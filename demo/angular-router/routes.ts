@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import type { Routes } from '@angular/router';
-import { highlight } from '../highlight';
+import { highlight } from '../shared/highlight';
 import { DOCS_INSTALL } from '../shared/content';
 
 @Component({

@@ -1,0 +1,14 @@
+{
+  "name": "@glyphnav-demo/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared demo helpers (charsets, address-bar utils, syntax highlighter, styles) used by every glyphnav demo.",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./styles.css": "./styles.css"
+  },
+  "dependencies": {
+    "glyphnav": "workspace:*"
+  }
+}

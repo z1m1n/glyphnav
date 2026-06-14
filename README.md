@@ -17,7 +17,9 @@ Jump straight to an integration:
 [React Router](https://z1m1n.github.io/glyphnav/react-router/) ·
 [TanStack (React)](https://z1m1n.github.io/glyphnav/tanstack-router/) ·
 [TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-solid-router/) ·
-[Angular Router](https://z1m1n.github.io/glyphnav/angular-router/)
+[Angular Router](https://z1m1n.github.io/glyphnav/angular-router/) ·
+[Next.js](https://z1m1n.github.io/glyphnav/next/) ·
+[Nuxt](https://z1m1n.github.io/glyphnav/nuxt/)
 
 `glyphnav` rewrites `history.replaceState` frame by frame: it fills the destination
 path with random glyphs (the **grow** phase), then resolves the real characters
@@ -26,7 +28,8 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 
 - 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
-  `glyphnav/react-router`, `glyphnav/tanstack-react-router`, `glyphnav/angular-router`.
+  `glyphnav/react-router`, `glyphnav/tanstack-react-router`, `glyphnav/angular-router`,
+  `glyphnav/next` (App **and** Pages Router) and `glyphnav/nuxt`.
 - ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
   instantly and the animation plays on top; switch to `commit: 'after'` for the
   classic animate‑then‑commit order.
@@ -150,10 +153,10 @@ import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } fro
 
 ## Router adapters
 
-Each subpath is named after the router it wraps. Only the Vue plugin (and vanilla
-`install()`) intercept anything globally — and both can be told not to. The React,
-TanStack and Angular adapters are opt‑in by design: only navigations made through
-their links/hooks animate.
+Each subpath is named after the router it wraps. The Vue and Nuxt plugins (and
+vanilla `install()`) intercept globally — and all can be told not to. The React,
+TanStack, Angular and Next adapters are opt‑in by design: only navigations made
+through their links/hooks animate.
 
 ### Vue Router — `glyphnav/vue-router`
 
@@ -292,6 +295,61 @@ For an animated link directive (`[glyphnavLink]`), copy the small directive from
 into your app, where your own Angular build compiles it. Or wrap a `Router` directly with
 `createGlyphnavNavigator(router, options)`.
 
+### Next.js — `glyphnav/next`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/next/)**
+
+One adapter for **both** Next routers. `routerMode` selects which one performs the
+real navigation — `'app'` (default, via `next/navigation`) or `'pages'` (via
+`next/compat/router`) — so the same code animates whether your routes live in
+`app/` or `pages/`.
+
+```tsx
+'use client';
+import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/next';
+
+<GlyphnavProvider duration={250} commit="after" routerMode="app">
+  <GlyphnavLink href="/about?tab=2#top">About</GlyphnavLink>
+</GlyphnavProvider>;
+
+// imperative, mirrors useRouter().push:
+const navigate = useGlyphnavNavigate();
+await navigate('/dashboard');
+```
+
+`GlyphnavLink` is a drop‑in for `next/link` (prefetch and all) that animates on
+click; `useGlyphnavNavigate()` mirrors `useRouter().push` (pass `{ replace: true }`
+for `replace`). Pass `basePath` if the app is served under one. **App Router note:**
+its navigations are asynchronous, so `commit: 'after'` (animate, then navigate) is
+the reliable mode there; the Pages Router resolves synchronously and works with
+either timing.
+
+### Nuxt — `glyphnav/nuxt`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/nuxt/)**
+
+Nuxt runs on Vue Router, so a single client plugin wraps `router.push`/`replace` and
+every `<NuxtLink>` click and `navigateTo()` call animates — no per‑link wiring:
+
+```ts
+// plugins/glyphnav.client.ts
+import { installGlyphnav } from 'glyphnav/nuxt';
+
+export default defineNuxtPlugin((nuxtApp) => {
+  installGlyphnav(
+    { $router: useRouter(), provide: (name, value) => nuxtApp.provide(name, value) },
+    { duration: 250, commit: 'before' },
+  );
+});
+
+// anywhere: const { controller, navigate } = useNuxtApp().$glyphnav;
+```
+
+`historyMode: 'hash'` keeps the animated target correct for hash‑mode routers, and
+`intercept: 'none'` leaves the router untouched so only the instance's
+`navigate()`/`push()`/`replace()` animate. Attach to a router manually with
+`attachGlyphnav(router, options)`.
+
 ---
 
 ## Core API — `glyphnav/core`
@@ -320,13 +378,31 @@ generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
 **▶ Hosted live at <https://z1m1n.github.io/glyphnav/>** — the same playground,
 deployed to GitHub Pages.
 
-One Vite playground covers **all six** integrations — vanilla, Vue Router,
+One Vite playground covers **six** integrations — vanilla, Vue Router,
 React Router, TanStack Router (React **and** Solid) and Angular Router:
 
 ```bash
 pnpm install
-pnpm demo                  # → http://localhost:5173  (picker + every demo)
+pnpm demo                  # → http://localhost:5173  (picker + all eight, live)
+# …or run one server individually:
+pnpm demo:vite             # → http://localhost:5173  (just the six Vite demos)
+pnpm demo:next             # → http://localhost:5174/next   (Next.js, own dev server)
+pnpm demo:nuxt             # → http://localhost:5176/nuxt   (Nuxt, own dev server)
 ```
+
+Next.js and Nuxt have their own build systems, so they're separate workspace
+projects under `demo/next` and `demo/nuxt` rather than Vite entries — each runs on
+its own dev server. `pnpm demo` (`run-p` via `npm-run-all2`) starts all three
+together, and the Vite dev server proxies `/next` and `/nuxt` to them, so the picker
+at `:5173` reaches every demo from one origin (run just `pnpm demo:vite` and those two
+links show a hint pointing at their own server). Run a **single** `pnpm demo` — a
+second Nuxt instance sharing `demo/nuxt/.nuxt` breaks dev; kill any stale `:5176`
+server first. For the deployed artifact,
+`pnpm demo:build` (`run-s`) builds the Vite playground, statically exports Next
+(`output: 'export'`) and Nuxt (`nuxi generate`), and copies their output into
+`demo/dist/{next,nuxt}` so a single `demo/dist` deploys all eight. All demos — Vite,
+Next and Nuxt — share one `@glyphnav-demo/shared` workspace package for the charsets,
+address‑bar helpers, syntax highlighter and styles.
 
 The Angular demo runs in **JIT mode** inside the same dev server: it imports
 `@angular/compiler` in the browser, so no ngtsc build step (and no second app)
@@ -347,8 +423,9 @@ The demos alias `glyphnav` to `src/`, so editing the library updates them live.
 
 ## Development
 
-The repo is a single [pnpm](https://pnpm.io) **11.5** package
-(`pnpm-workspace.yaml` holds the workspace settings).
+The repo is a [pnpm](https://pnpm.io) **11.5** workspace: the library is the root
+package, with the Next.js and Nuxt demos as members under `demo/` (the other demos
+are plain files in the root package).
 
 ```bash
 pnpm test            # Vitest (jsdom) — core, controller, vanilla + all adapters
@@ -357,10 +434,10 @@ pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
 ```
 
-The package is built with **Vite 8** in library mode with seven entry points
+The package is built with **Vite 8** in library mode with nine entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./tanstack-react-router`,
-`./tanstack-solid-router`, `./angular-router`); router/framework deps are always
-externalized. Declarations are
+`./tanstack-solid-router`, `./angular-router`, `./next`, `./nuxt`); router/framework
+deps are always externalized. Declarations are
 generated against `tsconfig.build.json` so they land flat in `dist/`.
 
 ---

@@ -1,7 +1,7 @@
 {
   "name": "glyphnav",
   "version": "0.1.4",
-  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, TanStack Router (React & Solid) and Angular Router adapters.",
+  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, TanStack Router (React & Solid), Angular Router, Next.js and Nuxt adapters.",
   "keywords": [
     "address-bar",
     "angular-router",
@@ -10,6 +10,9 @@
     "glitch",
     "history",
     "navigation",
+    "next",
+    "nextjs",
+    "nuxt",
     "react-router",
     "router",
     "scramble",
@@ -74,6 +77,16 @@
       "import": "./dist/angular-router.js",
       "require": "./dist/angular-router.cjs"
     },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "require": "./dist/next.cjs"
+    },
+    "./nuxt": {
+      "types": "./dist/nuxt.d.ts",
+      "import": "./dist/nuxt.js",
+      "require": "./dist/nuxt.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -87,8 +100,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "demo": "vite --config demo/vite.config.ts",
-    "demo:build": "vite build --config demo/vite.config.ts",
+    "demo": "run-p demo:vite demo:next demo:nuxt",
+    "demo:vite": "vite --config demo/vite.config.ts",
+    "demo:next": "pnpm --filter @glyphnav-demo/next dev",
+    "demo:nuxt": "pnpm --filter @glyphnav-demo/nuxt dev",
+    "demo:build": "run-s build demo:build:vite demo:build:next demo:build:nuxt",
+    "demo:build:vite": "vite build --config demo/vite.config.ts",
+    "demo:build:next": "pnpm --filter @glyphnav-demo/next build && cp -rT demo/next/out demo/dist/next",
+    "demo:build:nuxt": "pnpm --filter @glyphnav-demo/nuxt generate && cp -rT demo/nuxt/.output/public demo/dist/nuxt",
     "demo:preview": "vite preview --config demo/vite.config.ts",
     "prepublishOnly": "pnpm run build"
   },
@@ -110,6 +129,8 @@
     "@vitejs/plugin-vue": "6.0.7",
     "@vitest/coverage-v8": "4.1.8",
     "jsdom": "29.1.1",
+    "next": "^15.5.19",
+    "npm-run-all2": "9.0.2",
     "oxfmt": "0.54.0",
     "oxlint": "1.69.0",
     "react": "19.2.7",
@@ -130,6 +151,8 @@
     "@angular/router": ">=16",
     "@tanstack/react-router": ">=1",
     "@tanstack/solid-router": ">=1",
+    "next": ">=14",
+    "nuxt": ">=3",
     "react": ">=18",
     "react-dom": ">=18",
     "react-router-dom": ">=6",
@@ -148,6 +171,12 @@
       "optional": true
     },
     "@tanstack/solid-router": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "nuxt": {
       "optional": true
     },
     "react": {

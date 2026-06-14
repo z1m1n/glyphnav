@@ -4,6 +4,12 @@ coverage/
 demo/dist/
 demo/angular/dist/
 demo/angular/.angular/
+demo/next/.next/
+demo/next/out/
+demo/next/next-env.d.ts
+demo/nuxt/.nuxt/
+demo/nuxt/.output/
+demo/nuxt/.data/
 *.local
 *.log
 .DS_Store

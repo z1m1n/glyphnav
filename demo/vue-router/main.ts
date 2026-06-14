@@ -1,7 +1,7 @@
 import { createApp, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { glyphnav } from 'glyphnav/vue-router';
-import { highlight } from '../highlight';
+import { highlight } from '../shared/highlight';
 import { DOCS_INSTALL } from '../shared/content';
 import App from './App.vue';
 

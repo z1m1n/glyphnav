@@ -32,8 +32,8 @@
   },
   "include": [
     "main.ts",
-    "highlight.ts",
     "shared/content.ts",
+    "shared/highlight.ts",
     "shims-vue.d.ts",
     "vite-env.d.ts",
     "react-router/**/*.ts",

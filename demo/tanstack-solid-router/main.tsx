@@ -15,7 +15,7 @@ import {
   useGlyphnavController,
 } from 'glyphnav/tanstack-solid-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
-import { highlight } from '../highlight';
+import { highlight } from '../shared/highlight';
 import {
   charsets,
   currentUrl,

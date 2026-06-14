@@ -16,12 +16,14 @@ export default defineConfig({
         'tanstack-react-router': 'src/tanstack-react-router/index.tsx',
         'tanstack-solid-router': 'src/tanstack-solid-router/index.ts',
         'angular-router': 'src/angular-router/index.ts',
+        next: 'src/next/index.tsx',
+        nuxt: 'src/nuxt/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: [/^vue/, /^react/, /^solid-js/, /^@angular\//, /^@tanstack\//],
+      external: [/^vue/, /^react/, /^solid-js/, /^@angular\//, /^@tanstack\//, /^next/],
     },
   },
   plugins: [

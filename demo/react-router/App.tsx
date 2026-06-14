@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { GlyphnavLink, useGlyphnavController } from 'glyphnav/react-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
-import { highlight } from '../highlight';
+import { highlight } from '../shared/highlight';
 import {
   charsets,
   currentUrl,

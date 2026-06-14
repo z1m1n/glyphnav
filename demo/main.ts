@@ -25,6 +25,8 @@ const targets = [
   '/tanstack-router',
   '/tanstack-solid-router',
   '/angular-router',
+  '/next',
+  '/nuxt',
 ];
 let t = 0;
 
@@ -39,7 +41,7 @@ function play(frames: FrameInfo[], done: () => void): void {
     bar.classList.toggle('resolving', f.phase === 'resolve');
     setTimeout(tick, 45);
   };
-  
+
   tick();
 }
 

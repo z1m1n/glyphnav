@@ -1,3 +1,12 @@
+# The library is the root package; the Next.js and Nuxt demos are separate
+# projects (their own build systems) wired in as workspace members so a single
+# `pnpm install` covers everything and the demos consume the lib via
+# `glyphnav: workspace:*`. The Vite-based demos (vanilla, Vue, React, TanStack,
+# Angular) are NOT separate packages — they live in the root package's demo/.
+packages:
+  - 'demo/shared'
+  - 'demo/next'
+  - 'demo/nuxt'
 autoInstallPeers: true
 strictPeerDependencies: false
 # Pin dependencies to exact versions on `pnpm add` (ranges are reserved for
@@ -8,3 +17,6 @@ allowBuilds:
   esbuild: true
   lmdb: true
   msgpackr-extract: true
+  # sharp ships prebuilt binaries; the demos don't process images (Next uses
+  # images.unoptimized), so its postinstall build script isn't needed.
+  sharp: false
