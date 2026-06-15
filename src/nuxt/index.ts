@@ -67,6 +67,9 @@ const resolveTarget = (router: Router, to: RouteLocationRaw, mode: NuxtHistoryMo
 
 type PushFn = Router['push'];
 
+const samePathForm = (a: string, b: string): boolean =>
+  a.replace(/\/(?=$|[?#])/, '') === b.replace(/\/(?=$|[?#])/, '');
+
 const wrap = (
   controller: GlyphnavController,
   router: Router,
@@ -75,12 +78,17 @@ const wrap = (
 ): PushFn => {
   return (async (to: RouteLocationRaw) => {
     const target = resolveTarget(router, to, mode);
+    const current = resolveTarget(router, router.currentRoute.value.fullPath, mode);
+
+    if (samePathForm(current, target)) return original.call(router, to);
+
     let result: ReturnType<PushFn> | undefined;
-    await controller
-      .run(target, async () => {
-        result = original.call(router, to);
-        await result;
-      });
+
+    await controller.run(target, async () => {
+      result = original.call(router, to);
+      await result;
+    });
+
     return result;
   }) as PushFn;
 };
