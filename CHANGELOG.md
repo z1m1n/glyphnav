@@ -5,6 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-06-15
+
+### Fixed
+
+- **Nuxt adapter** (`glyphnav/nuxt`): the address bar no longer decodes on a plain
+  page reload. Nuxt re-issues the current route through `router.replace` on every
+  client hydration, which the adapter was treating as a navigation. It now skips
+  animating a navigation that only re-points at the route already shown —
+  including a trailing-slash form difference, the case static hosts such as GitHub
+  Pages introduce via their `/about` → `/about/` redirect (so the reloaded URL
+  differs from Vue Router's canonical resolution). Genuine navigations still
+  animate.
+
 ## [1.0.0] - 2026-06-14
 
 ### Changed
@@ -68,6 +81,7 @@ Initial public release.
 - Framework-agnostic core that animates navigation by scrambling random glyphs which resolve into the destination URL right in the address bar.
 - Router adapters: Vue Router, React Router, TanStack React Router, TanStack Solid Router, and Angular Router.
 
+[1.0.1]: https://github.com/z1m1n/glyphnav/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/z1m1n/glyphnav/compare/v0.1.4...v1.0.0
 [0.1.4]: https://github.com/z1m1n/glyphnav/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/z1m1n/glyphnav/compare/v0.1.2...v0.1.3
