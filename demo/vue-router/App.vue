@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useGlyphnav } from 'glyphnav/vue-router';
 import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav/core';
 import { charsets, currentUrl, durationToSlider, sliderToDuration } from '../shared/content';
+import logo from '../shared/logo.svg';
 
 const controller = useGlyphnav();
 
@@ -63,7 +64,10 @@ const onScope = (e: Event) => {
 </script>
 
 <template>
-  <h1><a :href="base">glyphnav</a> <span class="crumb">/ vue-router</span></h1>
+  <h1>
+    <img class="glyph-mark" :src="logo" alt="" /><a :href="base">glyphnav</a>
+    <span class="crumb">/ vue-router</span>
+  </h1>
 
   <p class="bar" :class="{ resolving }">
     Watch the address bar. Current path: <span class="path">{{ displayPath }}</span>

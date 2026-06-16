@@ -16,6 +16,7 @@ import {
 } from 'glyphnav/tanstack-router/solid';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../../shared/highlight';
+import logo from '../../shared/logo.svg';
 import {
   charsets,
   currentUrl,
@@ -122,6 +123,7 @@ function Layout(): JSX.Element {
   return (
     <>
       <h1>
+        <img class="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
         <span class="crumb">/ tanstack-router/solid</span>
       </h1>

@@ -4,12 +4,14 @@ import { GLYPHNAV } from 'glyphnav/angular-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { GlyphnavLinkDirective } from './glyphnav-link.directive';
 import { charsets, currentUrl, durationToSlider, sliderToDuration } from '../shared/content';
+import logoSrc from '../shared/logo.svg';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, GlyphnavLinkDirective],
   template: `
     <h1>
+      <img class="glyph-mark" [src]="logo" alt="" />
       <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="crumb">&ngsp;/ angular-router</span>
     </h1>
@@ -101,6 +103,8 @@ export class AppComponent {
   // directive routes base-aware on its own; these drive the visible hrefs.
   readonly base = import.meta.env.BASE_URL;
   readonly appBase = `${this.base}angular-router/`;
+  // The shared glyphnav logo mark, shown before the wordmark in the breadcrumb.
+  readonly logo = logoSrc;
 
   readonly path = signal(currentUrl());
   readonly resolving = signal(false);

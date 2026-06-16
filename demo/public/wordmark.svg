@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 44" width="176" height="44" role="img" aria-label="glyphnav">
+  <title>glyphnav</title>
+  <style>
+    .sq { fill: #111111 }
+    .st { stroke: #ffffff }
+    .fl { fill: #ffffff }
+    .cr { fill: #4d7cff }
+    .wm { fill: #111111 }
+    @media (prefers-color-scheme: dark) {
+      .sq { fill: #f5f5f5 }
+      .st { stroke: #111111 }
+      .fl { fill: #111111 }
+      .cr { fill: #3f76ff }
+      .wm { fill: #f5f5f5 }
+    }
+  </style>
+  <rect class="sq" x="4" y="6" width="32" height="32" rx="7" />
+  <path class="st" d="M13.5 16.5 L9.5 27.5" fill="none" stroke-width="2.6" stroke-linecap="round" />
+  <rect class="fl" x="16" y="17" width="4" height="10" rx="1.2" />
+  <rect class="fl" x="21.5" y="17" width="4" height="10" rx="1.2" opacity="0.45" />
+  <rect class="cr" x="27" y="17" width="4" height="10" rx="1.2" />
+  <text class="wm" x="46" y="30.5" font-family="ui-monospace,'Cascadia Code','SF Mono',Menlo,Consolas,monospace" font-size="25" font-weight="700" letter-spacing="-1">glyphnav</text>
+</svg>

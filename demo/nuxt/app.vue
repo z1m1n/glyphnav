@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { charsets, currentUrl, durationToSlider, sliderToDuration } from '@glyphnav-demo/shared';
+import logo from '@glyphnav-demo/shared/logo.svg';
 
 // SEO / social + AI link previews. Absolute URLs so the tags stay correct in the
 // statically generated output served from the GitHub Pages project subpath.
@@ -70,7 +71,10 @@ watch([charset, duration, effect, commit, scope], apply);
 
 <template>
   <div>
-    <h1><a :href="rootHref">glyphnav</a> <span class="crumb">/ nuxt</span></h1>
+    <h1>
+      <img class="glyph-mark" :src="logo" alt="" /><a :href="rootHref">glyphnav</a>
+      <span class="crumb">/ nuxt</span>
+    </h1>
 
     <p :class="resolving ? 'bar resolving' : 'bar'">
       Watch the address bar. Current path: <span class="path">{{ path }}</span>

@@ -1,7 +1,21 @@
-/* Bare, classless-ish monospace look: native widgets, default link colors. */
+/* Bare, classless-ish monospace look: native widgets, brand palette below. */
 
 :root {
   --mono: ui-monospace, 'Cascadia Code', 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  /* Brand palette — white, gray, blue. Defined once and reused by every demo
+     (links, text, borders, fills). The logo mark uses the same ink/white/blue. */
+  --white: #ffffff;
+  --fill: #f2f2f2; /* code & path fills */
+  --fill-soft: #f7f7f7; /* docs code blocks */
+  --rule: #eeeeee; /* hairline dividers */
+  --border: #dddddd; /* control & view borders */
+  --gray: #888888; /* muted text: crumb, hints, footnotes */
+  --gray-strong: #444444; /* denser copy: control labels, view text */
+  --ink: #111111; /* primary text */
+  --blue: #0000ee; /* links — strong, high-contrast blue */
+  --blue-soft: #e8eeff; /* resolving-state path highlight (soft blue tint) */
+  /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
 }
 
 * {
@@ -12,28 +26,38 @@ body {
   max-width: 44rem;
   margin: 2.5rem auto;
   padding: 0 1.25rem;
-  background: #fff;
-  color: #111;
+  background: var(--white);
+  color: var(--ink);
   font: 15px/1.6 var(--mono);
 }
 
-/* Keep visited links the same color as unvisited — no violet fade. #0000ee is
-   the browsers' default unvisited link color, so plain links look identical
-   before and after a visit. Declared before the per-element link rules below so
-   those (h1, nav, .deep) still win and keep their own colors. */
+/* Links use --blue, visited and unvisited alike (no violet fade). Declared
+   before the per-element rules below so those (h1, nav) still win. */
+a {
+  color: var(--blue);
+}
 a:visited {
-  color: #0000ee;
+  color: var(--blue);
 }
 
 h1 {
   font-size: 1.3rem;
   margin: 0 0 1.25rem;
 }
+/* The glyphnav mark, shown inline before the wordmark in every page title /
+   breadcrumb. Sized in em so it tracks the h1 font-size; the single source is
+   demo/shared/logo.svg, imported by every demo. */
+.glyph-mark {
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.22em;
+  margin-right: 0.4em;
+}
 h1 a {
   color: inherit;
 }
 h1 .crumb {
-  color: #888;
+  color: var(--gray);
   font-weight: 400;
 }
 
@@ -54,7 +78,7 @@ input {
   margin: 0 0 1.25rem;
 }
 .bar .origin {
-  color: #888;
+  color: var(--gray);
 }
 /* The path sits on its own line and only as wide as its content (capped at the
    container). Always block, so a long path scrolls in place instead of wrapping
@@ -64,13 +88,13 @@ input {
   width: fit-content;
   max-width: 100%;
   margin-top: 0.35rem;
-  background: #f2f2f2;
+  background: var(--fill);
   padding: 2px 6px;
   white-space: pre;
   overflow: hidden;
 }
 .resolving .path {
-  background: #e2efe6;
+  background: var(--blue-soft);
 }
 
 nav {
@@ -92,11 +116,8 @@ nav a.router-link-exact-active {
   flex-wrap: wrap;
   gap: 0.25rem 1rem;
   margin: 0 0 1.25rem;
-  color: #777;
+  color: var(--gray);
   font-size: 0.85rem;
-}
-.deep a {
-  color: #357a5b;
 }
 
 .controls {
@@ -105,14 +126,14 @@ nav a.router-link-exact-active {
   gap: 0.75rem 1.75rem;
   margin: 0 0 1.25rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
 }
 .controls label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #333;
+  color: var(--gray-strong);
 }
 .controls .ms {
   min-width: 6ch;
@@ -123,13 +144,13 @@ nav a.router-link-exact-active {
 }
 
 .view {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   padding: 1rem 1.25rem;
   min-height: 7.5rem;
 }
 .view p {
   margin-bottom: 0;
-  color: #444;
+  color: var(--gray-strong);
 }
 
 /* Per-demo docs pages. */
@@ -139,8 +160,8 @@ nav a.router-link-exact-active {
 .view.docs pre {
   margin: 0 0 0.75rem;
   padding: 0.7rem 0.9rem;
-  background: #f7f7f7;
-  border: 1px solid #e4e4e4;
+  background: var(--fill-soft);
+  border: 1px solid var(--border);
   overflow-x: auto;
   font-size: 0.8rem;
   line-height: 1.55;
@@ -199,13 +220,13 @@ nav a.router-link-exact-active {
   align-items: baseline;
 }
 .pick .hint {
-  color: #777;
+  color: var(--gray);
   font-size: 0.85rem;
 }
 
 .foot {
   margin-top: 1.5rem;
-  color: #777;
+  color: var(--gray);
   font-size: 0.8rem;
 }
 
@@ -216,12 +237,12 @@ nav a.router-link-exact-active {
   gap: 0.25rem 1rem;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid #eee;
-  color: #777;
+  border-top: 1px solid var(--rule);
+  color: var(--gray);
   font-size: 0.8rem;
 }
 
 code {
-  background: #f2f2f2;
+  background: var(--fill);
   padding: 1px 4px;
 }

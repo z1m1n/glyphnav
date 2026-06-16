@@ -15,6 +15,7 @@ import {
 } from 'glyphnav/tanstack-router/react';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../../shared/highlight';
+import logo from '../../shared/logo.svg';
 import {
   charsets,
   currentUrl,
@@ -121,6 +122,7 @@ function Layout() {
   return (
     <>
       <h1>
+        <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
         <span className="crumb">/ tanstack-router/react</span>
       </h1>

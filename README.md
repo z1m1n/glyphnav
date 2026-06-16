@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://z1m1n.github.io/glyphnav/wordmark.svg" alt="glyphnav" width="280" />
+</p>
+
 # glyphnav
 
 > Animate navigation: watch the URL **decode itself, glyph by glyph**, right in the address bar — then commit the real navigation.

@@ -18,6 +18,13 @@
     </text>
     <rect x="735" y="90" width="11" height="30" rx="1.5" fill="#0000ee"/>
 
+    <!-- brand mark: the logo, centered above the wordmark -->
+    <rect x="556" y="154" width="88" height="88" rx="20" fill="#111111"/>
+    <path d="M582.1 182.9 L571.1 213.1" fill="none" stroke="#ffffff" stroke-width="7.15" stroke-linecap="round"/>
+    <rect x="589" y="184.25" width="11" height="27.5" rx="3.3" fill="#ffffff"/>
+    <rect x="604.1" y="184.25" width="11" height="27.5" rx="3.3" fill="#ffffff" opacity="0.45"/>
+    <rect x="619.25" y="184.25" width="11" height="27.5" rx="3.3" fill="#4d7cff"/>
+
     <!-- wordmark -->
     <text x="600" y="352" text-anchor="middle" font-size="132" font-weight="bold" fill="#111111" letter-spacing="-2">glyphnav</text>
 

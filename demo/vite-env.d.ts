@@ -9,3 +9,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// SVG assets resolve to their (local) URL when imported — the demo breadcrumbs
+// import the shared logo this way. (Next types `*.svg` as a static-image object
+// via next/image-types and reads `.src`; it doesn't use this declaration.)
+declare module '*.svg' {
+  const src: string;
+  export default src;
+}

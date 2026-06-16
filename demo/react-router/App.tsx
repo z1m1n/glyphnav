@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import { GlyphnavLink, useGlyphnavController } from 'glyphnav/react-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
+import logo from '../shared/logo.svg';
 import {
   charsets,
   currentUrl,
@@ -106,6 +107,7 @@ export default function App() {
   return (
     <>
       <h1>
+        <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
         <span className="crumb">/ react-router</span>
       </h1>

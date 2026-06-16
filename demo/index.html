@@ -68,7 +68,7 @@
     </script>
   </head>
   <body>
-    <h1>glyphnav</h1>
+    <h1><img class="glyph-mark" src="./shared/logo.svg" alt="" />glyphnav</h1>
     <p>Animated navigation: the URL decodes itself, glyph by glyph, right in the address bar.</p>
 
     <p class="bar" id="bar">
@@ -112,9 +112,9 @@
 
     <p class="foot">
       Picking a demo animates the real address bar first (vanilla <code>install()</code> in reload
-      mode), then loads the page. The line above mirrors every frame, alternating the
-      <code>decode</code> and <code>scramble</code> effects. Demos are aliased to
-      <code>src/</code> — edit the library and refresh.
+      mode), then loads the page. While idle, the line above cycles through the demos, rotating its
+      glyph charset, effect (<code>decode</code> / <code>scramble</code>) and speed on every pass.
+      Demos are aliased to <code>src/</code> — edit the library and refresh.
     </p>
 
     <footer class="site-footer">

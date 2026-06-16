@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { GlyphnavLink, GlyphnavProvider, useGlyphnavController } from 'glyphnav/next';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { charsets, currentUrl, durationToSlider, sliderToDuration } from '@glyphnav-demo/shared';
+import logo from '@glyphnav-demo/shared/logo.svg';
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 // The picker lives one level up from this app's base path (`/glyphnav/next` →
@@ -72,6 +73,8 @@ function Inner({ children }: { children: ReactNode }) {
   return (
     <>
       <h1>
+        {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
+        <img className="glyph-mark" src={logo.src} alt="" />
         <a href={ROOT_HREF}>glyphnav</a> <span className="crumb">/ next</span>
       </h1>
 
