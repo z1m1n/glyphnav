@@ -14,6 +14,7 @@
 import type { Router, RouteLocationRaw } from 'vue-router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
+import { wrapRouterMethod } from '../internal/vue-router';
 
 /** Which Vue Router history mode Nuxt is configured with. */
 export type NuxtHistoryMode = 'history' | 'hash';
@@ -65,33 +66,8 @@ const resolveTarget = (router: Router, to: RouteLocationRaw, mode: NuxtHistoryMo
   return href;
 };
 
-type PushFn = Router['push'];
-
 const samePathForm = (a: string, b: string): boolean =>
   a.replace(/\/(?=$|[?#])/, '') === b.replace(/\/(?=$|[?#])/, '');
-
-const wrap = (
-  controller: GlyphnavController,
-  router: Router,
-  original: PushFn,
-  mode: NuxtHistoryMode,
-): PushFn => {
-  return (async (to: RouteLocationRaw) => {
-    const target = resolveTarget(router, to, mode);
-    const current = resolveTarget(router, router.currentRoute.value.fullPath, mode);
-
-    if (samePathForm(current, target)) return original.call(router, to);
-
-    let result: ReturnType<PushFn> | undefined;
-
-    await controller.run(target, async () => {
-      result = original.call(router, to);
-      await result;
-    });
-
-    return result;
-  }) as PushFn;
-};
 
 /**
  * Attach glyphnav to a Nuxt app's Vue Router instance.
@@ -108,10 +84,14 @@ export const attachGlyphnav = (
 ): NuxtGlyphnavInstance => {
   const { intercept = 'router', historyMode = 'history', ...glyph } = options;
   const controller = new GlyphnavController(glyph);
-  const originalPush = router.push.bind(router) as PushFn;
-  const originalReplace = router.replace.bind(router) as PushFn;
-  const push = wrap(controller, router, originalPush, historyMode);
-  const replace = wrap(controller, router, originalReplace, historyMode);
+  const originalPush = router.push.bind(router) as Router['push'];
+  const originalReplace = router.replace.bind(router) as Router['push'];
+  const resolveHref = (to: RouteLocationRaw): string => resolveTarget(router, to, historyMode);
+  // Skip the animation when navigating to the path already on screen.
+  const shouldSkip = (target: string): boolean =>
+    samePathForm(resolveTarget(router, router.currentRoute.value.fullPath, historyMode), target);
+  const push = wrapRouterMethod(controller, router, originalPush, { resolveHref, shouldSkip });
+  const replace = wrapRouterMethod(controller, router, originalReplace, { resolveHref, shouldSkip });
 
   if (intercept === 'router') {
     router.push = push;
@@ -123,11 +103,9 @@ export const attachGlyphnav = (
     push,
     replace,
     navigate(to, navOptions) {
-      const target = resolveTarget(router, to, historyMode);
-      let result: ReturnType<PushFn> | undefined;
-      return controller.run(target, async () => {
-        result = (navOptions?.replace ? originalReplace : originalPush).call(router, to);
-        await result;
+      const original = navOptions?.replace ? originalReplace : originalPush;
+      return controller.run(resolveTarget(router, to, historyMode), async () => {
+        await original.call(router, to);
       });
     },
     detach() {

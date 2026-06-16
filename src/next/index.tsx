@@ -23,6 +23,7 @@ import { useRouter as useAppRouter } from 'next/navigation';
 import { useRouter as usePagesRouter } from 'next/compat/router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
+import { isModifiedClick, toPath } from '../internal/links';
 
 /** Which Next.js routing system drives the real navigation. */
 export type NextRouterMode = 'app' | 'pages';
@@ -199,13 +200,6 @@ export interface GlyphnavLinkProps
   glyphOptions?: NextGlyphnavOptions;
 }
 
-/** Best-effort string form of next/link's `href` (string | UrlObject). */
-const hrefToString = (href: LinkProps['href']): string => {
-  if (typeof href === 'string') return href;
-
-  return (href.pathname ?? '') + (href.search ?? '') + (href.hash ?? '');
-};
-
 /**
  * Drop-in replacement for `next/link`'s `<Link>` that animates on click before
  * navigating via the Next router. Modified clicks (new tab, etc.) fall through
@@ -222,16 +216,12 @@ export const GlyphnavLink = ({
 }: GlyphnavLinkProps) => {
   const ctx = useGlyphnavContext(glyphOptions);
   const nav = useNextNav(ctx.mode);
-  const hrefString = hrefToString(href);
+  const hrefString = toPath(href);
 
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       onClick?.(event);
-
-      if (event.defaultPrevented) return;
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-        return; // let the browser handle modified clicks
-      }
+      if (isModifiedClick(event)) return; // let the browser handle modified clicks
 
       event.preventDefault();
       const target = withBasePath(ctx.basePath, hrefString);

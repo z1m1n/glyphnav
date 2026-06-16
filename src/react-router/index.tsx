@@ -14,17 +14,12 @@ import { Link, useHref, useNavigate } from 'react-router-dom';
 import type { LinkProps, NavigateOptions, To } from 'react-router-dom';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
+import { isModifiedClick, toPath } from '../internal/links';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (to: To | number, options?: NavigateOptions) => Promise<RunResult>;
 
 const GlyphnavContext = createContext<GlyphnavController | null>(null);
-
-const toPathString = (to: To): string => {
-  if (typeof to === 'string') return to;
-
-  return (to.pathname ?? '') + (to.search ?? '') + (to.hash ?? '');
-};
 
 export interface GlyphnavProviderProps extends GlyphnavOptions {
   children: ReactNode;
@@ -77,7 +72,7 @@ export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigate
         return Promise.resolve<RunResult>('skipped');
       }
 
-      const target = toPathString(to);
+      const target = toPath(to);
       return controller.run(target, () => {
         navigate(to, navOptions);
       });
@@ -112,11 +107,7 @@ export const GlyphnavLink = ({
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       onClick?.(event);
-
-      if (event.defaultPrevented) return;
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-        return; // let the browser handle modified clicks
-      }
+      if (isModifiedClick(event)) return; // let the browser handle modified clicks
 
       event.preventDefault();
       void controller.run(href, () => {

@@ -8,6 +8,7 @@
  */
 import { GlyphnavController } from '../core';
 import type { ControllerDeps, GlyphnavOptions, RunResult } from '../core';
+import { isModifiedClick } from '../internal/links';
 
 export interface NavigateOptions extends GlyphnavOptions {
   /**
@@ -143,8 +144,7 @@ export const navigate = (to: string, options: NavigateOptions = {}): Promise<Run
  * @returns The anchor to animate, or `null` if the click should pass through.
  */
 export const eligibleAnchor = (event: MouseEvent): HTMLAnchorElement | null => {
-  if (event.defaultPrevented || event.button !== 0) return null;
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
+  if (isModifiedClick(event)) return null;
 
   const target = event.target as Element | null;
   const anchor = target?.closest?.('a') as HTMLAnchorElement | null;

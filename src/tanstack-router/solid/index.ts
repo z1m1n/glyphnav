@@ -26,6 +26,7 @@ import { useRouter } from '@tanstack/solid-router';
 import type { NavigateOptions } from '@tanstack/solid-router';
 import { GlyphnavController } from '../../core';
 import type { GlyphnavOptions, RunResult } from '../../core';
+import { isModifiedClick } from '../../internal/links';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
@@ -134,10 +135,7 @@ export function GlyphnavLink(props: GlyphnavLinkProps): JSX.Element {
     if (Array.isArray(userClick)) userClick[0](userClick[1], event);
     else if (typeof userClick === 'function') userClick(event);
 
-    if (event.defaultPrevented) return;
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-      return; // let the browser handle modified clicks
-    }
+    if (isModifiedClick(event)) return; // let the browser handle modified clicks
 
     event.preventDefault();
     void controller.run(href(), () => router.navigate(navOpts()) as Promise<void>);

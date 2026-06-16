@@ -13,6 +13,7 @@ import type { App, InjectionKey } from 'vue';
 import type { Router, RouteLocationRaw } from 'vue-router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions } from '../core';
+import { wrapRouterMethod } from '../internal/vue-router';
 
 export interface VueGlyphnavOptions extends GlyphnavOptions {
   /**
@@ -41,22 +42,6 @@ export const GLYPHNAV_KEY: InjectionKey<GlyphnavController> = Symbol('glyphnav')
 /** Injection key for the full adapter instance (animated push/replace). */
 export const GLYPHNAV_ROUTER_KEY: InjectionKey<GlyphnavVueInstance> = Symbol('glyphnav-router');
 
-type PushFn = Router['push'];
-
-const wrap = (controller: GlyphnavController, router: Router, original: PushFn): PushFn => {
-  return ((to: RouteLocationRaw) => {
-    // `.href` is base-aware (matches the real address bar); `.fullPath` is not.
-    const target = router.resolve(to).href;
-    let result: ReturnType<PushFn> | undefined;
-    return controller
-      .run(target, async () => {
-        result = original.call(router, to);
-        await result;
-      })
-      .then(() => result);
-  }) as PushFn;
-};
-
 /**
  * Attach glyphnav to an existing router instance.
  *
@@ -71,10 +56,12 @@ export const attachGlyphnav = (
 ): GlyphnavVueInstance => {
   const { intercept = 'router', ...glyph } = options;
   const controller = new GlyphnavController(glyph);
-  const originalPush = router.push.bind(router) as PushFn;
-  const originalReplace = router.replace.bind(router) as PushFn;
-  const push = wrap(controller, router, originalPush);
-  const replace = wrap(controller, router, originalReplace);
+  const originalPush = router.push.bind(router) as Router['push'];
+  const originalReplace = router.replace.bind(router) as Router['push'];
+  // `.href` is base-aware (matches the real address bar); `.fullPath` is not.
+  const resolveHref = (to: RouteLocationRaw): string => router.resolve(to).href;
+  const push = wrapRouterMethod(controller, router, originalPush, { resolveHref });
+  const replace = wrapRouterMethod(controller, router, originalReplace, { resolveHref });
 
   if (intercept === 'router') {
     router.push = push;

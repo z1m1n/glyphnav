@@ -14,6 +14,7 @@ import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
 import { GlyphnavController } from '../../core';
 import type { GlyphnavOptions, RunResult } from '../../core';
+import { isModifiedClick } from '../../internal/links';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
@@ -111,11 +112,7 @@ export const GlyphnavLink = ({
   const handleClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       onClick?.(event);
-
-      if (event.defaultPrevented) return;
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-        return; // let the browser handle modified clicks
-      }
+      if (isModifiedClick(event)) return; // let the browser handle modified clicks
 
       event.preventDefault();
       void controller.run(href, () => router.navigate(navOpts) as Promise<void>);
