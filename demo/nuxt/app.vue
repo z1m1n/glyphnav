@@ -2,6 +2,30 @@
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { charsets, currentUrl, durationToSlider, sliderToDuration } from '@glyphnav-demo/shared';
 
+// SEO / social + AI link previews. Absolute URLs so the tags stay correct in the
+// statically generated output served from the GitHub Pages project subpath.
+useHead({
+  link: [
+    { rel: 'canonical', href: 'https://z1m1n.github.io/glyphnav/nuxt/' },
+    { rel: 'icon', type: 'image/svg+xml', href: 'https://z1m1n.github.io/glyphnav/favicon.svg' },
+  ],
+  meta: [{ name: 'theme-color', content: '#ffffff' }],
+});
+useSeoMeta({
+  title: 'glyphnav — nuxt',
+  description:
+    'glyphnav for Nuxt: a client plugin wraps router.push / navigateTo so every NuxtLink animates the destination URL in the address bar. Live, interactive demo.',
+  ogType: 'website',
+  ogSiteName: 'glyphnav',
+  ogTitle: 'glyphnav — Nuxt demo',
+  ogDescription:
+    'A client plugin wraps router.push / navigateTo so every NuxtLink animates the destination URL in the address bar.',
+  ogUrl: 'https://z1m1n.github.io/glyphnav/nuxt/',
+  ogImage: 'https://z1m1n.github.io/glyphnav/og.png',
+  twitterCard: 'summary_large_image',
+  twitterImage: 'https://z1m1n.github.io/glyphnav/og.png',
+});
+
 // The picker lives one level up from this app's base (`/glyphnav/nuxt/` →
 // `/glyphnav/`). A plain anchor does the full reload back to it.
 const baseURL = useRuntimeConfig().app.baseURL;

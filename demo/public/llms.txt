@@ -1,0 +1,37 @@
+# glyphnav
+
+> glyphnav animates browser navigation: when you follow a link, the address bar
+> doesn't just switch — random glyphs cascade and resolve, one character at a
+> time, into the destination URL (the `decode` effect), or scramble away from
+> the old one. It's a small, dependency-free, framework-agnostic library with
+> thin adapters for the major routers.
+
+glyphnav hooks into navigation (the History API directly, or a router's
+push/replace) and animates the *visible* URL between the old and new path using
+generated "glyph frames". The core is framework-agnostic; each adapter just
+wires it into a router. Live, interactive demos for every adapter are linked
+below. Install with `pnpm add glyphnav` (npm/yarn work too).
+
+## Demos
+
+- [Vanilla / no framework](https://z1m1n.github.io/glyphnav/vanilla/): `install()` hijacks link clicks and drives the History API
+- [Vue Router](https://z1m1n.github.io/glyphnav/vue-router/): a plugin wraps `router.push` / `router.replace`
+- [React Router](https://z1m1n.github.io/glyphnav/react-router/): `GlyphnavLink` + `useGlyphnavNavigate`
+- [TanStack Router (React)](https://z1m1n.github.io/glyphnav/tanstack-router/react/): `GlyphnavLink` + `useGlyphnavNavigate`
+- [TanStack Router (Solid)](https://z1m1n.github.io/glyphnav/tanstack-router/solid/): the same engine with Solid bindings
+- [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/): `provideGlyphnav` + the `[glyphnavLink]` directive
+- [Next.js (App Router)](https://z1m1n.github.io/glyphnav/next/): `GlyphnavLink` + `useGlyphnavNavigate`
+- [Nuxt](https://z1m1n.github.io/glyphnav/nuxt/): a client plugin wraps `router.push` / `navigateTo`
+
+## Install & source
+
+- [npm package](https://www.npmjs.com/package/glyphnav): `pnpm add glyphnav`
+- [Source & full README](https://github.com/z1m1n/glyphnav): API reference, options and per-adapter setup
+- [Changelog](https://github.com/z1m1n/glyphnav/blob/master/CHANGELOG.md)
+
+## API at a glance
+
+- `install(options)` — vanilla: hijack in-page link clicks and animate via the History API
+- `generateFrames(from, to, { charset, effect })` — produce the per-frame URL strings the animation steps through
+- Options: `duration` (ms), `effect` (`decode` | `scramble`), `charset` (`url` | `hex` | `matrix` | `symbols`), `commit` (`before` | `after` — navigate first vs. animate first), `scope` (`full` | `tail`)
+- Adapter entry points: `glyphnav/core`, `glyphnav/vue-router`, `glyphnav/react-router`, `glyphnav/tanstack-router/react`, `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`, `glyphnav/nuxt`

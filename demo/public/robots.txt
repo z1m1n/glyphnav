@@ -1,0 +1,6 @@
+# glyphnav demo — https://z1m1n.github.io/glyphnav/
+
+User-agent: *
+Allow: /
+
+Sitemap: https://z1m1n.github.io/glyphnav/sitemap.xml
