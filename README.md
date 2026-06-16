@@ -8,6 +8,10 @@
 
 **[GitHub](https://github.com/z1m1n/glyphnav)** · **[Live demo](https://z1m1n.github.io/glyphnav/)** · **[npm](https://www.npmjs.com/package/glyphnav)**
 
+<p align="center">
+  <img src="https://z1m1n.github.io/glyphnav/glyphnav-demo.gif" alt="The address bar scrambling random glyphs and resolving into each route as glyphnav navigates between Vue Router, React Router, TanStack Router and Angular Router" width="720" />
+</p>
+
 ```
 /  →  /x  →  /xy  →  /xyz  →  /xyzw  →  /tyzw  →  /tezw  →  /tesw  →  /test
       └────────────  grow  ────────────┘└───────────  resolve  ──────────┘
