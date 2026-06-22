@@ -34,9 +34,10 @@ function Inner({ children }: { children: ReactNode }) {
   const [duration, setDuration] = useState(250);
   const [effect, setEffect] = useState<GlyphEffect>('decode');
   // App Router navigations are async (the URL isn't observable synchronously
-  // right after router.push), so 'after' — animate to the precomputed target,
-  // then navigate — is the mode that reliably animates here. 'before' still
-  // navigates correctly; it just skips the on-top animation on the App Router.
+  // right after router.push). Both timings animate: 'after' animates to the
+  // precomputed target then navigates, while 'before' navigates first and the
+  // adapter waits for the URL to settle before animating to the landed path.
+  // 'after' stays the default for its smoother, navigate-at-the-end feel.
   const [commit, setCommit] = useState<CommitTiming>('after');
   const [scope, setScope] = useState<AnimateScope>('full');
 

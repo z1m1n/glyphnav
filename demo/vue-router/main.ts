@@ -7,11 +7,18 @@ import App from './App.vue';
 
 /** A view as a render-function component (no runtime template compiler needed). */
 const page = (title: string, body: string) => ({
-  render: () => h('div', { class: 'view' }, [h('h2', title), h('p', body)]),
+  render: () =>
+    h('div', { class: 'view' }, [
+      h('article', [h('header', { class: 'lead' }, [h('h2', title), body])]),
+    ]),
 });
 
-/** A syntax-highlighted code block as a vnode. */
-const codeBlock = (code: string) => h('pre', h('code', { innerHTML: highlight(code) }));
+/** A code listing as a captioned `<figure>` vnode. */
+const figure = (code: string, caption?: string, id?: string) =>
+  h('figure', [
+    caption ? h('figcaption', id ? { id } : {}, caption) : null,
+    h('pre', h('code', { innerHTML: highlight(code) })),
+  ]);
 
 const DOCS_SETUP = `import { glyphnav } from 'glyphnav/vue-router';
 
@@ -38,13 +45,15 @@ const DOCS_OPTIONS = `app.use(glyphnav, {
 const docs = {
   render: () =>
     h('div', { class: 'view docs' }, [
-      h('h2', 'docs'),
-      h('p', 'Install the package — Vue Router stays a peer dependency:'),
-      codeBlock(DOCS_INSTALL),
-      h('p', 'The plugin wraps router.push / router.replace:'),
-      codeBlock(DOCS_SETUP),
-      h('p', { id: 'options' }, 'Every entry point accepts the same options object:'),
-      codeBlock(DOCS_OPTIONS),
+      h('article', [
+        h('header', { class: 'lead' }, [
+          h('h2', 'docs'),
+          'Install the package — Vue Router stays a peer dependency:',
+        ]),
+        figure(DOCS_INSTALL),
+        figure(DOCS_SETUP, 'The plugin wraps router.push / router.replace:'),
+        figure(DOCS_OPTIONS, 'Every entry point accepts the same options object:', 'options'),
+      ]),
     ]),
 };
 

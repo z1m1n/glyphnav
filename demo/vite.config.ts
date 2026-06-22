@@ -115,7 +115,7 @@ function baseAwareLinks(): Plugin {
 function staticRoutes(): Plugin {
   // Sub-routes per app; the "/" home is already the app's own index.html.
   const ROUTES: Record<string, string[]> = {
-    vanilla: ['about', 'docs', 'contact'],
+    vanilla: ['about', 'docs', 'contact', 'core'],
     'vue-router': ['about', 'features', 'docs'],
     'react-router': ['about', 'docs', 'blog'],
     'tanstack-router/react': ['about', 'posts', 'docs'],

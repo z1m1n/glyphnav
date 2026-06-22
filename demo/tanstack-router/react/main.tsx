@@ -1,4 +1,5 @@
 import { StrictMode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Outlet,
@@ -47,34 +48,60 @@ const DOCS_OPTIONS = `<GlyphnavProvider
 function View({ title, body }: { title: string; body: string }) {
   return (
     <div className="view">
-      <h2>{title}</h2>
-      <p>{body}</p>
+      <article>
+        <header className="lead">
+          <h2>{title}</h2>
+          {body}
+        </header>
+      </article>
     </div>
   );
 }
 
-/** A syntax-highlighted code block. */
-function Code({ children }: { children: string }) {
+/** A code listing as a captioned <figure>. */
+function Figure({
+  code,
+  caption,
+  captionId,
+}: {
+  code: string;
+  caption?: ReactNode;
+  captionId?: string;
+}) {
   return (
-    <pre>
-      <code dangerouslySetInnerHTML={{ __html: highlight(children) }} />
-    </pre>
+    <figure>
+      {caption ? <figcaption id={captionId}>{caption}</figcaption> : null}
+      <pre>
+        <code dangerouslySetInnerHTML={{ __html: highlight(code) }} />
+      </pre>
+    </figure>
   );
 }
 
 function Docs() {
   return (
     <div className="view docs">
-      <h2>docs</h2>
-      <p>Install the package — TanStack Router stays a peer dependency:</p>
-      <Code>{DOCS_INSTALL}</Code>
-      <p>
-        The animated path is basepath-aware via <code>router.buildLocation()</code>; nothing is
-        patched globally:
-      </p>
-      <Code>{DOCS_SETUP}</Code>
-      <p id="options">Every entry point accepts the same options object:</p>
-      <Code>{DOCS_OPTIONS}</Code>
+      <article>
+        <header className="lead">
+          <h2>docs</h2>
+          Install the package — TanStack Router stays a peer dependency:
+        </header>
+        <Figure code={DOCS_INSTALL} />
+        <Figure
+          caption={
+            <>
+              The animated path is basepath-aware via <code>router.buildLocation()</code>; nothing
+              is patched globally:
+            </>
+          }
+          code={DOCS_SETUP}
+        />
+        <Figure
+          captionId="options"
+          caption="Every entry point accepts the same options object:"
+          code={DOCS_OPTIONS}
+        />
+      </article>
     </div>
   );
 }

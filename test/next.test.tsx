@@ -40,6 +40,22 @@ function NavButton({ mode }: { mode?: 'app' | 'pages' }) {
   );
 }
 
+// Navigate-first (commit: 'before') with a captured per-frame hook.
+function NavFirstButton({ onFrame }: { onFrame: (path: string) => void }) {
+  const navigate = useGlyphnavNavigate({
+    charset: 'q',
+    rng: () => 0,
+    stepDuration: 5,
+    commit: 'before',
+    hooks: { onFrame: (f) => onFrame(f.path) },
+  });
+  return (
+    <button type="button" onClick={() => void navigate('/test')}>
+      go
+    </button>
+  );
+}
+
 describe('next adapter', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => {
@@ -58,6 +74,28 @@ describe('next adapter', () => {
 
     expect(m.push).toHaveBeenCalledWith('/test', undefined);
     expect(m.pagesPush).not.toHaveBeenCalled();
+  });
+
+  it('navigate first animates to the landed path once the App Router URL settles', async () => {
+    // The App Router updates the URL asynchronously, after push returns — so the
+    // bar must not be read back until it settles, or the animation is skipped.
+    window.history.replaceState(null, '', '/');
+    m.push.mockImplementationOnce((href: string) => {
+      setTimeout(() => window.history.pushState(null, '', String(href)), 30);
+    });
+
+    const frames: string[] = [];
+    render(<NavFirstButton onFrame={(p) => frames.push(p)} />);
+
+    fireEvent.click(screen.getByText('go'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    expect(m.push).toHaveBeenCalledWith('/test', undefined);
+    expect(frames.length).toBeGreaterThan(0);
+    expect(frames.at(-1)).toBe('/test');
+    expect(window.location.pathname).toBe('/test');
   });
 
   it("routerMode: 'pages' routes navigation through next/compat/router", async () => {

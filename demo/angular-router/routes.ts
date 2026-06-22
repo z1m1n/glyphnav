@@ -7,8 +7,12 @@ import { DOCS_INSTALL } from '../shared/content';
 @Component({
   selector: 'app-page',
   template: `<div class="view">
-    <h2>{{ data.title }}</h2>
-    <p>{{ data.body }}</p>
+    <article>
+      <header class="lead">
+        <h2>{{ data.title }}</h2>
+        {{ data.body }}
+      </header>
+    </article>
   </div>`,
 })
 export class PageComponent {
@@ -19,19 +23,31 @@ export class PageComponent {
   selector: 'app-docs',
   template: `
     <div class="view docs">
-      <h2>docs</h2>
-      <p>Install the package — the Angular Router stays a peer dependency:</p>
-      <pre><code [innerHTML]="installHtml"></code></pre>
-      <p>Register the navigator next to your router, then inject it anywhere:</p>
-      <pre><code [innerHTML]="setupHtml"></code></pre>
-      <p id="options">Every entry point accepts the same options object:</p>
-      <pre><code [innerHTML]="optionsHtml"></code></pre>
-      <p>
-        For an animated link, copy <code>demo/angular-router/glyphnav-link.directive.ts</code>
-        into your app — glyphnav ships compiler-free helpers, so the directive must be compiled by
-        your own Angular build. Or wrap a Router directly with
-        <code>createGlyphnavNavigator(router, options)</code>.
-      </p>
+      <article>
+        <header class="lead">
+          <h2>docs</h2>
+          Install the package — the Angular Router stays a peer dependency:
+        </header>
+        <figure>
+          <pre><code [innerHTML]="installHtml"></code></pre>
+        </figure>
+        <figure>
+          <figcaption>
+            Register the navigator next to your router, then inject it anywhere:
+          </figcaption>
+          <pre><code [innerHTML]="setupHtml"></code></pre>
+        </figure>
+        <figure>
+          <figcaption id="options">Every entry point accepts the same options object:</figcaption>
+          <pre><code [innerHTML]="optionsHtml"></code></pre>
+        </figure>
+        <aside class="note">
+          For an animated link, copy <code>demo/angular-router/glyphnav-link.directive.ts</code>
+          into your app — glyphnav ships compiler-free helpers, so the directive must be compiled by
+          your own Angular build. Or wrap a Router directly with
+          <code>createGlyphnavNavigator(router, options)</code>.
+        </aside>
+      </article>
     </div>
   `,
 })

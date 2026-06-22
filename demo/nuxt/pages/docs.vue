@@ -31,14 +31,21 @@ const DOCS_OPTIONS = `installGlyphnav(app, {
 
 <template>
   <div class="view docs">
-    <h2>docs</h2>
-    <p>Install the package — Nuxt stays a peer dependency:</p>
-    <pre><code v-html="highlight(DOCS_INSTALL)" /></pre>
-    <p>Register one client plugin; every <code>&lt;NuxtLink&gt;</code> then animates:</p>
-    <pre><code v-html="highlight(DOCS_SETUP)" /></pre>
-    <p>Works with either history mode, and with or without global interception:</p>
-    <pre><code v-html="highlight(DOCS_VARIANTS)" /></pre>
-    <p id="options">Every entry point accepts the same options object:</p>
-    <pre><code v-html="highlight(DOCS_OPTIONS)" /></pre>
+    <article>
+      <header class="lead"><h2>docs</h2>Install the package — Nuxt stays a peer dependency:</header>
+      <figure><pre><code v-html="highlight(DOCS_INSTALL)" /></pre></figure>
+      <figure>
+        <figcaption>Register one client plugin; every <code>&lt;NuxtLink&gt;</code> then animates:</figcaption>
+        <pre><code v-html="highlight(DOCS_SETUP)" /></pre>
+      </figure>
+      <figure>
+        <figcaption>Works with either history mode, and with or without global interception:</figcaption>
+        <pre><code v-html="highlight(DOCS_VARIANTS)" /></pre>
+      </figure>
+      <figure>
+        <figcaption id="options">Every entry point accepts the same options object:</figcaption>
+        <pre><code v-html="highlight(DOCS_OPTIONS)" /></pre>
+      </figure>
+    </article>
   </div>
 </template>

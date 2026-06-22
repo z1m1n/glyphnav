@@ -87,9 +87,48 @@ const withBasePath = (basePath: string, href: string): string => {
 };
 
 interface NextNav {
-  push: (href: string, extras?: NextNavigateExtras) => void;
-  replace: (href: string, extras?: NextNavigateExtras) => void;
+  push: (href: string, extras?: NextNavigateExtras) => void | Promise<void>;
+  replace: (href: string, extras?: NextNavigateExtras) => void | Promise<void>;
 }
+
+/** How long to wait for an App Router navigation to land before giving up. */
+const APP_ROUTER_COMMIT_TIMEOUT_MS = 1200;
+
+const currentPath = (): string => {
+  if (typeof window === 'undefined' || !window.location) return '/';
+  const { pathname, search, hash } = window.location;
+  return pathname + search + hash;
+};
+
+/**
+ * Run an App Router navigation and resolve only once the URL actually changes
+ * (or a short budget elapses). The App Router commits navigations
+ * asynchronously — `router.push` returns *before* `window.location` updates — so
+ * with `commit: 'before'` (navigate first) the core would read the old path back
+ * and skip the on-top animation. Awaiting the settle lets it animate to the
+ * landed path, the same as a synchronous router. A no-op navigation never
+ * changes the URL and falls through after the budget, exactly as before.
+ */
+const commitAppRouter = (navigate: () => void): void | Promise<void> => {
+  if (typeof window === 'undefined' || !window.location) {
+    navigate();
+    return;
+  }
+  const before = currentPath();
+  navigate();
+
+  return new Promise<void>((resolve) => {
+    const start = Date.now();
+    const tick = (): void => {
+      if (currentPath() !== before || Date.now() - start >= APP_ROUTER_COMMIT_TIMEOUT_MS) {
+        resolve();
+        return;
+      }
+      setTimeout(tick, 16);
+    };
+    tick();
+  });
+};
 
 /**
  * Resolve the active Next router's `push`/`replace`. `routerMode` is a static
@@ -113,8 +152,8 @@ const useNextNav = (mode: NextRouterMode): NextNav => {
   // oxlint-disable-next-line react-hooks/rules-of-hooks
   const router = useAppRouter();
   return {
-    push: (href, extras) => router.push(href, extras),
-    replace: (href, extras) => router.replace(href, extras),
+    push: (href, extras) => commitAppRouter(() => router.push(href, extras)),
+    replace: (href, extras) => commitAppRouter(() => router.replace(href, extras)),
   };
 };
 
@@ -182,8 +221,8 @@ export const useGlyphnavNavigate = (options?: NextGlyphnavOptions): GlyphnavNavi
     (href, extras) => {
       const target = withBasePath(ctx.basePath, href);
       return ctx.controller.run(target, () => {
-        if (extras?.replace) nav.replace(href, extras);
-        else nav.push(href, extras);
+        if (extras?.replace) return nav.replace(href, extras);
+        return nav.push(href, extras);
       });
     },
     [ctx, nav],
@@ -227,8 +266,8 @@ export const GlyphnavLink = ({
       const target = withBasePath(ctx.basePath, hrefString);
       void ctx.controller.run(target, () => {
         const extras = { scroll };
-        if (replace) nav.replace(hrefString, extras);
-        else nav.push(hrefString, extras);
+        if (replace) return nav.replace(hrefString, extras);
+        return nav.push(hrefString, extras);
       });
     },
     [onClick, ctx, nav, hrefString, replace, scroll],

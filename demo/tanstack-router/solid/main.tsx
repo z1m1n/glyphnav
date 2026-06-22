@@ -48,34 +48,52 @@ const DOCS_OPTIONS = `<GlyphnavProvider
 function View(props: { title: string; body: string }): JSX.Element {
   return (
     <div class="view">
-      <h2>{props.title}</h2>
-      <p>{props.body}</p>
+      <article>
+        <header class="lead">
+          <h2>{props.title}</h2>
+          {props.body}
+        </header>
+      </article>
     </div>
   );
 }
 
-/** A syntax-highlighted code block. */
-function Code(props: { children: string }): JSX.Element {
+/** A code listing as a captioned <figure>. */
+function Figure(props: { code: string; caption?: JSX.Element; captionId?: string }): JSX.Element {
   return (
-    <pre>
-      <code innerHTML={highlight(props.children)} />
-    </pre>
+    <figure>
+      {props.caption ? <figcaption id={props.captionId}>{props.caption}</figcaption> : null}
+      <pre>
+        <code innerHTML={highlight(props.code)} />
+      </pre>
+    </figure>
   );
 }
 
 function Docs(): JSX.Element {
   return (
     <div class="view docs">
-      <h2>docs</h2>
-      <p>Install the package — TanStack Router stays a peer dependency:</p>
-      <Code>{DOCS_INSTALL}</Code>
-      <p>
-        The animated path is basepath-aware via <code>router.buildLocation()</code>; nothing is
-        patched globally:
-      </p>
-      <Code>{DOCS_SETUP}</Code>
-      <p id="options">Every entry point accepts the same options object:</p>
-      <Code>{DOCS_OPTIONS}</Code>
+      <article>
+        <header class="lead">
+          <h2>docs</h2>
+          Install the package — TanStack Router stays a peer dependency:
+        </header>
+        <Figure code={DOCS_INSTALL} />
+        <Figure
+          caption={
+            <>
+              The animated path is basepath-aware via <code>router.buildLocation()</code>; nothing
+              is patched globally:
+            </>
+          }
+          code={DOCS_SETUP}
+        />
+        <Figure
+          captionId="options"
+          caption="Every entry point accepts the same options object:"
+          code={DOCS_OPTIONS}
+        />
+      </article>
     </div>
   );
 }

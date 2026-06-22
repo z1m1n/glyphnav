@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { GlyphnavLink, useGlyphnavController } from 'glyphnav/react-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -33,34 +34,60 @@ const DOCS_OPTIONS = `<GlyphnavProvider
 function View({ title, body }: { title: string; body: string }) {
   return (
     <div className="view">
-      <h2>{title}</h2>
-      <p>{body}</p>
+      <article>
+        <header className="lead">
+          <h2>{title}</h2>
+          {body}
+        </header>
+      </article>
     </div>
   );
 }
 
-/** A syntax-highlighted code block. */
-function Code({ children }: { children: string }) {
+/** A code listing as a captioned <figure>. */
+function Figure({
+  code,
+  caption,
+  captionId,
+}: {
+  code: string;
+  caption?: ReactNode;
+  captionId?: string;
+}) {
   return (
-    <pre>
-      <code dangerouslySetInnerHTML={{ __html: highlight(children) }} />
-    </pre>
+    <figure>
+      {caption ? <figcaption id={captionId}>{caption}</figcaption> : null}
+      <pre>
+        <code dangerouslySetInnerHTML={{ __html: highlight(code) }} />
+      </pre>
+    </figure>
   );
 }
 
 function Docs() {
   return (
     <div className="view docs">
-      <h2>docs</h2>
-      <p>Install the package — React Router stays a peer dependency:</p>
-      <Code>{DOCS_INSTALL}</Code>
-      <p>
-        <code>GlyphnavLink</code> is a drop-in for <code>&lt;Link&gt;</code> (basename-aware via{' '}
-        <code>useHref</code>); nothing is patched globally:
-      </p>
-      <Code>{DOCS_SETUP}</Code>
-      <p id="options">Every entry point accepts the same options object:</p>
-      <Code>{DOCS_OPTIONS}</Code>
+      <article>
+        <header className="lead">
+          <h2>docs</h2>
+          Install the package — React Router stays a peer dependency:
+        </header>
+        <Figure code={DOCS_INSTALL} />
+        <Figure
+          caption={
+            <>
+              <code>GlyphnavLink</code> is a drop-in for <code>&lt;Link&gt;</code> (basename-aware
+              via <code>useHref</code>); nothing is patched globally:
+            </>
+          }
+          code={DOCS_SETUP}
+        />
+        <Figure
+          captionId="options"
+          caption="Every entry point accepts the same options object:"
+          code={DOCS_OPTIONS}
+        />
+      </article>
     </div>
   );
 }

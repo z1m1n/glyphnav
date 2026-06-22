@@ -1,4 +1,6 @@
-/* Bare, classless-ish monospace look: native widgets, brand palette below. */
+/* Bare, classless-ish monospace look: native widgets, brand palette below.
+   Authored with native CSS nesting — supported in every evergreen browser
+   (Chrome 112+, Safari 16.5+, Firefox 117+); no build-time transform needed. */
 
 :root {
   --mono: ui-monospace, 'Cascadia Code', 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
@@ -32,17 +34,28 @@ body {
 }
 
 /* Links use --blue, visited and unvisited alike (no violet fade). Declared
-   before the per-element rules below so those (h1, nav) still win. */
+   before the per-element rules below so those (h1, nav) still win at equal
+   specificity. */
 a {
   color: var(--blue);
-}
-a:visited {
-  color: var(--blue);
+
+  &:visited {
+    color: var(--blue);
+  }
 }
 
 h1 {
   font-size: 1.3rem;
   margin: 0 0 1.25rem;
+
+  a {
+    color: inherit;
+  }
+
+  .crumb {
+    color: var(--gray);
+    font-weight: 400;
+  }
 }
 /* The glyphnav mark, shown inline before the wordmark in every page title /
    breadcrumb. Sized in em so it tracks the h1 font-size; the single source is
@@ -52,13 +65,6 @@ h1 {
   height: 1.15em;
   vertical-align: -0.22em;
   margin-right: 0.4em;
-}
-h1 a {
-  color: inherit;
-}
-h1 .crumb {
-  color: var(--gray);
-  font-weight: 400;
 }
 
 h2 {
@@ -76,9 +82,10 @@ input {
 /* The in-page mirror of the address bar. */
 .bar {
   margin: 0 0 1.25rem;
-}
-.bar .origin {
-  color: var(--gray);
+
+  .origin {
+    color: var(--gray);
+  }
 }
 /* The path sits on its own line and only as wide as its content (capped at the
    container). Always block, so a long path scrolls in place instead of wrapping
@@ -92,9 +99,10 @@ input {
   padding: 2px 6px;
   white-space: pre;
   overflow: hidden;
-}
-.resolving .path {
-  background: var(--blue-soft);
+
+  .resolving & {
+    background: var(--blue-soft);
+  }
 }
 
 nav {
@@ -102,12 +110,13 @@ nav {
   flex-wrap: wrap;
   gap: 0.25rem 1.25rem;
   margin: 0 0 0.5rem;
-}
-nav a.active,
-nav a.router-link-exact-active {
-  font-weight: 700;
-  text-decoration: none;
-  color: inherit;
+
+  a.active,
+  a.router-link-exact-active {
+    font-weight: 700;
+    text-decoration: none;
+    color: inherit;
+  }
 }
 
 /* Second nav row: targets with ?query and #hash — they animate like any path. */
@@ -127,81 +136,156 @@ nav a.router-link-exact-active {
   margin: 0 0 1.25rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
-}
-.controls label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--gray-strong);
-}
-.controls .ms {
-  min-width: 6ch;
-  display: inline-block;
-}
-.controls input[type='range'] {
-  width: 7.5rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--gray-strong);
+  }
+
+  .ms {
+    min-width: 6ch;
+    display: inline-block;
+  }
+
+  input[type='range'] {
+    width: 7.5rem;
+  }
 }
 
 .view {
   border: 1px solid var(--border);
   padding: 1rem 1.25rem;
   min-height: 7.5rem;
-}
-.view p {
-  margin-bottom: 0;
-  color: var(--gray-strong);
+
+  /* Per-demo docs pages. */
+  &.docs {
+    pre {
+      margin: 0 0 0.75rem;
+      padding: 0.7rem 0.9rem;
+      background: var(--fill-soft);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      font-size: 0.8rem;
+      line-height: 1.55;
+
+      code {
+        background: none;
+        padding: 0;
+      }
+    }
+
+    /* Light-theme syntax highlighting (see demo/highlight.ts). */
+    .tok-keyword {
+      color: #8959a8; /* control / declaration */
+    }
+    .tok-function {
+      color: #2f6fb0; /* calls & definitions */
+    }
+    .tok-type {
+      color: #0e7c86; /* Components / Types */
+    }
+    .tok-constant {
+      color: #a3238e; /* ALL_CAPS values */
+    }
+    .tok-literal {
+      color: #c0392b; /* true / false / null / this */
+    }
+    .tok-string {
+      color: #357a5b;
+    }
+    .tok-number {
+      color: #b06d1a;
+    }
+    .tok-property {
+      color: #5b6ea8; /* member after `.` */
+    }
+    .tok-operator {
+      color: #8a8a8a;
+    }
+    .tok-comment {
+      color: #9a9a9a;
+      font-style: italic;
+    }
+  }
+
+  /* Every demo renders each page as a semantic <article>: a <header> lead, code
+     <figure>s and an <aside> note — no <p> inside the .view panel. */
+  header.lead {
+    margin: 0 0 1rem;
+    color: var(--gray-strong);
+
+    h2 {
+      color: var(--ink);
+    }
+  }
+
+  figure {
+    margin: 0 0 0.75rem;
+  }
+
+  figcaption {
+    margin: 0.75rem 0 0.4rem;
+    color: var(--gray-strong);
+  }
+
+  aside.note {
+    margin: 0.75rem 0 0;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--border);
+    color: var(--gray-strong);
+  }
 }
 
-/* Per-demo docs pages. */
-.view.docs p {
-  margin: 0.75rem 0 0.4rem;
+/* /core demo: the address-bar engine pointed at a DOM node instead of history.
+   The stage holds the scrambling text; the form lets you feed it your own. */
+.core-demo {
+  margin-bottom: 0.5rem;
 }
-.view.docs pre {
-  margin: 0 0 0.75rem;
-  padding: 0.7rem 0.9rem;
-  background: var(--fill-soft);
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  font-size: 0.8rem;
-  line-height: 1.55;
+.glyph-stage {
+  display: flex;
+  align-items: center;
+  min-height: 2.2em;
+  padding: 0.5rem 0.7rem;
+  background: var(--fill);
+  /* Monospace, only a notch larger than body copy — the glyph grid stays
+     legible and the stage sits comfortably among the surrounding text. */
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
 }
-.view.docs pre code {
-  background: none;
-  padding: 0;
-}
+.core-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
 
-/* Light-theme syntax highlighting (see demo/highlight.ts). */
-.view.docs .tok-keyword {
-  color: #8959a8; /* control / declaration */
-}
-.view.docs .tok-function {
-  color: #2f6fb0; /* calls & definitions */
-}
-.view.docs .tok-type {
-  color: #0e7c86; /* Components / Types */
-}
-.view.docs .tok-constant {
-  color: #a3238e; /* ALL_CAPS values */
-}
-.view.docs .tok-literal {
-  color: #c0392b; /* true / false / null / this */
-}
-.view.docs .tok-string {
-  color: #357a5b;
-}
-.view.docs .tok-number {
-  color: #b06d1a;
-}
-.view.docs .tok-property {
-  color: #5b6ea8; /* member after `.` */
-}
-.view.docs .tok-operator {
-  color: #8a8a8a;
-}
-.view.docs .tok-comment {
-  color: #9a9a9a;
-  font-style: italic;
+  input {
+    flex: 1 1 18rem;
+    min-width: 0;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--ink);
+  }
+
+  button {
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border);
+    background: var(--fill);
+    color: var(--ink);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+  }
 }
 
 /* Landing page demo picker. */
@@ -212,16 +296,18 @@ nav a.router-link-exact-active {
   margin: 1.5rem 0;
   padding: 0;
   list-style: none;
-}
-.pick li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: baseline;
-}
-.pick .hint {
-  color: var(--gray);
-  font-size: 0.85rem;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+
+  .hint {
+    color: var(--gray);
+    font-size: 0.85rem;
+  }
 }
 
 .foot {
