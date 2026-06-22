@@ -26,5 +26,11 @@
       "glyphnav/tanstack-router/solid": ["../../../src/tanstack-router/solid/index.ts"]
     }
   },
-  "include": ["*.tsx", "*.ts", "../../shared/highlight.ts", "../../shared/content.ts", "../../vite-env.d.ts"]
+  "include": [
+    "*.tsx",
+    "*.ts",
+    "../../shared/highlight.ts",
+    "../../shared/content.ts",
+    "../../vite-env.d.ts"
+  ]
 }

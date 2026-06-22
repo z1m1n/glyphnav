@@ -1,4 +1,5 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import type { Plugin, ProxyOptions } from 'vite';
@@ -7,6 +8,34 @@ import react from '@vitejs/plugin-react';
 import solid from 'vite-plugin-solid';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
+
+const nodeRequire = createRequire(import.meta.url);
+
+/** An installed dependency's version, read from its package.json. */
+const pkgVersion = (name: string): string =>
+  (nodeRequire(`${name}/package.json`) as { version: string }).version;
+
+/** The library's own version, from the root manifest (glyphnav itself). */
+const glyphnavVersion = (
+  JSON.parse(readFileSync(r('../package.json'), 'utf8')) as { version: string }
+).version;
+
+/**
+ * The framework + router each demo runs, shown muted on the right of its footer.
+ * Read from the installed package.json so the labels never drift from the deps.
+ * The vanilla demo has no framework, so it shows the library version instead.
+ */
+const STACK_BY_APP: Record<string, () => string> = {
+  vanilla: () => `glyphnav ${glyphnavVersion}`,
+  'vue-router': () => `vue ${pkgVersion('vue')} · vue-router ${pkgVersion('vue-router')}`,
+  'react-router': () => `react ${pkgVersion('react')} · react-router ${pkgVersion('react-router')}`,
+  'tanstack-router/react': () =>
+    `react ${pkgVersion('react')} · @tanstack/react-router ${pkgVersion('@tanstack/react-router')}`,
+  'tanstack-router/solid': () =>
+    `solid-js ${pkgVersion('solid-js')} · @tanstack/solid-router ${pkgVersion('@tanstack/solid-router')}`,
+  'angular-router': () =>
+    `angular ${pkgVersion('@angular/core')} · @angular/router ${pkgVersion('@angular/router')}`,
+};
 
 /**
  * Dev proxy for a demo that runs on its own server (Next, Nuxt). Forwards the
@@ -96,6 +125,30 @@ function baseAwareLinks(): Plugin {
         if (base === '/') return html;
         // `href="/x"` → `href="<base>x"`; the negative lookahead skips `href="//"`.
         return html.replace(/href="\/(?!\/)/g, `href="${base}`);
+      },
+    },
+  };
+}
+
+/**
+ * Fill the version placeholders left in the demo HTML: the library version after
+ * the wordmark on the landing page (`__GLYPHNAV_VERSION__`), and each demo's
+ * framework/router stack in its footer (`__STACK__`). Done at transform time so
+ * the numbers always track the installed dependencies.
+ */
+function injectVersions(): Plugin {
+  return {
+    name: 'demo-inject-versions',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html, ctx) {
+        html = html.replace('__GLYPHNAV_VERSION__', `v${glyphnavVersion}`);
+        if (html.includes('__STACK__')) {
+          const path = ctx.filename.replace(/\\/g, '/').replace(/\/?index\.html$/, '');
+          const app = Object.keys(STACK_BY_APP).find((name) => path.endsWith(name));
+          html = html.replace('__STACK__', app ? STACK_BY_APP[app]() : '');
+        }
+        return html;
       },
     },
   };
@@ -213,6 +266,7 @@ export default defineConfig({
     }),
     demoFallback(),
     baseAwareLinks(),
+    injectVersions(),
     staticRoutes(),
   ],
   build: {

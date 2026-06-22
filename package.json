@@ -112,38 +112,38 @@
     "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
-    "@angular/common": "22.0.0",
-    "@angular/compiler": "22.0.0",
-    "@angular/core": "22.0.0",
-    "@angular/platform-browser": "22.0.0",
-    "@angular/router": "22.0.0",
-    "@microsoft/api-extractor": "^7.58.8",
-    "@tanstack/react-router": "1.170.15",
-    "@tanstack/solid-router": "1.170.15",
+    "@angular/common": "22.0.2",
+    "@angular/compiler": "22.0.2",
+    "@angular/core": "22.0.2",
+    "@angular/platform-browser": "22.0.2",
+    "@angular/router": "22.0.2",
+    "@microsoft/api-extractor": "7.58.9",
+    "@tanstack/react-router": "1.170.16",
+    "@tanstack/solid-router": "1.170.16",
     "@testing-library/dom": "10.4.1",
     "@testing-library/react": "16.3.2",
-    "@types/node": "25.9.2",
+    "@types/node": "26.0.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-vue": "6.0.7",
-    "@vitest/coverage-v8": "4.1.8",
+    "@vitest/coverage-v8": "4.1.9",
     "jsdom": "29.1.1",
-    "next": "^15.5.19",
+    "next": "16.2.9",
     "npm-run-all2": "9.0.2",
-    "oxfmt": "0.54.0",
-    "oxlint": "1.69.0",
+    "oxfmt": "0.55.0",
+    "oxlint": "1.70.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "react-router-dom": "7.17.0",
+    "react-router": "8.0.1",
     "rxjs": "7.8.2",
     "solid-js": "1.9.13",
     "typescript": "6.0.3",
     "vite": "8.0.16",
     "vite-plugin-dts": "5.0.2",
     "vite-plugin-solid": "2.11.12",
-    "vitest": "4.1.8",
-    "vue": "3.5.35",
+    "vitest": "4.1.9",
+    "vue": "3.5.38",
     "vue-router": "5.1.0"
   },
   "peerDependencies": {
@@ -155,7 +155,7 @@
     "nuxt": ">=3",
     "react": ">=18",
     "react-dom": ">=18",
-    "react-router-dom": ">=6",
+    "react-router": ">=6",
     "solid-js": ">=1.9",
     "vue": ">=3",
     "vue-router": ">=4"
@@ -185,7 +185,7 @@
     "react-dom": {
       "optional": true
     },
-    "react-router-dom": {
+    "react-router": {
       "optional": true
     },
     "solid-js": {
@@ -201,5 +201,5 @@
   "engines": {
     "node": ">=20.19"
   },
-  "packageManager": "pnpm@11.5.2"
+  "packageManager": "pnpm@11.8.0"
 }

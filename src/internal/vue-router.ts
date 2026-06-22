@@ -38,16 +38,15 @@ export const wrapRouterMethod = (
 ): RouterMethod => {
   return (async (to: RouteLocationRaw) => {
     const target = options.resolveHref(to);
-    
+
     if (options.shouldSkip?.(target, to)) return original.call(router, to);
 
     let result: ReturnType<RouterMethod> | undefined;
 
-    await controller
-      .run(target, async () => {
-        result = original.call(router, to);
-        await result;
-      });
+    await controller.run(target, async () => {
+      result = original.call(router, to);
+      await result;
+    });
 
     return result;
   }) as RouterMethod;

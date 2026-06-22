@@ -6,6 +6,7 @@
 // `app.baseURL` is derived from it — the same source runs at `/nuxt/` locally or
 // `/glyphnav/nuxt/` on the project page. Nuxt emits a real folder per route, so
 // deep-link reloads serve a real file.
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const base = process.env.DEMO_BASE ?? '/';
@@ -13,9 +14,18 @@ const baseURL = (base === '/' ? '/' : base) + 'nuxt/';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 
+// The framework + view library this demo runs, shown muted in the footer. Read
+// from the installed package.json so the label tracks the actual dependency.
+const nodeRequire = createRequire(import.meta.url);
+const ver = (name: string): string =>
+  (nodeRequire(`${name}/package.json`) as { version: string }).version;
+const stack = `nuxt ${ver('nuxt')} · vue ${ver('vue')}`;
+
 export default defineNuxtConfig({
   ssr: true,
   app: { baseURL },
+  // Surfaced to the client so the footer can show which stack this demo runs.
+  runtimeConfig: { public: { stack } },
   css: ['@glyphnav-demo/shared/styles.css'],
   devtools: { enabled: false },
   // No phoning home from the demo.

@@ -56,6 +56,14 @@ h1 {
     color: var(--gray);
     font-weight: 400;
   }
+
+  /* Library version after the wordmark on the landing page — muted, like the
+     breadcrumb, and a touch smaller so it reads as a tag, not part of the name. */
+  .version {
+    color: var(--gray);
+    font-weight: 400;
+    font-size: 0.7em;
+  }
 }
 /* The glyphnav mark, shown inline before the wordmark in every page title /
    breadcrumb. Sized in em so it tracks the h1 font-size; the single source is
@@ -326,6 +334,12 @@ nav {
   border-top: 1px solid var(--rule);
   color: var(--gray);
   font-size: 0.8rem;
+
+  /* Which framework + router this demo runs, pushed to the right edge. Inherits
+     the footer's muted gray. Wraps under the links on narrow viewports. */
+  .stack {
+    margin-left: auto;
+  }
 }
 
 code {

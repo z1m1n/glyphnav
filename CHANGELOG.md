@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **React Router adapter** (`glyphnav/react-router`): support for React Router v8,
+  alongside the existing v6 and v7.
+
+### Changed
+
+- **Breaking — React Router adapter** (`glyphnav/react-router`): the peer
+  dependency is now `react-router` (`>=6`) instead of `react-router-dom`, and the
+  adapter imports its navigation hooks (`useNavigate`, `useHref`) from
+  `react-router`. v8 ships only `react-router` (the `react-router-dom` package was
+  dropped), while v6 and v7 expose the same hooks there too, so one import path
+  covers all three majors. `GlyphnavLink` now renders a plain `<a>` (its `href`
+  resolved via `useHref`) instead of wrapping `<Link>`, so `GlyphnavLinkProps`
+  extends the anchor attributes plus `to`/`replace`/`state` rather than React
+  Router's `LinkProps`. Apps on v6/v7 keep working without changes — `react-router`
+  is already present as a dependency of `react-router-dom`.
+
 ### Fixed
 
 - **Next.js adapter** (`glyphnav/next`): navigate-first (`commit: 'before'`) on the

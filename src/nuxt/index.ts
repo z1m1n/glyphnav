@@ -91,7 +91,10 @@ export const attachGlyphnav = (
   const shouldSkip = (target: string): boolean =>
     samePathForm(resolveTarget(router, router.currentRoute.value.fullPath, historyMode), target);
   const push = wrapRouterMethod(controller, router, originalPush, { resolveHref, shouldSkip });
-  const replace = wrapRouterMethod(controller, router, originalReplace, { resolveHref, shouldSkip });
+  const replace = wrapRouterMethod(controller, router, originalReplace, {
+    resolveHref,
+    shouldSkip,
+  });
 
   if (intercept === 'router') {
     router.push = push;

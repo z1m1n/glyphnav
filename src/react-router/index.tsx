@@ -1,5 +1,12 @@
 /**
- * Adapter for React Router (v6+).
+ * Adapter for React Router (v6–v8).
+ *
+ * Imports only from `react-router` — the navigation hooks (`useNavigate`,
+ * `useHref`) live in that package in every version, so the adapter works with or
+ * without `react-router-dom`. v6 ships the DOM bindings (`<Link>`, …) separately
+ * in `react-router-dom`; v8 dropped that package and exposes everything from
+ * `react-router`. Rendering a plain `<a>` (instead of `<Link>`) keeps the import
+ * surface to the one package common to all three majors.
  *
  *  - `<GlyphnavProvider>` shares a single controller across the tree (optional).
  *  - `useGlyphnavNavigate()` is a drop-in for `useNavigate()` that animates first.
@@ -9,9 +16,9 @@
  * points animate.
  */
 import { createContext, createElement, useCallback, useContext, useRef } from 'react';
-import type { MouseEvent, ReactNode } from 'react';
-import { Link, useHref, useNavigate } from 'react-router-dom';
-import type { LinkProps, NavigateOptions, To } from 'react-router-dom';
+import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
+import { useHref, useNavigate } from 'react-router';
+import type { NavigateOptions, To } from 'react-router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
 import { isModifiedClick, toPath } from '../internal/links';
@@ -81,7 +88,13 @@ export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigate
   );
 };
 
-export interface GlyphnavLinkProps extends LinkProps {
+export interface GlyphnavLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
+  /** Destination, like React Router's `<Link to>`. */
+  to: To;
+  /** Replace the current history entry instead of pushing a new one. */
+  replace?: boolean;
+  /** History state to associate with the new location. */
+  state?: unknown;
   /** Per-link option overrides. */
   glyphOptions?: GlyphnavOptions;
 }
@@ -89,6 +102,9 @@ export interface GlyphnavLinkProps extends LinkProps {
 /**
  * Drop-in replacement for React Router's `<Link>` that animates on click.
  * Modified clicks (new tab, etc.) fall through to the browser as usual.
+ *
+ * Renders a plain `<a>` whose `href` comes from `useHref`, then navigates
+ * imperatively — so it needs only `react-router` (no `<Link>`/`react-router-dom`).
  */
 export const GlyphnavLink = ({
   to,
@@ -100,8 +116,8 @@ export const GlyphnavLink = ({
 }: GlyphnavLinkProps) => {
   const navigate = useNavigate();
   const controller = useGlyphnavController(glyphOptions);
-  // `useHref` resolves `to` to a basename-aware path, so the animated bar
-  // matches what React Router actually navigates to.
+  // `useHref` resolves `to` to a basename-aware path, so the rendered href and
+  // the animated bar both match what React Router actually navigates to.
   const href = useHref(to);
 
   const handleClick = useCallback(
@@ -117,5 +133,5 @@ export const GlyphnavLink = ({
     [onClick, controller, navigate, href, to, replace, state],
   );
 
-  return createElement(Link, { to, onClick: handleClick, replace, state, ...rest });
+  return createElement('a', { href, onClick: handleClick, ...rest });
 };

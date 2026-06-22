@@ -29,8 +29,10 @@ useSeoMeta({
 
 // The picker lives one level up from this app's base (`/glyphnav/nuxt/` →
 // `/glyphnav/`). A plain anchor does the full reload back to it.
-const baseURL = useRuntimeConfig().app.baseURL;
+const config = useRuntimeConfig();
+const baseURL = config.app.baseURL;
 const rootHref = baseURL.replace(/nuxt\/$/, '') || '/';
+const stack = config.public.stack;
 
 const path = ref('/');
 const resolving = ref(false);
@@ -153,6 +155,7 @@ watch([charset, duration, effect, commit, scope], apply);
       <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener"
         >npm package</a
       >
+      <span class="stack">{{ stack }}</span>
     </footer>
   </div>
 </template>

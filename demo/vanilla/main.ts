@@ -169,10 +169,14 @@ function render(): void {
     a.classList.toggle('active', here === location.pathname.replace(/\/$/, ''));
   });
 
-  // The commit control only changes how a real navigation commits, so hide it
-  // on the /core text demo — it has nothing to do with animating a DOM node.
-  const commitCtl = document.getElementById('ctl-commit');
-  if (commitCtl) commitCtl.style.display = sub === '/core' ? 'none' : '';
+  // Hide the navigation-only controls on the /core text demo: commit timing and
+  // scope ('tail' animates only the path tail that differs from the current
+  // path) are URL concepts with nothing to act on when scrambling a DOM node.
+  const navOnly = sub === '/core' ? 'none' : '';
+  for (const id of ['ctl-commit', 'ctl-scope']) {
+    const ctl = document.getElementById(id);
+    if (ctl) ctl.style.display = navOnly;
+  }
 
   if (sub === '/core') setupCore();
 }

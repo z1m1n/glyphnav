@@ -157,6 +157,7 @@ function Inner({ children }: { children: ReactNode }) {
         <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">
           npm package
         </a>
+        <span className="stack">{process.env.NEXT_PUBLIC_STACK}</span>
       </footer>
     </>
   );

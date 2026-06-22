@@ -5,7 +5,10 @@ defineProps<{ title: string; body: string }>();
 <template>
   <div class="view">
     <article>
-      <header class="lead"><h2>{{ title }}</h2>{{ body }}</header>
+      <header class="lead">
+        <h2>{{ title }}</h2>
+        {{ body }}
+      </header>
     </article>
   </div>
 </template>

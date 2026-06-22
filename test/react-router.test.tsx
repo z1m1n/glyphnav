@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { GlyphnavLink, useGlyphnavNavigate } from '../src/react-router';
 
 const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
