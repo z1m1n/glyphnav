@@ -8,13 +8,12 @@
  * Nothing is patched globally: only navigations made through these entry
  * points animate.
  */
-import { createContext, createElement, useCallback, useContext, useMemo, useRef } from 'react';
+import { createContext, createElement, useCallback, useContext, useMemo } from 'react';
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
-import { GlyphnavController } from '../../core';
-import type { GlyphnavOptions, RunResult } from '../../core';
-import { isModifiedClick } from '../../internal/links';
+import type { GlyphnavController, GlyphnavOptions, RunResult } from '../../core';
+import { runLinkClick, useFallbackController, useSharedController } from '../../internal/react';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
@@ -29,13 +28,8 @@ export interface GlyphnavProviderProps extends GlyphnavOptions {
  * Provide a shared controller (and base options) to the subtree. Optional —
  * the hooks work without it, each creating their own controller.
  */
-export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) => {
-  const ref = useRef<GlyphnavController | null>(null);
-  if (!ref.current) ref.current = new GlyphnavController(options);
-  else ref.current.update(options);
-
-  return createElement(GlyphnavContext.Provider, { value: ref.current }, children);
-};
+export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) =>
+  createElement(GlyphnavContext.Provider, { value: useSharedController(options) }, children);
 
 /**
  * Get the controller from context, or a stable per-component fallback.
@@ -46,11 +40,9 @@ export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps
  */
 export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavController => {
   const fromContext = useContext(GlyphnavContext);
-  const ref = useRef<GlyphnavController | null>(null);
-  if (fromContext) return fromContext;
-  if (!ref.current) ref.current = new GlyphnavController(options);
+  const fallback = useFallbackController(!fromContext, options);
 
-  return ref.current;
+  return fromContext ?? (fallback as GlyphnavController);
 };
 
 /**
@@ -110,13 +102,14 @@ export const GlyphnavLink = ({
   const href = router.buildLocation(navOpts).href;
 
   const handleClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) => {
-      onClick?.(event);
-      if (isModifiedClick(event)) return; // let the browser handle modified clicks
-
-      event.preventDefault();
-      void controller.run(href, () => router.navigate(navOpts) as Promise<void>);
-    },
+    (event: MouseEvent<HTMLAnchorElement>) =>
+      runLinkClick(
+        event,
+        onClick,
+        controller,
+        href,
+        () => router.navigate(navOpts) as Promise<void>,
+      ),
     [onClick, controller, router, href, navOpts],
   );
 

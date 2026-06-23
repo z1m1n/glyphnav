@@ -50,3 +50,16 @@ export const toPath = (value: string | LocationParts): string =>
   typeof value === 'string'
     ? value
     : (value.pathname ?? '') + (value.search ?? '') + (value.hash ?? '');
+
+/**
+ * The current address-bar path (`pathname + search + hash`). Safe to call in
+ * non-browser environments (SSR), where it returns `'/'`.
+ *
+ * @returns The current path, or `'/'` when there is no `window.location`.
+ */
+export const currentPath = (): string => {
+  if (typeof window === 'undefined' || !window.location) return '/';
+
+  const { pathname, search, hash } = window.location;
+  return pathname + search + hash;
+};

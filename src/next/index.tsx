@@ -15,15 +15,16 @@
  */
 'use client';
 
-import { createContext, createElement, useCallback, useContext, useMemo, useRef } from 'react';
+import { createContext, createElement, useCallback, useContext, useMemo } from 'react';
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
 import Link from 'next/link';
 import type { LinkProps } from 'next/link';
 import { useRouter as useAppRouter } from 'next/navigation';
 import { useRouter as usePagesRouter } from 'next/compat/router';
-import { GlyphnavController } from '../core';
+import type { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
-import { isModifiedClick, toPath } from '../internal/links';
+import { currentPath, toPath } from '../internal/links';
+import { runLinkClick, useFallbackController, useSharedController } from '../internal/react';
 
 /** Which Next.js routing system drives the real navigation. */
 export type NextRouterMode = 'app' | 'pages';
@@ -71,12 +72,9 @@ interface GlyphnavContextValue {
 
 const GlyphnavContext = createContext<GlyphnavContextValue | null>(null);
 
-/** Strip the adapter-only options before they reach the framework-agnostic core. */
-const toGlyphOptions = (options?: NextGlyphnavOptions): GlyphnavOptions => {
-  if (!options) return {};
-  const { routerMode: _mode, basePath: _base, ...glyph } = options;
-  return glyph;
-};
+// The adapter-only options (`routerMode`, `basePath`) are passed straight to the
+// controller: `resolveOptions` reads only the keys it knows about, so the extra
+// fields are inert — no stripping needed before reaching the core.
 
 /** Prefix the base path onto a rooted href (matters only for `commit: 'after'`). */
 const withBasePath = (basePath: string, href: string): string => {
@@ -93,12 +91,6 @@ interface NextNav {
 
 /** How long to wait for an App Router navigation to land before giving up. */
 const APP_ROUTER_COMMIT_TIMEOUT_MS = 1200;
-
-const currentPath = (): string => {
-  if (typeof window === 'undefined' || !window.location) return '/';
-  const { pathname, search, hash } = window.location;
-  return pathname + search + hash;
-};
 
 /**
  * Run an App Router navigation and resolve only once the URL actually changes
@@ -160,12 +152,11 @@ const useNextNav = (mode: NextRouterMode): NextNav => {
 /** Read the shared context, or build a stable per-component fallback. */
 const useGlyphnavContext = (options?: NextGlyphnavOptions): GlyphnavContextValue => {
   const fromContext = useContext(GlyphnavContext);
-  const ref = useRef<GlyphnavController | null>(null);
+  const fallback = useFallbackController(!fromContext, options);
   if (fromContext) return fromContext;
-  if (!ref.current) ref.current = new GlyphnavController(toGlyphOptions(options));
 
   return {
-    controller: ref.current,
+    controller: fallback as GlyphnavController,
     mode: options?.routerMode ?? 'app',
     basePath: options?.basePath ?? '',
   };
@@ -180,16 +171,12 @@ export interface GlyphnavProviderProps extends NextGlyphnavOptions {
  * Optional — the hooks work without it, each creating their own controller.
  */
 export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) => {
-  const ref = useRef<GlyphnavController | null>(null);
-  const glyph = toGlyphOptions(options);
-  if (!ref.current) ref.current = new GlyphnavController(glyph);
-  else ref.current.update(glyph);
-
+  const controller = useSharedController(options);
   const mode = options.routerMode ?? 'app';
   const basePath = options.basePath ?? '';
   const value = useMemo<GlyphnavContextValue>(
-    () => ({ controller: ref.current as GlyphnavController, mode, basePath }),
-    [mode, basePath],
+    () => ({ controller, mode, basePath }),
+    [controller, mode, basePath],
   );
 
   return createElement(GlyphnavContext.Provider, { value }, children);
@@ -258,18 +245,12 @@ export const GlyphnavLink = ({
   const hrefString = toPath(href);
 
   const handleClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) => {
-      onClick?.(event);
-      if (isModifiedClick(event)) return; // let the browser handle modified clicks
-
-      event.preventDefault();
-      const target = withBasePath(ctx.basePath, hrefString);
-      void ctx.controller.run(target, () => {
+    (event: MouseEvent<HTMLAnchorElement>) =>
+      runLinkClick(event, onClick, ctx.controller, withBasePath(ctx.basePath, hrefString), () => {
         const extras = { scroll };
         if (replace) return nav.replace(hrefString, extras);
         return nav.push(hrefString, extras);
-      });
-    },
+      }),
     [onClick, ctx, nav, hrefString, replace, scroll],
   );
 

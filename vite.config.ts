@@ -3,9 +3,9 @@ import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   build: {
-    target: 'es2020',
+    target: 'es2022',
     minify: 'oxc',
-    sourcemap: true,
+    sourcemap: false,
     emptyOutDir: true,
     lib: {
       entry: {

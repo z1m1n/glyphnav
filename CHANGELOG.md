@@ -24,6 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   extends the anchor attributes plus `to`/`replace`/`state` rather than React
   Router's `LinkProps`. Apps on v6/v7 keep working without changes — `react-router`
   is already present as a dependency of `react-router-dom`.
+- **Smaller adapters.** The React-family adapters (`glyphnav/react-router`,
+  `glyphnav/tanstack-router/react`, `glyphnav/next`) now share their controller
+  lifecycle and link-click handling through an internal module instead of each
+  re-implementing it, and the Next.js adapter no longer strips its adapter-only
+  options before the core (`resolveOptions` reads only the keys it knows, so they
+  were already inert). Every adapter entry is now **under 1 kB gzipped**; the
+  Next.js adapter — previously the largest at ~1.16 kB — drops to ~0.98 kB. No API
+  changes.
+- **Build.** The published package no longer ships sourcemaps, and the build
+  target is raised from `es2020` to `es2022`. This roughly halves the size of the
+  published `dist/` (sourcemaps were ~48% of it) and lets the minifier keep modern
+  syntax instead of down-leveling it.
 
 ### Fixed
 
