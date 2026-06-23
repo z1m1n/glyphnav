@@ -56,6 +56,14 @@ export class GlyphnavController {
   private options: GlyphnavOptions;
   private readonly deps: Required<Omit<ControllerDeps, 'history'>> & { history: History | null };
   private readonly player: Player;
+  /**
+   * `history.replaceState` resolved and bound once, so every animation frame
+   * skips the `instanceof History` probe + prototype lookup. We go through the
+   * prototype (not the instance method) so routers that monkey-patch the instance
+   * (e.g. TanStack Router's history wrapper) do not observe each frame as a real
+   * navigation. `null` when there is no history to write to.
+   */
+  private readonly replaceState: ((data: unknown, unused: string, url: string) => void) | null;
 
   /** Monotonic id so a newer run cleanly supersedes an older one. */
   private runId = 0;
@@ -77,6 +85,16 @@ export class GlyphnavController {
       prefersReducedMotion: deps.prefersReducedMotion ?? defaultPrefersReducedMotion,
     };
     this.player = createPlayer(this.deps.scheduler);
+
+    const history = this.deps.history;
+    this.replaceState =
+      history == null
+        ? null
+        : (
+            typeof History !== 'undefined' && history instanceof History
+              ? History.prototype.replaceState
+              : history.replaceState
+          ).bind(history);
   }
 
   /** True while an animation is on screen. */
@@ -266,16 +284,10 @@ export class GlyphnavController {
 
   private writePath(path: string): void {
     const history = this.deps.history;
-    if (!history) return;
+    const replace = this.replaceState;
+    if (!history || !replace) return;
     try {
-      // Go through the prototype so routers that monkey-patch the instance
-      // method (e.g. TanStack Router's history wrapper) do not observe every
-      // animation frame as a real navigation.
-      const replace =
-        typeof History !== 'undefined' && history instanceof History
-          ? History.prototype.replaceState
-          : history.replaceState;
-      replace.call(history, history.state, '', path);
+      replace(history.state, '', path);
     } catch {
       /* cross-origin / unsupported environments */
     }

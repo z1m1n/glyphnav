@@ -46,6 +46,7 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - ⏱️ **`duration`** budgets the _whole_ animation — frames auto‑scale to fit.
 - 🪶 **Under 1 kB per adapter** (gzipped, ~0.5–1 kB) on top of a ~3 kB core.
 - ♿ Honors `prefers-reduced-motion`, supersedes overlapping navigations, fully cancelable.
+- 🔋 Frames run on `requestAnimationFrame` — vsync-aligned and **paused while the tab is backgrounded**.
 - 🛡️ Writes only rooted same‑origin paths and backs off if the URL changes
   underneath it (back button mid‑animation) — the address bar can't be corrupted.
 - 🧪 ESM + CJS + types, built with **Vite**, covered by **Vitest**.

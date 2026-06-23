@@ -220,12 +220,13 @@ describe('GlyphnavController', () => {
     });
 
     const run = controller.run('/test', vi.fn());
-    await vi.advanceTimersByTimeAsync(0);
-    expect(frames.length).toBe(1); // first frame renders immediately
-    await vi.advanceTimersByTimeAsync(70);
-    expect(frames.length).toBe(4); // half the duration → half the frames
-    await vi.advanceTimersByTimeAsync(70);
-    expect(frames.length).toBe(8); // the last frame lands exactly at `duration`
+    await vi.advanceTimersByTimeAsync(16);
+    expect(frames.length).toBe(1); // first frame lands on the next animation frame
+    await vi.advanceTimersByTimeAsync(64); // ~80 ms elapsed — past the halfway point
+    expect(frames.length).toBeGreaterThanOrEqual(3); // frames are spread across the duration…
+    expect(frames.length).toBeLessThan(8); // …not dumped all at once
+    await vi.advanceTimersByTimeAsync(80); // past the full 140 ms duration
+    expect(frames.length).toBe(8); // every frame has landed
     await expect(run).resolves.toBe('completed');
   });
 

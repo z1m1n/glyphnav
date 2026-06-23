@@ -36,6 +36,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   target is raised from `es2020` to `es2022`. This roughly halves the size of the
   published `dist/` (sourcemaps were ~48% of it) and lets the minifier keep modern
   syntax instead of down-leveling it.
+- **Animation runs on `requestAnimationFrame`.** The frame player now schedules
+  ticks via `requestAnimationFrame` keyed off a `performance.now` start time
+  (with a `setTimeout` fallback for SSR/non-visual environments) instead of a
+  chain of `setTimeout`s. The animation now **pauses entirely while the tab is in
+  the background** (rather than dribbling `replaceState` calls into a hidden page
+  at the browser's throttled ~1/s) and stays time-accurate under main-thread load
+  instead of drifting. Each frame also skips a now-hoisted `instanceof History` +
+  prototype lookup. The frame sequence and ordering are unchanged.
+  - **Breaking (advanced).** The injectable `Scheduler` (via `createGlyphnav(_, { scheduler })`
+    / `createPlayer`) changed shape from `{ setTimeout, clearTimeout }` to
+    `{ now, requestFrame, cancelFrame }`. Only code that supplies its own
+    `scheduler` is affected; the default and every adapter are unchanged.
 
 ### Fixed
 

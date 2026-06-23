@@ -123,7 +123,7 @@ describe('navigate', () => {
       hooks: { onFrame: (f) => frames.push(f.path), onCommit },
     });
 
-    await vi.advanceTimersByTimeAsync(12); // a few frames into the animation
+    await vi.advanceTimersByTimeAsync(20); // a few frames into the animation
     // The animation is running and nothing has been committed — i.e. the
     // navigate-first request fell back to animate-first.
     expect(frames.length).toBeGreaterThan(0);
