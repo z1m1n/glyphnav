@@ -17,7 +17,14 @@
   --ink: #111111; /* primary text */
   --blue: #0000ee; /* links — strong, high-contrast blue */
   --blue-soft: #e8eeff; /* resolving-state path highlight (soft blue tint) */
+  --blue-hover: #4d7cff; /* link hover — the logo mark's own softer blue */
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
+
+  /* Accent for the controls panel — a muted, greyish light-yellow so the knobs
+     read as the interactive block, set apart from the white page and the
+     gray-bordered view/code panels. */
+  --accent-bg: #faf8ea; /* soft greyish-yellow fill */
+  --accent-border: #e3dcad; /* greyish-yellow hairline */
 }
 
 * {
@@ -38,9 +45,17 @@ body {
    specificity. */
 a {
   color: var(--blue);
+  transition: color 0.15s ease;
 
   &:visited {
     color: var(--blue);
+  }
+
+  /* Brighten to the logo blue on hover. Comes after :visited (LVHA order) so
+     it applies to visited links too, and its specificity (0,1,1) lifts it over
+     the inherit-colored wordmark (h1 a), so that brightens on hover as well. */
+  &:hover {
+    color: var(--blue-hover);
   }
 }
 
@@ -48,10 +63,20 @@ h1 {
   font-size: 1.3rem;
   margin: 0 0 1.25rem;
 
+  /* Flex + gap owns every inter-token space here, so the wordmark/separator
+     spacing never depends on a literal whitespace node — those collapse away
+     in JSX/Angular/Vue templates, gluing "glyphnav" to the "/". */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4em;
+
   a {
     color: inherit;
   }
 
+  /* Breadcrumb separator ("/") and the trailing page name, both muted. */
+  .sep,
   .crumb {
     color: var(--gray);
     font-weight: 400;
@@ -71,8 +96,9 @@ h1 {
 .glyph-mark {
   width: 1.15em;
   height: 1.15em;
-  vertical-align: -0.22em;
-  margin-right: 0.4em;
+  /* h1 is a baseline flex; center the mark against the wordmark line instead
+     of relying on inline vertical-align. Spacing is handled by the h1 gap. */
+  align-self: center;
 }
 
 h2 {
@@ -142,8 +168,10 @@ nav {
   flex-wrap: wrap;
   gap: 0.75rem 1.75rem;
   margin: 0 0 1.25rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
+  padding: 0.8rem 1rem;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 4px;
 
   label {
     display: flex;
@@ -151,6 +179,12 @@ nav {
     gap: 0.5rem;
     font-size: 0.85rem;
     color: var(--gray-strong);
+  }
+
+  /* The back/forward toggle puts its checkbox before the text, like a native
+     checkbox label. */
+  label.toggle {
+    cursor: pointer;
   }
 
   .ms {

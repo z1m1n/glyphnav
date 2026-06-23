@@ -4,7 +4,7 @@
  * directly so the controller-lifecycle and link-click boilerplate is written
  * once instead of being re-implemented per adapter.
  */
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions } from '../core';
 import { isModifiedClick } from './links';
@@ -43,6 +43,21 @@ export const useFallbackController = (
   if (enabled && !ref.current) ref.current = new GlyphnavController(options);
 
   return ref.current;
+};
+
+/**
+ * Wire {@link GlyphnavController.enableHistoryAnimation} to a provider's
+ * lifetime: attach the popstate listener while `enabled`, detach on unmount or
+ * when the controller/flag changes. A no-op when `enabled` is `false`, so the
+ * per-link adapters stay global-patch-free until a provider opts in.
+ *
+ * @param controller - The provider's shared controller.
+ * @param enabled - Whether back/forward (popstate) traversals should animate.
+ */
+export const useHistoryAnimation = (controller: GlyphnavController, enabled: boolean): void => {
+  useEffect(() => {
+    if (enabled) return controller.enableHistoryAnimation();
+  }, [controller, enabled]);
 };
 
 /**

@@ -1,12 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { GlyphnavLink, GlyphnavProvider, useGlyphnavController } from 'glyphnav/next';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
-import { charsets, currentUrl, durationToSlider, sliderToDuration } from '@glyphnav-demo/shared';
+import {
+  charsets,
+  CONTROL_TOOLTIPS,
+  currentUrl,
+  DEFAULT_TOOLBAR,
+  durationToSlider,
+  loadToolbar,
+  saveToolbar,
+  sliderToDuration,
+} from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
+
+/** This page's own localStorage key — not shared with the other demos. */
+const STORE_KEY = 'next';
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 // The picker lives one level up from this app's base path (`/glyphnav/next` →
@@ -40,6 +52,7 @@ function Inner({ children }: { children: ReactNode }) {
   // 'after' stays the default for its smoother, navigate-at-the-end feel.
   const [commit, setCommit] = useState<CommitTiming>('after');
   const [scope, setScope] = useState<AnimateScope>('full');
+  const [backForward, setBackForward] = useState(true);
 
   // usePathname() changes once Next commits a navigation; mirror the real,
   // settled path then. The App Router updates the URL asynchronously (after the
@@ -71,12 +84,43 @@ function Inner({ children }: { children: ReactNode }) {
     });
   }, [controller, charset, duration, effect, commit, scope]);
 
+  // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
+  // the popstate listener (the cleanup returned by enableHistoryAnimation).
+  useEffect(() => {
+    if (backForward) return controller.enableHistoryAnimation();
+  }, [controller, backForward]);
+
+  // Restore the saved toolbar on the client (after hydration), so the
+  // statically prerendered markup — which has no localStorage — never mismatches.
+  useEffect(() => {
+    const s = loadToolbar(STORE_KEY, { ...DEFAULT_TOOLBAR, commit: 'after' as CommitTiming });
+    setCharset(s.charset);
+    setDuration(s.duration);
+    setEffect(s.effect);
+    setCommit(s.commit);
+    setScope(s.scope);
+    setBackForward(s.backForward);
+  }, []);
+
+  // Persist on change, under this page's own key. Skip the initial mount so the
+  // restore above wins instead of writing the defaults back over it.
+  const firstSave = useRef(true);
+  useEffect(() => {
+    if (firstSave.current) {
+      firstSave.current = false;
+      return;
+    }
+    saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
+  }, [charset, duration, effect, commit, scope, backForward]);
+
   return (
     <>
       <h1>
         {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
         <img className="glyph-mark" src={logo.src} alt="" />
-        <a href={ROOT_HREF}>glyphnav</a> <span className="crumb">/ next</span>
+        <a href={ROOT_HREF}>glyphnav</a>
+        <span className="sep">/</span>
+        <span className="crumb">next</span>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>
@@ -98,7 +142,7 @@ function Inner({ children }: { children: ReactNode }) {
       </p>
 
       <div className="controls">
-        <label>
+        <label title={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset} onChange={(e) => setCharset(e.target.value)}>
             <option value="url">url-safe</option>
@@ -107,7 +151,7 @@ function Inner({ children }: { children: ReactNode }) {
             <option value="symbols">symbols</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
@@ -119,26 +163,34 @@ function Inner({ children }: { children: ReactNode }) {
           />
           <span className="ms">{duration}ms</span>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.effect}>
           effect
           <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
             <option value="decode">decode</option>
             <option value="scramble">scramble</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.commit}>
           commit
           <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
             <option value="before">navigate first</option>
             <option value="after">animate first</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
             <option value="full">full</option>
             <option value="tail">tail</option>
           </select>
+        </label>
+        <label className="toggle" title={CONTROL_TOOLTIPS.backForward}>
+          <input
+            type="checkbox"
+            checked={backForward}
+            onChange={(e) => setBackForward(e.target.checked)}
+          />
+          back/forward
         </label>
       </div>
 

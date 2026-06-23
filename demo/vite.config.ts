@@ -27,6 +27,7 @@ const glyphnavVersion = (
  */
 const STACK_BY_APP: Record<string, () => string> = {
   vanilla: () => `glyphnav ${glyphnavVersion}`,
+  core: () => `glyphnav ${glyphnavVersion}`,
   'vue-router': () => `vue ${pkgVersion('vue')} · vue-router ${pkgVersion('vue-router')}`,
   'react-router': () => `react ${pkgVersion('react')} · react-router ${pkgVersion('react-router')}`,
   'tanstack-router/react': () =>
@@ -168,7 +169,7 @@ function injectVersions(): Plugin {
 function staticRoutes(): Plugin {
   // Sub-routes per app; the "/" home is already the app's own index.html.
   const ROUTES: Record<string, string[]> = {
-    vanilla: ['about', 'docs', 'contact', 'core'],
+    vanilla: ['about', 'docs', 'contact'],
     'vue-router': ['about', 'features', 'docs'],
     'react-router': ['about', 'docs', 'blog'],
     'tanstack-router/react': ['about', 'posts', 'docs'],
@@ -276,6 +277,7 @@ export default defineConfig({
       input: {
         main: r('index.html'),
         vanilla: r('vanilla/index.html'),
+        core: r('core/index.html'),
         'vue-router': r('vue-router/index.html'),
         'react-router': r('react-router/index.html'),
         'tanstack-router/react': r('tanstack-router/react/index.html'),

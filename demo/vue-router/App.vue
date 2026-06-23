@@ -1,8 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useGlyphnav } from 'glyphnav/vue-router';
-import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav/core';
-import { charsets, currentUrl, durationToSlider, sliderToDuration } from '../shared/content';
+import type { FrameInfo } from 'glyphnav/core';
+import {
+  charsets,
+  CONTROL_TOOLTIPS,
+  currentUrl,
+  DEFAULT_TOOLBAR,
+  durationToSlider,
+  loadToolbar,
+  saveToolbar,
+  sliderToDuration,
+} from '../shared/content';
 import logo from '../shared/logo.svg';
 
 const controller = useGlyphnav();
@@ -10,21 +19,38 @@ const controller = useGlyphnav();
 // '/' in dev, '/glyphnav/' on the deployed project page.
 const base = import.meta.env.BASE_URL;
 
+/** This page's own localStorage key — not shared with the other demos. */
+const STORE_KEY = 'vue-router';
+const tips = CONTROL_TOOLTIPS;
+
+const s = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
 const displayPath = ref(currentUrl());
 const resolving = ref(false);
-const duration = ref(250);
+const charset = ref(s.charset);
+const duration = ref(s.duration);
+const effect = ref(s.effect);
+const commit = ref(s.commit);
+const scope = ref(s.scope);
+const backForward = ref(s.backForward);
 
-const state = {
-  charset: charsets.url,
-  duration: 250,
-  effect: 'decode' as GlyphEffect,
-  commit: 'before' as CommitTiming,
-  scope: 'full' as AnimateScope,
-};
+function persist(): void {
+  saveToolbar(STORE_KEY, {
+    charset: charset.value,
+    duration: duration.value,
+    effect: effect.value,
+    commit: commit.value,
+    scope: scope.value,
+    backForward: backForward.value,
+  });
+}
 
 function apply(): void {
   controller.update({
-    ...state,
+    charset: charsets[charset.value],
+    duration: duration.value,
+    effect: effect.value,
+    commit: commit.value,
+    scope: scope.value,
     hooks: {
       onFrame: (f: FrameInfo) => {
         displayPath.value = f.path;
@@ -36,37 +62,32 @@ function apply(): void {
       },
     },
   });
+  persist();
 }
 apply();
+watch([charset, duration, effect, commit, scope], apply);
 
-const onCharset = (e: Event) => {
-  state.charset = charsets[(e.target as HTMLSelectElement).value];
-  apply();
-};
-const onSpeed = (e: Event) => {
-  // Slider is inverted: full right = 20 ms (fastest whole animation).
-  state.duration = sliderToDuration(Number((e.target as HTMLInputElement).value));
-  duration.value = state.duration;
-  apply();
-};
-const onEffect = (e: Event) => {
-  state.effect = (e.target as HTMLSelectElement).value as GlyphEffect;
-  apply();
-};
-const onCommit = (e: Event) => {
-  state.commit = (e.target as HTMLSelectElement).value as CommitTiming;
-  apply();
-};
-const onScope = (e: Event) => {
-  state.scope = (e.target as HTMLSelectElement).value as AnimateScope;
-  apply();
-};
+// Back/forward animation: attach/detach the popstate listener as the checkbox
+// (restored from storage) toggles.
+let stopPopState: (() => void) | null = backForward.value
+  ? controller.enableHistoryAnimation()
+  : null;
+watch(backForward, (on) => {
+  if (on && !stopPopState) stopPopState = controller.enableHistoryAnimation();
+  else if (!on && stopPopState) {
+    stopPopState();
+    stopPopState = null;
+  }
+  persist();
+});
 </script>
 
 <template>
   <h1>
-    <img class="glyph-mark" :src="logo" alt="" /><a :href="base">glyphnav</a>
-    <span class="crumb">/ vue-router</span>
+    <img class="glyph-mark" :src="logo" alt="" />
+    <a :href="base">glyphnav</a>
+    <span class="sep">/</span>
+    <span class="crumb">vue-router</span>
   </h1>
 
   <p class="bar" :class="{ resolving }">
@@ -88,16 +109,16 @@ const onScope = (e: Event) => {
   </p>
 
   <div class="controls">
-    <label
+    <label :title="tips.charset"
       >charset
-      <select @change="onCharset">
+      <select v-model="charset">
         <option value="url">url-safe</option>
         <option value="hex">hex</option>
         <option value="matrix">matrix</option>
         <option value="symbols">symbols</option>
       </select>
     </label>
-    <label
+    <label :title="tips.speed"
       >speed
       <input
         type="range"
@@ -105,30 +126,34 @@ const onScope = (e: Event) => {
         max="1000"
         step="10"
         :value="durationToSlider(duration)"
-        @input="onSpeed"
+        @input="duration = sliderToDuration(Number(($event.target as HTMLInputElement).value))"
       />
       <span class="ms">{{ duration }}ms</span>
     </label>
-    <label
+    <label :title="tips.effect"
       >effect
-      <select @change="onEffect">
+      <select v-model="effect">
         <option value="decode">decode</option>
         <option value="scramble">scramble</option>
       </select>
     </label>
-    <label
+    <label :title="tips.commit"
       >commit
-      <select @change="onCommit">
+      <select v-model="commit">
         <option value="before">navigate first</option>
         <option value="after">animate first</option>
       </select>
     </label>
-    <label
+    <label :title="tips.scope"
       >scope
-      <select @change="onScope">
+      <select v-model="scope">
         <option value="full">full</option>
         <option value="tail">tail</option>
       </select>
+    </label>
+    <label class="toggle" :title="tips.backForward">
+      <input v-model="backForward" type="checkbox" />
+      back/forward
     </label>
   </div>
 

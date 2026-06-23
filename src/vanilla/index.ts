@@ -40,6 +40,15 @@ export interface InstallOptions extends GlyphnavOptions {
    * @defaultValue `true`
    */
   reload?: boolean;
+  /**
+   * Also animate browser back/forward (popstate) traversals. Defaults to `true`
+   * when intercepting links — the install already animates every link click, so
+   * history moves stay consistent — and `false` otherwise. Harmless in reload
+   * (MPA) mode, where each entry is a fresh document, so it only does visible
+   * work for SPA navigations (`reload: false`).
+   * @defaultValue `intercept === 'links'`
+   */
+  animatePopState?: boolean;
   /** Final say on whether a given anchor should be animated. */
   shouldHandle?: (anchor: HTMLAnchorElement, event: MouseEvent) => boolean;
 }
@@ -175,11 +184,16 @@ export const install = (options: InstallOptions = {}): GlyphnavHandle => {
     intercept = 'links',
     root = typeof document !== 'undefined' ? document : undefined,
     reload = true,
+    animatePopState = intercept === 'links',
     shouldHandle,
     ...glyph
   } = options;
 
   const controller = getController(glyph);
+
+  if (animatePopState) {
+    installCleanups.push(controller.enableHistoryAnimation());
+  }
 
   if (intercept === 'links' && root) {
     const handler = (event: Event): void => {

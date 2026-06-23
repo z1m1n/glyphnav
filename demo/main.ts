@@ -29,6 +29,7 @@ install({
 // navigation takes over.
 const targets = [
   '/vanilla',
+  '/core',
   '/vue-router',
   '/react-router',
   '/tanstack-router/react',

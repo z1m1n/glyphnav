@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Animate browser back/forward (popstate).** The core controller gains
+  `enableHistoryAnimation()` — which plays the glyph decode on history traversals
+  (back/forward), where the browser moves the URL itself and there is nothing to
+  commit — and the lower-level `replay(from, to)` it builds on (decode between two
+  known paths without committing). The vanilla `install()` enables it **by default**
+  when intercepting links (a no-op in reload/MPA mode; pass `animatePopState: false`
+  to disable). Every router adapter exposes an opt-in `animatePopState` option
+  (default `false`), preserving their "nothing patched globally" contract:
+  `<GlyphnavProvider animatePopState>` for React Router, TanStack Router (React &
+  Solid) and Next.js; `animatePopState: true` on `attachGlyphnav` / `installGlyphnav`
+  (Vue / Nuxt) and `provideGlyphnav` / `createGlyphnavNavigator` (Angular). In-flight
+  runs still back off from an external URL change as before.
 - **React Router adapter** (`glyphnav/react-router`): support for React Router v8,
   alongside the existing v6 and v7.
 
@@ -29,9 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lifecycle and link-click handling through an internal module instead of each
   re-implementing it, and the Next.js adapter no longer strips its adapter-only
   options before the core (`resolveOptions` reads only the keys it knows, so they
-  were already inert). Every adapter entry is now **under 1 kB gzipped**; the
-  Next.js adapter — previously the largest at ~1.16 kB — drops to ~0.98 kB. No API
-  changes.
+  were already inert). Every adapter entry is around **1 kB gzipped or less**; the
+  Next.js adapter — previously the largest at ~1.16 kB — drops to ~1 kB (it ticks
+  just over once the opt-in back/forward wiring is included). No API changes.
 - **Build.** The published package no longer ships sourcemaps, and the build
   target is raised from `es2020` to `es2022`. This roughly halves the size of the
   published `dist/` (sourcemaps were ~48% of it) and lets the minifier keep modern

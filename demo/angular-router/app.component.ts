@@ -3,8 +3,20 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { GLYPHNAV } from 'glyphnav/angular-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { GlyphnavLinkDirective } from './glyphnav-link.directive';
-import { charsets, currentUrl, durationToSlider, sliderToDuration } from '../shared/content';
+import {
+  charsets,
+  CONTROL_TOOLTIPS,
+  currentUrl,
+  DEFAULT_TOOLBAR,
+  durationToSlider,
+  loadToolbar,
+  saveToolbar,
+  sliderToDuration,
+} from '../shared/content';
 import logoSrc from '../shared/logo.svg';
+
+/** This page's own localStorage key — not shared with the other demos. */
+const STORE_KEY = 'angular-router';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +25,8 @@ import logoSrc from '../shared/logo.svg';
     <h1>
       <img class="glyph-mark" [src]="logo" alt="" />
       <a [href]="base" data-glyphnav="off">glyphnav</a>
-      <span class="crumb">&ngsp;/ angular-router</span>
+      <span class="sep">/</span>
+      <span class="crumb">angular-router</span>
     </h1>
 
     <p class="bar" [class.resolving]="resolving()">
@@ -43,16 +56,16 @@ import logoSrc from '../shared/logo.svg';
     </p>
 
     <div class="controls">
-      <label
+      <label [title]="tips.charset"
         >charset
-        <select (change)="onCharset($event)">
+        <select [value]="charset()" (change)="onCharset($event)">
           <option value="url">url-safe</option>
           <option value="hex">hex</option>
           <option value="matrix">matrix</option>
           <option value="symbols">symbols</option>
         </select>
       </label>
-      <label
+      <label [title]="tips.speed"
         >speed
         <input
           type="range"
@@ -64,26 +77,30 @@ import logoSrc from '../shared/logo.svg';
         />
         <span class="ms">{{ duration() }}ms</span>
       </label>
-      <label
+      <label [title]="tips.effect"
         >effect
-        <select (change)="onEffect($event)">
+        <select [value]="effect()" (change)="onEffect($event)">
           <option value="decode">decode</option>
           <option value="scramble">scramble</option>
         </select>
       </label>
-      <label
+      <label [title]="tips.commit"
         >commit
-        <select (change)="onCommit($event)">
+        <select [value]="commit()" (change)="onCommit($event)">
           <option value="before">navigate first</option>
           <option value="after">animate first</option>
         </select>
       </label>
-      <label
+      <label [title]="tips.scope"
         >scope
-        <select (change)="onScope($event)">
+        <select [value]="scope()" (change)="onScope($event)">
           <option value="full">full</option>
           <option value="tail">tail</option>
         </select>
+      </label>
+      <label class="toggle" [title]="tips.backForward">
+        <input type="checkbox" [checked]="backForward()" (change)="onBackForward($event)" />
+        back/forward
       </label>
     </div>
 
@@ -106,21 +123,34 @@ export class AppComponent {
   // The shared glyphnav logo mark, shown before the wordmark in the breadcrumb.
   readonly logo = logoSrc;
 
+  // Restore this page's toolbar (charset is the option key; resolved to a glyph
+  // pool only when handing options to the controller). Not shared with other demos.
+  private readonly saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
+
   readonly path = signal(currentUrl());
   readonly resolving = signal(false);
   readonly active = signal('/');
-  readonly duration = signal(250);
+  readonly tips = CONTROL_TOOLTIPS;
+
+  readonly charset = signal(this.saved.charset);
+  readonly duration = signal(this.saved.duration);
+  readonly effect = signal<GlyphEffect>(this.saved.effect);
+  readonly commit = signal<CommitTiming>(this.saved.commit);
+  readonly scope = signal<AnimateScope>(this.saved.scope);
+  readonly backForward = signal(this.saved.backForward);
+
+  // Back/forward animation is opt-in; the checkbox attaches/detaches the
+  // popstate listener (the cleanup returned by enableHistoryAnimation).
+  private stopPopState: (() => void) | null = null;
 
   // Exposed for the template's inverted speed slider.
   readonly durationToSlider = durationToSlider;
 
-  private charset = charsets.url;
-  private effect: GlyphEffect = 'decode';
-  private commit: CommitTiming = 'before';
-  private scope: AnimateScope = 'full';
-
   constructor() {
     this.apply();
+    if (this.backForward()) {
+      this.stopPopState = this.nav.controller.enableHistoryAnimation();
+    }
     inject(Router).events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.active.set(event.urlAfterRedirects.split(/[?#]/)[0]);
@@ -130,11 +160,11 @@ export class AppComponent {
 
   private apply(): void {
     this.nav.controller.update({
-      charset: this.charset,
+      charset: charsets[this.charset()],
       duration: this.duration(),
-      effect: this.effect,
-      commit: this.commit,
-      scope: this.scope,
+      effect: this.effect(),
+      commit: this.commit(),
+      scope: this.scope(),
       hooks: {
         onFrame: (f) => {
           this.path.set(f.path);
@@ -146,10 +176,22 @@ export class AppComponent {
         },
       },
     });
+    this.persist();
+  }
+
+  private persist(): void {
+    saveToolbar(STORE_KEY, {
+      charset: this.charset(),
+      duration: this.duration(),
+      effect: this.effect(),
+      commit: this.commit(),
+      scope: this.scope(),
+      backForward: this.backForward(),
+    });
   }
 
   onCharset(event: Event): void {
-    this.charset = charsets[(event.target as HTMLSelectElement).value];
+    this.charset.set((event.target as HTMLSelectElement).value);
     this.apply();
   }
 
@@ -160,17 +202,29 @@ export class AppComponent {
   }
 
   onEffect(event: Event): void {
-    this.effect = (event.target as HTMLSelectElement).value as GlyphEffect;
+    this.effect.set((event.target as HTMLSelectElement).value as GlyphEffect);
     this.apply();
   }
 
   onCommit(event: Event): void {
-    this.commit = (event.target as HTMLSelectElement).value as CommitTiming;
+    this.commit.set((event.target as HTMLSelectElement).value as CommitTiming);
     this.apply();
   }
 
   onScope(event: Event): void {
-    this.scope = (event.target as HTMLSelectElement).value as AnimateScope;
+    this.scope.set((event.target as HTMLSelectElement).value as AnimateScope);
     this.apply();
+  }
+
+  onBackForward(event: Event): void {
+    const on = (event.target as HTMLInputElement).checked;
+    this.backForward.set(on);
+    if (on && !this.stopPopState) {
+      this.stopPopState = this.nav.controller.enableHistoryAnimation();
+    } else if (!on && this.stopPopState) {
+      this.stopPopState();
+      this.stopPopState = null;
+    }
+    this.persist();
   }
 }

@@ -15,6 +15,7 @@ below. Install with `pnpm add glyphnav` (npm/yarn work too).
 ## Demos
 
 - [Vanilla / no framework](https://z1m1n.github.io/glyphnav/vanilla/): `install()` hijacks link clicks and drives the History API
+- [Core engine](https://z1m1n.github.io/glyphnav/core/): `generateFrames()` + a `Player` decode any text, not just the URL — the engine behind every adapter
 - [Vue Router](https://z1m1n.github.io/glyphnav/vue-router/): a plugin wraps `router.push` / `router.replace`
 - [React Router](https://z1m1n.github.io/glyphnav/react-router/): `GlyphnavLink` + `useGlyphnavNavigate`
 - [TanStack Router (React)](https://z1m1n.github.io/glyphnav/tanstack-router/react/): `GlyphnavLink` + `useGlyphnavNavigate`

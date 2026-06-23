@@ -19,8 +19,17 @@ import type { NavigationExtras, UrlTree } from '@angular/router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
 
-/** Options for the Angular adapter (same as {@link GlyphnavOptions}). */
-export type AngularGlyphnavOptions = GlyphnavOptions;
+/** Options for the Angular adapter ({@link GlyphnavOptions} plus adapter wiring). */
+export interface AngularGlyphnavOptions extends GlyphnavOptions {
+  /**
+   * Also animate browser back/forward (popstate) traversals. Off by design —
+   * the navigator animates only navigations made through it until you opt in.
+   * The listener lives for the navigator's lifetime (Angular providers are
+   * app-scoped), like the router itself.
+   * @defaultValue `false`
+   */
+  animatePopState?: boolean;
+}
 
 /** An Angular-aware navigator that animates before delegating to the Router. */
 export interface GlyphnavNavigator {
@@ -49,6 +58,7 @@ export const createGlyphnavNavigator = (
   prepareUrl: (routerUrl: string) => string = (url) => url,
 ): GlyphnavNavigator => {
   const controller = new GlyphnavController(options);
+  if (options.animatePopState) controller.enableHistoryAnimation();
 
   return {
     controller,

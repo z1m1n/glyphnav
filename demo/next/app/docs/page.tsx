@@ -25,6 +25,7 @@ const DOCS_OPTIONS = `<GlyphnavProvider
   commit="before"       // navigate instantly, animate on top ('after' = classic order)
   routerMode="app"      // 'app' (next/navigation) or 'pages' (next/compat/router)
   scope="tail"          // animate only the part that differs from the current path
+  animatePopState       // also animate browser back/forward (opt-in)
 >`;
 
 /** A code listing as a captioned <figure>. */

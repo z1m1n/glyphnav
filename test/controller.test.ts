@@ -392,6 +392,76 @@ describe('GlyphnavController', () => {
     expect(commit).toHaveBeenCalledTimes(1);
   });
 
+  it('replay() animates between two known paths without committing', async () => {
+    // The browser has already moved the bar to /test (popstate); replay only
+    // decodes on top — no commit callback at all.
+    window.history.replaceState(null, '', '/test');
+    const frames: string[] = [];
+    const controller = new GlyphnavController({
+      charset: 'xyzw',
+      rng: seqRng([0, 0.25, 0.5, 0.75]),
+      stepDuration: 10,
+      hooks: { onFrame: (f) => frames.push(f.path) },
+    });
+
+    const run = controller.replay('/', '/test');
+    await vi.advanceTimersByTimeAsync(200);
+
+    await expect(run).resolves.toBe('completed');
+    expect(frames).toEqual(['/x', '/xy', '/xyz', '/xyzw', '/tyzw', '/tezw', '/tesw', '/test']);
+    expect(window.location.pathname).toBe('/test');
+  });
+
+  it('replay() skips a no-op (from === to) and under reduced motion', async () => {
+    const onFrame = vi.fn();
+    const a = new GlyphnavController({ stepDuration: 5, hooks: { onFrame } });
+    await expect(a.replay('/x', '/x')).resolves.toBe('skipped');
+
+    const b = new GlyphnavController(
+      { stepDuration: 5, hooks: { onFrame } },
+      { prefersReducedMotion: () => true },
+    );
+    await expect(b.replay('/', '/test')).resolves.toBe('skipped');
+    expect(onFrame).not.toHaveBeenCalled();
+  });
+
+  it('enableHistoryAnimation animates a back/forward traversal, tracking the from-path', async () => {
+    window.history.replaceState(null, '', '/users/1');
+    const frames: string[] = [];
+    const controller = new GlyphnavController({
+      charset: 'q',
+      rng: () => 0,
+      stepDuration: 5,
+      scope: 'tail', // only the differing tail animates → proves `from` is tracked
+      hooks: { onFrame: (f) => frames.push(f.path) },
+    });
+    const stop = controller.enableHistoryAnimation();
+
+    // Forward navigation updates the tracked path to /users/2.
+    const fwd = controller.run('/users/2', () => window.history.pushState(null, '', '/users/2'));
+    await vi.advanceTimersByTimeAsync(200);
+    await fwd;
+
+    // The browser handles the back button: it moves the URL itself, then fires
+    // popstate. We replay from the previously shown /users/2 to /users/1, so the
+    // tail scope only scrambles the final character.
+    frames.length = 0;
+    window.history.replaceState(null, '', '/users/1');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(frames).toEqual(['/users/q', '/users/1']);
+    expect(window.location.pathname).toBe('/users/1');
+
+    // After teardown a traversal no longer animates.
+    stop();
+    frames.length = 0;
+    window.history.replaceState(null, '', '/users/2');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await vi.advanceTimersByTimeAsync(200);
+    expect(frames).toEqual([]);
+  });
+
   it('supports async commit functions', async () => {
     const controller = new GlyphnavController({ charset: 'q', rng: () => 0, stepDuration: 5 });
     const order: string[] = [];

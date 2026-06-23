@@ -178,4 +178,56 @@ describe('install', () => {
 
     expect(onFrame).not.toHaveBeenCalled();
   });
+
+  it('animates browser back/forward by default when intercepting links', async () => {
+    setLocation('/start');
+    const frames: string[] = [];
+    install({
+      reload: false,
+      charset: 'q',
+      rng: () => 0,
+      stepDuration: 5,
+      hooks: { onFrame: (f) => frames.push(f.path) },
+    });
+
+    // A forward SPA navigation pushes /about and updates the tracked path.
+    const fwd = navigate('/about', { reload: false });
+    await vi.advanceTimersByTimeAsync(200);
+    await fwd;
+
+    // The back button: the browser restores /start itself, then fires popstate.
+    frames.length = 0;
+    window.history.replaceState(null, '', '/start');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(frames.length).toBeGreaterThan(0);
+    expect(frames.at(-1)).toBe('/start');
+    expect(window.location.pathname).toBe('/start');
+  });
+
+  it('leaves back/forward alone with intercept: none (and stops on uninstall)', async () => {
+    setLocation('/start');
+    const onFrame = vi.fn();
+    install({
+      intercept: 'none',
+      reload: false,
+      charset: 'q',
+      rng: () => 0,
+      stepDuration: 5,
+      hooks: { onFrame },
+    });
+
+    const fwd = navigate('/about', { reload: false });
+    await vi.advanceTimersByTimeAsync(200);
+    await fwd;
+
+    onFrame.mockClear();
+    window.history.replaceState(null, '', '/start');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await vi.advanceTimersByTimeAsync(200);
+
+    // intercept: 'none' defaults animatePopState to false — the traversal is not animated.
+    expect(onFrame).not.toHaveBeenCalled();
+  });
 });

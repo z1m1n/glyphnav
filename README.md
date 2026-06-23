@@ -44,7 +44,9 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - 🎞️ **Two effects**: `decode` (grow + resolve left‑to‑right) and `scramble`
   (full‑length noise at once, characters lock in random order).
 - ⏱️ **`duration`** budgets the _whole_ animation — frames auto‑scale to fit.
-- 🪶 **Under 1 kB per adapter** (gzipped, ~0.5–1 kB) on top of a ~3 kB core.
+- ↩️ **Animates browser back/forward** too — on by default for the vanilla
+  `install()`, opt‑in (`animatePopState`) for the router adapters.
+- 🪶 **~1 kB per adapter** (gzipped, ~0.5–1 kB) on top of a ~3 kB core.
 - ♿ Honors `prefers-reduced-motion`, supersedes overlapping navigations, fully cancelable.
 - 🔋 Frames run on `requestAnimationFrame` — vsync-aligned and **paused while the tab is backgrounded**.
 - 🛡️ Writes only rooted same‑origin paths and backs off if the URL changes
@@ -130,6 +132,32 @@ test‑suite pins down.
 
 ---
 
+## Back/forward animation
+
+By default an in‑flight run just **backs off** when the user hits back/forward — the
+browser has already moved the URL, so glyphnav leaves it alone. You can instead have
+those history traversals **animate too**: glyphnav replays the decode from the
+previously shown path to the one the browser landed on (nothing is committed — the
+browser already did that).
+
+- **Vanilla `install()`** turns it **on by default** when intercepting links. It is a
+  no‑op in reload (MPA) mode and only does visible work for SPA navigations
+  (`reload: false`). Pass `animatePopState: false` to switch it off.
+- **Router adapters** keep it **off by design** (they patch nothing globally) — opt in
+  with `animatePopState: true`:
+  - React Router / TanStack / Next: `<GlyphnavProvider animatePopState>` (a `Provider`
+    owns the listener for the subtree's lifetime).
+  - Vue / Nuxt: `attachGlyphnav(router, { animatePopState: true })` /
+    `installGlyphnav(app, { animatePopState: true })` — `detach()` removes the listener.
+  - Angular: `provideGlyphnav({ animatePopState: true })`.
+
+Under the hood the core controller exposes `enableHistoryAnimation()` (wire up the
+`popstate` listener; returns a cleanup) and `replay(from, to)` (decode between two
+known paths without committing). Reduced motion, no‑op traversals (`from === to`) and
+non‑rooted paths are skipped, exactly like `run()`.
+
+---
+
 ## Options
 
 Every entry point accepts the same options object.
@@ -165,7 +193,9 @@ import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } fro
 Each subpath is named after the router it wraps. The Vue and Nuxt plugins (and
 vanilla `install()`) intercept globally — and all can be told not to. The React,
 TanStack, Angular and Next adapters are opt‑in by design: only navigations made
-through their links/hooks animate.
+through their links/hooks animate. Browser back/forward animation is opt‑in for every
+adapter via `animatePopState` — except the vanilla `install()`, where it is on by
+default; see [Back/forward animation](#backforward-animation).
 
 ### Vue Router — `glyphnav/vue-router`
 
@@ -377,6 +407,8 @@ generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
 ```
 
 `createGlyphnav(options, deps)` returns a controller with `run(to, commit, perCall?)`,
+`replay(from, to, perCall?)` (decode between two known paths without committing),
+`enableHistoryAnimation(perCall?)` (animate back/forward; returns a cleanup),
 `cancel()`, `update(options)` and an `animating` flag. `deps` lets you inject `history`,
 `getCurrentPath`, a `scheduler` and a reduced‑motion probe (used throughout the tests).
 

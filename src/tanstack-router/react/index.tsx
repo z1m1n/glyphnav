@@ -13,7 +13,12 @@ import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
 import type { GlyphnavController, GlyphnavOptions, RunResult } from '../../core';
-import { runLinkClick, useFallbackController, useSharedController } from '../../internal/react';
+import {
+  runLinkClick,
+  useFallbackController,
+  useHistoryAnimation,
+  useSharedController,
+} from '../../internal/react';
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
@@ -22,14 +27,28 @@ const GlyphnavContext = createContext<GlyphnavController | null>(null);
 
 export interface GlyphnavProviderProps extends GlyphnavOptions {
   children: ReactNode;
+  /**
+   * Also animate browser back/forward (popstate) traversals for the subtree.
+   * Off by design — the adapter patches nothing globally until you opt in here.
+   * @defaultValue `false`
+   */
+  animatePopState?: boolean;
 }
 
 /**
  * Provide a shared controller (and base options) to the subtree. Optional —
  * the hooks work without it, each creating their own controller.
  */
-export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) =>
-  createElement(GlyphnavContext.Provider, { value: useSharedController(options) }, children);
+export const GlyphnavProvider = ({
+  children,
+  animatePopState = false,
+  ...options
+}: GlyphnavProviderProps) => {
+  const controller = useSharedController(options);
+  useHistoryAnimation(controller, animatePopState);
+
+  return createElement(GlyphnavContext.Provider, { value: controller }, children);
+};
 
 /**
  * Get the controller from context, or a stable per-component fallback.

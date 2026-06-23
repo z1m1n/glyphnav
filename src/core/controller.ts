@@ -51,6 +51,11 @@ const frameDelay = (opts: ResolvedOptions, count: number): number => {
  * landed URL; with `commit: 'after'` it animates the address bar from the
  * current path to the target and commits at the end. Adapters are thin
  * wrappers that supply the right `commit` callback for their router.
+ *
+ * Browser back/forward (popstate) traversals are *not* animated by `run`: the
+ * browser changes the URL itself, so there is nothing to commit. Opt into
+ * animating them with {@link GlyphnavController.enableHistoryAnimation}, which
+ * replays the decode on top of the landed entry via {@link GlyphnavController.replay}.
  */
 export class GlyphnavController {
   private options: GlyphnavOptions;
@@ -75,6 +80,20 @@ export class GlyphnavController {
    * button, another script) and we must not touch the bar again.
    */
   private observedPath: string | null = null;
+  /**
+   * The path the bar last settled on (after a navigation or a popstate replay).
+   * Read only by {@link enableHistoryAnimation} to know the path to animate
+   * *from* when the browser traverses history, since popstate only reports the
+   * destination. `null` until the first navigation or until seeded on enable.
+   */
+  private lastPath: string | null = null;
+  /**
+   * True while a {@link run} is committing/animating. The popstate listener uses
+   * it to ignore the synthetic `popstate` some adapters dispatch right after
+   * their own `pushState` (e.g. the vanilla adapter notifying popstate routers),
+   * which would otherwise look like a user back/forward traversal.
+   */
+  private navigating = false;
 
   constructor(options: GlyphnavOptions = {}, deps: ControllerDeps = {}) {
     this.options = options;
@@ -90,10 +109,9 @@ export class GlyphnavController {
     this.replaceState =
       history == null
         ? null
-        : (
-            typeof History !== 'undefined' && history instanceof History
-              ? History.prototype.replaceState
-              : history.replaceState
+        : (typeof History !== 'undefined' && history instanceof History
+            ? History.prototype.replaceState
+            : history.replaceState
           ).bind(history);
   }
 
@@ -140,31 +158,115 @@ export class GlyphnavController {
     // protocol-relative, unresolvable) would corrupt the URL when written.
     const animatable = !reduceMotion && this.deps.history != null && isRootedPath(target);
 
-    if (animatable && opts.commit === 'before') {
-      return this.runNavigateFirst(myId, ctx, commit, opts);
-    }
+    // Mark the navigation in-flight so the popstate listener ignores any
+    // synthetic `popstate` our own commit dispatches. Cleared only by the run
+    // that is still current, so a superseded run never unmarks its successor.
+    this.navigating = true;
+    try {
+      if (animatable && opts.commit === 'before') {
+        return await this.runNavigateFirst(myId, ctx, commit, opts);
+      }
 
-    const frames = animatable ? generateFrames(from, target, opts) : [];
+      const frames = animatable ? generateFrames(from, target, opts) : [];
 
-    if (frames.length === 0) {
+      if (frames.length === 0) {
+        await commit();
+        this.lastPath = this.deps.getCurrentPath();
+        hooks.onComplete?.(ctx, 'skipped');
+        return 'skipped';
+      }
+
+      const outcome = await this.playFrames(myId, ctx, frames, opts, from);
+      if (outcome === 'cancelled') return 'cancelled';
+
+      hooks.onCommit?.(ctx);
       await commit();
-      hooks.onComplete?.(ctx, 'skipped');
-      return 'skipped';
+      hooks.onComplete?.(ctx, 'completed');
+      return 'completed';
+    } finally {
+      if (this.runId === myId) this.navigating = false;
     }
-
-    const outcome = await this.playFrames(myId, ctx, frames, opts, from);
-    if (outcome === 'cancelled') return 'cancelled';
-
-    hooks.onCommit?.(ctx);
-    await commit();
-    hooks.onComplete?.(ctx, 'completed');
-    return 'completed';
   }
 
   /** Cancel the current animation (if any) and restore the address bar. */
   cancel(): void {
     this.runId += 1;
     this.stopActive();
+  }
+
+  /**
+   * Replay the glyph animation between two already-known paths *without*
+   * committing any navigation — for browser back/forward (popstate), where the
+   * URL has already been moved to `to` and only the decode needs to play on
+   * top. Same frame machinery, supersede and external-move guards as
+   * {@link run}; `from` matters only for `scope: 'tail'` (the common-prefix
+   * split). A no-op (`from === to`), reduced motion, or a non-rooted endpoint
+   * skips cleanly.
+   *
+   * @param from - The path the bar should appear to animate *from*.
+   * @param to - The path the bar must end on (already the live URL).
+   * @param perCall - Options that override the base options for this run only.
+   * @returns Whether the run `completed`, was `cancelled`, or was `skipped`.
+   */
+  async replay(from: string, to: string, perCall?: GlyphnavOptions): Promise<RunResult> {
+    const myId = ++this.runId;
+    this.stopActive();
+
+    const opts = resolveOptions(perCall ? { ...this.options, ...perCall } : this.options);
+    const hooks = opts.hooks;
+    const ctx: AnimationContext = { from, to };
+
+    const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
+    const animatable =
+      !reduceMotion && this.deps.history != null && isRootedPath(from) && isRootedPath(to);
+    const frames = animatable && from !== to ? generateFrames(from, to, opts) : [];
+
+    if (frames.length === 0) {
+      this.lastPath = to;
+      hooks.onComplete?.(ctx, 'skipped');
+      return 'skipped';
+    }
+
+    const outcome = await this.playFrames(myId, ctx, frames, opts, to);
+    if (outcome === 'cancelled') return 'cancelled';
+
+    hooks.onComplete?.(ctx, 'completed');
+    return 'completed';
+  }
+
+  /**
+   * Animate browser back/forward (popstate) traversals too. The browser changes
+   * the URL itself on a history move, so there is nothing to commit — this
+   * replays the decode from the previously shown path to the one the browser
+   * landed on (see {@link replay}). The path to animate *from* is tracked across
+   * navigations, so it stays correct after link clicks and earlier traversals.
+   *
+   * Safe in non-browser environments (returns a no-op). Adapters wire the
+   * returned cleanup into their own teardown so the listener is removed
+   * alongside everything else.
+   *
+   * @param perCall - Options that override the base options for popstate runs only.
+   * @returns A cleanup function that detaches the `popstate` listener.
+   */
+  enableHistoryAnimation(perCall?: GlyphnavOptions): () => void {
+    if (typeof window === 'undefined' || !window.addEventListener) return () => {};
+
+    this.lastPath ??= this.deps.getCurrentPath();
+    const onPopState = (): void => {
+      // Ignore the synthetic popstate our own navigation dispatches; a real
+      // traversal only happens while we are idle.
+      if (this.navigating) return;
+      const to = this.deps.getCurrentPath();
+      const from = this.lastPath ?? to;
+      // The browser is already at `to`; record it now so a rapid follow-up
+      // traversal animates from here even if this run is superseded mid-flight.
+      this.lastPath = to;
+      if (from === to) return;
+      void this.replay(from, to, perCall);
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }
 
   /**
@@ -195,6 +297,7 @@ export class GlyphnavController {
       landed !== ctx.from && isRootedPath(landed) ? generateFrames(ctx.from, landed, opts) : [];
 
     if (frames.length === 0) {
+      this.lastPath = landed;
       hooks.onComplete?.(ctx, 'skipped');
       return 'skipped';
     }
@@ -261,6 +364,7 @@ export class GlyphnavController {
     this.writePath(restoreTo);
     this.activeFrom = null;
     this.observedPath = null;
+    this.lastPath = restoreTo;
 
     if (result === 'cancelled') {
       hooks.onCancel?.(ctx);

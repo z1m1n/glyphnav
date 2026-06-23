@@ -26,6 +26,7 @@ const DOCS_OPTIONS = `installGlyphnav(app, {
   intercept: 'router',  // wrap router.push/replace ('none' = explicit-only)
   historyMode: 'history', // or 'hash' for createWebHashHistory
   scope: 'tail',        // animate only the part that differs from the current path
+  animatePopState: true, // also animate browser back/forward (opt-in)
 });`;
 </script>
 

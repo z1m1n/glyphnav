@@ -36,6 +36,13 @@ export interface NuxtGlyphnavOptions extends GlyphnavOptions {
    * @defaultValue `'history'`
    */
   historyMode?: NuxtHistoryMode;
+  /**
+   * Also animate browser back/forward (popstate) traversals. Off by default so
+   * the plugin stays a per-navigation wrapper; opt in to decode the bar on
+   * history moves too. `detach()` removes the listener.
+   * @defaultValue `false`
+   */
+  animatePopState?: boolean;
 }
 
 export interface NuxtGlyphnavInstance {
@@ -82,7 +89,12 @@ export const attachGlyphnav = (
   router: Router,
   options: NuxtGlyphnavOptions = {},
 ): NuxtGlyphnavInstance => {
-  const { intercept = 'router', historyMode = 'history', ...glyph } = options;
+  const {
+    intercept = 'router',
+    historyMode = 'history',
+    animatePopState = false,
+    ...glyph
+  } = options;
   const controller = new GlyphnavController(glyph);
   const originalPush = router.push.bind(router) as Router['push'];
   const originalReplace = router.replace.bind(router) as Router['push'];
@@ -101,6 +113,8 @@ export const attachGlyphnav = (
     router.replace = replace;
   }
 
+  const stopPopState = animatePopState ? controller.enableHistoryAnimation() : (): void => {};
+
   return {
     controller,
     push,
@@ -116,6 +130,7 @@ export const attachGlyphnav = (
         router.push = originalPush;
         router.replace = originalReplace;
       }
+      stopPopState();
       controller.cancel();
     },
   };

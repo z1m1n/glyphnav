@@ -19,11 +19,18 @@ import { highlight } from '../../shared/highlight';
 import logo from '../../shared/logo.svg';
 import {
   charsets,
+  CONTROL_TOOLTIPS,
   currentUrl,
+  DEFAULT_TOOLBAR,
   DOCS_INSTALL,
   durationToSlider,
+  loadToolbar,
+  saveToolbar,
   sliderToDuration,
 } from '../../shared/content';
+
+/** This page's own localStorage key — not shared with the other demos. */
+const STORE_KEY = 'tanstack-router/react';
 
 const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-router/react';
 
@@ -43,6 +50,7 @@ const DOCS_OPTIONS = `<GlyphnavProvider
   commit="before"       // navigate instantly, animate on top ('after' = classic order)
   charset={MATRIX}      // glyph pool — URL_SAFE stays readable in the bar
   scope="tail"          // animate only the part that differs from the current path
+  animatePopState       // also animate browser back/forward (opt-in)
 >`;
 
 function View({ title, body }: { title: string; body: string }) {
@@ -118,13 +126,15 @@ function NavItem({ to, children }: { to: string; children: string }) {
 
 function Layout() {
   const controller = useGlyphnavController();
+  const [saved] = useState(() => loadToolbar(STORE_KEY, DEFAULT_TOOLBAR));
   const [path, setPath] = useState(currentUrl());
   const [resolving, setResolving] = useState(false);
-  const [charset, setCharset] = useState('url');
-  const [duration, setDuration] = useState(250);
-  const [effect, setEffect] = useState<GlyphEffect>('decode');
-  const [commit, setCommit] = useState<CommitTiming>('before');
-  const [scope, setScope] = useState<AnimateScope>('full');
+  const [charset, setCharset] = useState(saved.charset);
+  const [duration, setDuration] = useState(saved.duration);
+  const [effect, setEffect] = useState<GlyphEffect>(saved.effect);
+  const [commit, setCommit] = useState<CommitTiming>(saved.commit);
+  const [scope, setScope] = useState<AnimateScope>(saved.scope);
+  const [backForward, setBackForward] = useState(saved.backForward);
 
   useEffect(() => {
     controller.update({
@@ -146,12 +156,24 @@ function Layout() {
     });
   }, [controller, charset, duration, effect, commit, scope]);
 
+  // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
+  // the popstate listener (the cleanup returned by enableHistoryAnimation).
+  useEffect(() => {
+    if (backForward) return controller.enableHistoryAnimation();
+  }, [controller, backForward]);
+
+  // Persist this page's toolbar under its own key (no syncing between demos).
+  useEffect(() => {
+    saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
+  }, [charset, duration, effect, commit, scope, backForward]);
+
   return (
     <>
       <h1>
         <img className="glyph-mark" src={logo} alt="" />
-        <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
-        <span className="crumb">/ tanstack-router/react</span>
+        <a href={import.meta.env.BASE_URL}>glyphnav</a>
+        <span className="sep">/</span>
+        <span className="crumb">tanstack-router/react</span>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>
@@ -179,7 +201,7 @@ function Layout() {
       </p>
 
       <div className="controls">
-        <label>
+        <label title={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset} onChange={(e) => setCharset(e.target.value)}>
             <option value="url">url-safe</option>
@@ -188,7 +210,7 @@ function Layout() {
             <option value="symbols">symbols</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
@@ -200,26 +222,34 @@ function Layout() {
           />
           <span className="ms">{duration}ms</span>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.effect}>
           effect
           <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
             <option value="decode">decode</option>
             <option value="scramble">scramble</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.commit}>
           commit
           <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
             <option value="before">navigate first</option>
             <option value="after">animate first</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
             <option value="full">full</option>
             <option value="tail">tail</option>
           </select>
+        </label>
+        <label className="toggle" title={CONTROL_TOOLTIPS.backForward}>
+          <input
+            type="checkbox"
+            checked={backForward}
+            onChange={(e) => setBackForward(e.target.checked)}
+          />
+          back/forward
         </label>
       </div>
 

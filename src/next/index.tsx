@@ -24,7 +24,12 @@ import { useRouter as usePagesRouter } from 'next/compat/router';
 import type { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
 import { currentPath, toPath } from '../internal/links';
-import { runLinkClick, useFallbackController, useSharedController } from '../internal/react';
+import {
+  runLinkClick,
+  useFallbackController,
+  useHistoryAnimation,
+  useSharedController,
+} from '../internal/react';
 
 /** Which Next.js routing system drives the real navigation. */
 export type NextRouterMode = 'app' | 'pages';
@@ -164,16 +169,29 @@ const useGlyphnavContext = (options?: NextGlyphnavOptions): GlyphnavContextValue
 
 export interface GlyphnavProviderProps extends NextGlyphnavOptions {
   children: ReactNode;
+  /**
+   * Also animate browser back/forward (popstate) traversals for the subtree.
+   * Off by design — the adapter patches nothing globally until you opt in here.
+   * App Router note: it owns popstate, so the decode plays on top of the entry
+   * it restores; the URL itself is never rewritten by the replay.
+   * @defaultValue `false`
+   */
+  animatePopState?: boolean;
 }
 
 /**
  * Provide a shared controller (and the router mode / base path) to the subtree.
  * Optional — the hooks work without it, each creating their own controller.
  */
-export const GlyphnavProvider = ({ children, ...options }: GlyphnavProviderProps) => {
+export const GlyphnavProvider = ({
+  children,
+  animatePopState = false,
+  ...options
+}: GlyphnavProviderProps) => {
   const controller = useSharedController(options);
   const mode = options.routerMode ?? 'app';
   const basePath = options.basePath ?? '';
+  useHistoryAnimation(controller, animatePopState);
   const value = useMemo<GlyphnavContextValue>(
     () => ({ controller, mode, basePath }),
     [controller, mode, basePath],

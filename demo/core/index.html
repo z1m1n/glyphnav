@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>glyphnav — core</title>
+    <meta
+      name="description"
+      content="glyphnav's framework-agnostic core: generateFrames() builds the in-between strings and a Player ticks through them, so the same engine that animates the address bar can decode any text. Live, interactive demo."
+    />
+    <link rel="canonical" href="https://z1m1n.github.io/glyphnav/core/" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="https://z1m1n.github.io/glyphnav/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="glyphnav" />
+    <meta property="og:title" content="glyphnav — core demo" />
+    <meta
+      property="og:description"
+      content="The framework-agnostic core: generateFrames() + a Player decode any text, not just the URL — the same engine behind every adapter."
+    />
+    <meta property="og:url" content="https://z1m1n.github.io/glyphnav/core/" />
+    <meta property="og:image" content="https://z1m1n.github.io/glyphnav/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://z1m1n.github.io/glyphnav/og.png" />
+    <link rel="stylesheet" href="../shared/styles.css" />
+  </head>
+  <body>
+    <h1>
+      <img class="glyph-mark" src="../shared/logo.svg" alt="" />
+      <a href="/" data-glyphnav="off">glyphnav</a>
+      <span class="sep">/</span>
+      <span class="crumb">core</span>
+    </h1>
+
+    <p>
+      The framework-agnostic engine behind every adapter: <code>generateFrames()</code> builds the
+      in-between strings and a <code>Player</code> ticks through them. Point that Player at a DOM
+      node instead of <code>history</code> and any text decodes the same way — no URL, no router
+      involved.
+    </p>
+
+    <div class="controls">
+      <label id="ctl-charset"
+        >charset
+        <select id="charset">
+          <option value="url">url-safe</option>
+          <option value="hex">hex</option>
+          <option value="matrix">matrix</option>
+          <option value="symbols">symbols</option>
+        </select>
+      </label>
+      <label id="ctl-speed"
+        >speed
+        <input id="speed" type="range" min="20" max="1000" step="10" value="770" />
+        <span class="ms" id="speedval">250ms</span>
+      </label>
+      <label id="ctl-effect"
+        >effect
+        <select id="effect">
+          <option value="decode">decode</option>
+          <option value="scramble">scramble</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="view docs">
+      <article>
+        <section class="core-demo">
+          <output class="glyph-stage" id="stage" for="coreinput"></output>
+          <form class="core-form" id="coretext">
+            <input
+              id="coreinput"
+              type="text"
+              value="decode any text — not just the URL"
+              aria-label="text to scramble"
+            />
+            <button type="submit">decode →</button>
+          </form>
+        </section>
+        <figure>
+          <figcaption>
+            The same two calls, pointed at an element instead of the address bar:
+          </figcaption>
+          <pre><code id="snippet"></code></pre>
+        </figure>
+        <aside class="note">
+          Charset, effect and speed (the controls above) drive this — change one and the line
+          re-scrambles; your choices are remembered per page. Type your own text and run it. This
+          page never touches the URL: it is the same core engine, pointed at a
+          <code>&lt;span&gt;</code>.
+        </aside>
+      </article>
+    </div>
+
+    <p class="foot">
+      Reachable from the <a href="/" data-glyphnav="off">picker</a>. The same two calls (<code
+        >generateFrames</code
+      >
+      + <code>createPlayer</code>) power the address-bar animation in every other demo.
+    </p>
+
+    <footer class="site-footer">
+      <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener"
+        >npm package</a
+      >
+      <span class="stack">__STACK__</span>
+    </footer>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

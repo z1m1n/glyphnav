@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal, onCleanup } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { render } from 'solid-js/web';
 import {
@@ -19,11 +19,18 @@ import { highlight } from '../../shared/highlight';
 import logo from '../../shared/logo.svg';
 import {
   charsets,
+  CONTROL_TOOLTIPS,
   currentUrl,
+  DEFAULT_TOOLBAR,
   DOCS_INSTALL,
   durationToSlider,
+  loadToolbar,
+  saveToolbar,
   sliderToDuration,
 } from '../../shared/content';
+
+/** This page's own localStorage key — not shared with the other demos. */
+const STORE_KEY = 'tanstack-router/solid';
 
 const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/tanstack-router/solid';
 
@@ -43,6 +50,7 @@ const DOCS_OPTIONS = `<GlyphnavProvider
   commit="before"       // navigate instantly, animate on top ('after' = classic order)
   charset={MATRIX}      // glyph pool — URL_SAFE stays readable in the bar
   scope="tail"          // animate only the part that differs from the current path
+  animatePopState       // also animate browser back/forward (opt-in)
 >`;
 
 function View(props: { title: string; body: string }): JSX.Element {
@@ -110,13 +118,15 @@ function NavItem(props: { to: string; children: JSX.Element }): JSX.Element {
 
 function Layout(): JSX.Element {
   const controller = useGlyphnavController();
+  const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
   const [path, setPath] = createSignal(currentUrl());
   const [resolving, setResolving] = createSignal(false);
-  const [charset, setCharset] = createSignal('url');
-  const [duration, setDuration] = createSignal(250);
-  const [effect, setEffect] = createSignal<GlyphEffect>('decode');
-  const [commit, setCommit] = createSignal<CommitTiming>('before');
-  const [scope, setScope] = createSignal<AnimateScope>('full');
+  const [charset, setCharset] = createSignal(saved.charset);
+  const [duration, setDuration] = createSignal(saved.duration);
+  const [effect, setEffect] = createSignal<GlyphEffect>(saved.effect);
+  const [commit, setCommit] = createSignal<CommitTiming>(saved.commit);
+  const [scope, setScope] = createSignal<AnimateScope>(saved.scope);
+  const [backForward, setBackForward] = createSignal(saved.backForward);
 
   createEffect(() => {
     controller.update({
@@ -138,12 +148,31 @@ function Layout(): JSX.Element {
     });
   });
 
+  // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
+  // the popstate listener (onCleanup runs before each re-run and on disposal).
+  createEffect(() => {
+    if (backForward()) onCleanup(controller.enableHistoryAnimation());
+  });
+
+  // Persist this page's toolbar under its own key (no syncing between demos).
+  createEffect(() => {
+    saveToolbar(STORE_KEY, {
+      charset: charset(),
+      duration: duration(),
+      effect: effect(),
+      commit: commit(),
+      scope: scope(),
+      backForward: backForward(),
+    });
+  });
+
   return (
     <>
       <h1>
         <img class="glyph-mark" src={logo} alt="" />
-        <a href={import.meta.env.BASE_URL}>glyphnav</a>{' '}
-        <span class="crumb">/ tanstack-router/solid</span>
+        <a href={import.meta.env.BASE_URL}>glyphnav</a>
+        <span class="sep">/</span>
+        <span class="crumb">tanstack-router/solid</span>
       </h1>
 
       <p class={resolving() ? 'bar resolving' : 'bar'}>
@@ -171,7 +200,7 @@ function Layout(): JSX.Element {
       </p>
 
       <div class="controls">
-        <label>
+        <label title={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset()} onChange={(e) => setCharset(e.currentTarget.value)}>
             <option value="url">url-safe</option>
@@ -180,7 +209,7 @@ function Layout(): JSX.Element {
             <option value="symbols">symbols</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
@@ -192,7 +221,7 @@ function Layout(): JSX.Element {
           />
           <span class="ms">{duration()}ms</span>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.effect}>
           effect
           <select
             value={effect()}
@@ -202,7 +231,7 @@ function Layout(): JSX.Element {
             <option value="scramble">scramble</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.commit}>
           commit
           <select
             value={commit()}
@@ -212,12 +241,20 @@ function Layout(): JSX.Element {
             <option value="after">animate first</option>
           </select>
         </label>
-        <label>
+        <label title={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope()} onChange={(e) => setScope(e.currentTarget.value as AnimateScope)}>
             <option value="full">full</option>
             <option value="tail">tail</option>
           </select>
+        </label>
+        <label class="toggle" title={CONTROL_TOOLTIPS.backForward}>
+          <input
+            type="checkbox"
+            checked={backForward()}
+            onChange={(e) => setBackForward(e.currentTarget.checked)}
+          />
+          back/forward
         </label>
       </div>
 

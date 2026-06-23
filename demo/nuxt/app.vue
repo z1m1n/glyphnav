@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
-import { charsets, currentUrl, durationToSlider, sliderToDuration } from '@glyphnav-demo/shared';
+import {
+  charsets,
+  CONTROL_TOOLTIPS,
+  currentUrl,
+  DEFAULT_TOOLBAR,
+  durationToSlider,
+  loadToolbar,
+  saveToolbar,
+  sliderToDuration,
+} from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
 
 // SEO / social + AI link previews. Absolute URLs so the tags stay correct in the
@@ -34,6 +43,12 @@ const baseURL = config.app.baseURL;
 const rootHref = baseURL.replace(/nuxt\/$/, '') || '/';
 const stack = config.public.stack;
 
+/** This page's own localStorage key — not shared with the other demos. */
+const STORE_KEY = 'nuxt';
+const tips = CONTROL_TOOLTIPS;
+
+// Refs start at the defaults so the prerendered markup is stable; the saved
+// toolbar is restored on the client in onMounted (after hydration).
 const path = ref('/');
 const resolving = ref(false);
 const charset = ref('url');
@@ -41,6 +56,32 @@ const duration = ref(250);
 const effect = ref<GlyphEffect>('decode');
 const commit = ref<CommitTiming>('before');
 const scope = ref<AnimateScope>('full');
+const backForward = ref(true);
+
+// Back/forward animation is opt-in; the checkbox attaches/detaches the popstate
+// listener. The instance only exists client-side, so this runs from onMounted.
+let stopPopState: (() => void) | null = null;
+function applyBackForward(): void {
+  const instance = useNuxtApp().$glyphnav;
+  if (!instance) return;
+  if (backForward.value && !stopPopState) {
+    stopPopState = instance.controller.enableHistoryAnimation();
+  } else if (!backForward.value && stopPopState) {
+    stopPopState();
+    stopPopState = null;
+  }
+}
+
+function persist(): void {
+  saveToolbar(STORE_KEY, {
+    charset: charset.value,
+    duration: duration.value,
+    effect: effect.value,
+    commit: commit.value,
+    scope: scope.value,
+    backForward: backForward.value,
+  });
+}
 
 function apply(): void {
   const instance = useNuxtApp().$glyphnav;
@@ -62,20 +103,35 @@ function apply(): void {
       },
     },
   });
+  persist();
 }
 
 onMounted(() => {
+  const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
+  charset.value = saved.charset;
+  duration.value = saved.duration;
+  effect.value = saved.effect;
+  commit.value = saved.commit;
+  scope.value = saved.scope;
+  backForward.value = saved.backForward;
   path.value = currentUrl();
   apply();
+  applyBackForward();
 });
 watch([charset, duration, effect, commit, scope], apply);
+watch(backForward, () => {
+  applyBackForward();
+  persist();
+});
 </script>
 
 <template>
   <div>
     <h1>
-      <img class="glyph-mark" :src="logo" alt="" /><a :href="rootHref">glyphnav</a>
-      <span class="crumb">/ nuxt</span>
+      <img class="glyph-mark" :src="logo" alt="" />
+      <a :href="rootHref">glyphnav</a>
+      <span class="sep">/</span>
+      <span class="crumb">nuxt</span>
     </h1>
 
     <p :class="resolving ? 'bar resolving' : 'bar'">
@@ -97,7 +153,7 @@ watch([charset, duration, effect, commit, scope], apply);
     </p>
 
     <div class="controls">
-      <label>
+      <label :title="tips.charset">
         charset
         <select v-model="charset">
           <option value="url">url-safe</option>
@@ -106,7 +162,7 @@ watch([charset, duration, effect, commit, scope], apply);
           <option value="symbols">symbols</option>
         </select>
       </label>
-      <label>
+      <label :title="tips.speed">
         speed
         <input
           type="range"
@@ -118,26 +174,30 @@ watch([charset, duration, effect, commit, scope], apply);
         />
         <span class="ms">{{ duration }}ms</span>
       </label>
-      <label>
+      <label :title="tips.effect">
         effect
         <select v-model="effect">
           <option value="decode">decode</option>
           <option value="scramble">scramble</option>
         </select>
       </label>
-      <label>
+      <label :title="tips.commit">
         commit
         <select v-model="commit">
           <option value="before">navigate first</option>
           <option value="after">animate first</option>
         </select>
       </label>
-      <label>
+      <label :title="tips.scope">
         scope
         <select v-model="scope">
           <option value="full">full</option>
           <option value="tail">tail</option>
         </select>
+      </label>
+      <label class="toggle" :title="tips.backForward">
+        <input v-model="backForward" type="checkbox" />
+        back/forward
       </label>
     </div>
 

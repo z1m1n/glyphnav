@@ -74,6 +74,7 @@ export class DocsComponent {
     "  commit: 'before',     // navigate instantly, animate on top ('after' = classic order)",
     '  charset: MATRIX,      // glyph pool — URL_SAFE stays readable in the bar',
     "  scope: 'tail',        // animate only the part that differs from the current path",
+    '  animatePopState: true, // also animate browser back/forward (opt-in)',
     '}',
   ].join('\n');
 

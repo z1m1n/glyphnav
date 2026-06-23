@@ -17,6 +17,7 @@ import {
   createMemo,
   createRenderEffect,
   mergeProps,
+  onCleanup,
   splitProps,
   useContext,
 } from 'solid-js';
@@ -35,6 +36,12 @@ const GlyphnavContext = createContext<GlyphnavController | null>(null);
 
 export interface GlyphnavProviderProps extends GlyphnavOptions {
   children?: JSX.Element;
+  /**
+   * Also animate browser back/forward (popstate) traversals for the subtree.
+   * Off by design — the adapter patches nothing globally until you opt in here.
+   * @defaultValue `false`
+   */
+  animatePopState?: boolean;
 }
 
 /**
@@ -43,9 +50,12 @@ export interface GlyphnavProviderProps extends GlyphnavOptions {
  */
 export function GlyphnavProvider(props: GlyphnavProviderProps): JSX.Element {
   const controller = new GlyphnavController();
-  const [, options] = splitProps(props, ['children']);
+  const [, options] = splitProps(props, ['children', 'animatePopState']);
   // Keep the base options in sync as the (reactive) provider props change.
   createRenderEffect(() => controller.update({ ...options }));
+  // The flag is treated as static; wire the listener once and tear it down with
+  // the provider.
+  if (props.animatePopState) onCleanup(controller.enableHistoryAnimation());
 
   return createComponent(GlyphnavContext.Provider, {
     value: controller,
