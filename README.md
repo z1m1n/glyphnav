@@ -4,6 +4,14 @@
 
 # glyphnav
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/glyphnav"><img src="https://img.shields.io/npm/v/glyphnav?logo=npm&color=cb3837" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/glyphnav"><img src="https://img.shields.io/npm/dm/glyphnav?logo=npm&color=cb3837" alt="npm downloads" /></a>
+  <a href="https://bundlejs.com/?q=glyphnav"><img src="https://deno.bundlejs.com/badge?q=glyphnav&badge=detailed" alt="min+gzip size" /></a>
+  <img src="https://img.shields.io/npm/types/glyphnav?logo=typescript&logoColor=white" alt="TypeScript types included" />
+  <a href="LICENSE"><img src="https://img.shields.io/npm/l/glyphnav?color=blue" alt="MIT license" /></a>
+</p>
+
 > Animate navigation: watch the URL **decode itself, glyph by glyph**, right in the address bar — then commit the real navigation.
 
 **[GitHub](https://github.com/z1m1n/glyphnav)** · **[Live demo](https://z1m1n.github.io/glyphnav/)** · **[npm](https://www.npmjs.com/package/glyphnav)**
@@ -11,11 +19,6 @@
 <p align="center">
   <img src="https://z1m1n.github.io/glyphnav/glyphnav-demo.gif" alt="The address bar scrambling random glyphs and resolving into each route as glyphnav navigates between Vue Router, React Router, TanStack Router and Angular Router" width="720" />
 </p>
-
-```
-/  →  /x  →  /xy  →  /xyz  →  /xyzw  →  /tyzw  →  /tezw  →  /tesw  →  /test
-      └────────────  grow  ────────────┘└───────────  resolve  ──────────┘
-```
 
 ### ▶ [Live demo](https://z1m1n.github.io/glyphnav/)
 
@@ -101,17 +104,28 @@ cross‑origin links, and anything marked `data-glyphnav="off"`.
 
 Given a target like `/test` (query and hash included — they are just part of the
 path), glyphnav splits it into a **fixed prefix** and the **animated text**, then
-generates frames. Two effects:
+generates frames. There are two effects, shown below resolving the same `/test`:
 
-- **`decode`** (default) —
-  1. **grow**: append one random glyph per frame until the text reaches the
-     target length, producing a random "base" string.
-  2. **resolve**: lock in the real characters left‑to‑right, leaving the
-     unresolved tail at its base glyphs.
-- **`scramble`** — a random string of the target's full length appears
-  immediately, then the real characters lock in at **random positions** while
-  every unresolved slot keeps flickering:
-  `/qqqq → /qeqq → /qesq → /qest → /test`.
+**`decode`** (default) — two phases:
+
+1. **grow**: append one random glyph per frame until the text reaches the
+   target length, producing a random "base" string.
+2. **resolve**: lock in the real characters left‑to‑right, leaving the
+   unresolved tail at its base glyphs.
+
+```
+/  →  /x  →  /xy  →  /xyz  →  /xyzw  →  /tyzw  →  /tezw  →  /tesw  →  /test
+      └────────────  grow  ────────────┘└───────────  resolve  ──────────┘
+```
+
+**`scramble`** — a random string of the target's full length appears immediately,
+then the real characters lock in at **random positions** while every unresolved
+slot keeps flickering:
+
+```
+/qqqq  →  /qeqq  →  /qesq  →  /qest  →  /test
+          └─────  lock in random order  ────┘
+```
 
 By default (`commit: 'before'`) the navigation goes out **immediately** — the
 page never waits for the animation — and the bar replays the decode from the old
