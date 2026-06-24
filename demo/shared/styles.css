@@ -20,9 +20,14 @@
   --blue-hover: #4d7cff; /* link hover — the logo mark's own softer blue */
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
 
-  /* Accent for the controls panel — a muted, greyish light-yellow so the knobs
-     read as the interactive block, set apart from the white page and the
-     gray-bordered view/code panels. */
+  /* Panel for the controls toolbar — the brand's soft blue tint (shared with the
+     resolving path highlight) so the knobs read as the interactive block, set
+     apart from the white page and the gray-bordered view/code panels. */
+  --toolbar-bg: var(--blue-soft); /* soft blue tint */
+  --toolbar-border: #ccd5e6; /* greyish-blue hairline */
+
+  /* Accent for the control tooltips — a muted, greyish light-yellow, a warm
+     contrast to the cool toolbar the tip springs from. */
   --accent-bg: #faf8ea; /* soft greyish-yellow fill */
   --accent-border: #e3dcad; /* greyish-yellow hairline */
 }
@@ -169,8 +174,8 @@ nav {
   gap: 0.75rem 1.75rem;
   margin: 0 0 1.25rem;
   padding: 0.8rem 1rem;
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
+  background: var(--toolbar-bg);
+  border: 1px solid var(--toolbar-border);
   border-radius: 4px;
 
   label {
@@ -197,10 +202,107 @@ nav {
   }
 }
 
+/* Styled tooltip for the toolbar controls — one shared element in the browser
+   top layer (native Popover API), driven by demo/shared/tooltip.ts. It replaces
+   each control's native `title`: themed to match the controls panel, it fades in,
+   glides between adjacent controls and fades out. position/top/left are set
+   inline by the script; everything visual lives here. */
+.glyph-tooltip {
+  position: fixed;
+  inset: auto; /* override the UA popover centring; script sets top/left */
+  margin: 0;
+  max-width: 18rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--accent-bg);
+  color: var(--gray-strong);
+  border: 1px solid var(--accent-border);
+  border-radius: 4px;
+  /* The UA popover default is `overflow: auto`, which adds a stray scrollbar and
+     clips the arrow (it sits half outside the box) — a tooltip never scrolls. */
+  overflow: visible;
+  box-shadow: 0 4px 14px -4px rgb(17 17 17 / 0.18);
+  font: 0.78rem / 1.4 var(--mono);
+  text-align: left;
+  /* Never intercept pointer events — it must not eat clicks on the controls
+     nor trigger its own hover state. */
+  pointer-events: none;
+
+  /* Resting (hidden) state. `:popover-open` is the shown state; @starting-style
+     gives the entry its from-values. top/left carry no starting value, so they
+     snap on first show and only transition (glide) on later moves. */
+  opacity: 0;
+  transform: translateY(3px);
+  transition:
+    opacity 0.16s ease,
+    transform 0.16s ease,
+    top 0.22s ease,
+    left 0.22s ease,
+    overlay 0.16s allow-discrete,
+    display 0.16s allow-discrete;
+
+  &:popover-open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* The arrow: a small rotated square sharing the box fill + hairline, showing
+     only its two outward faces so it reads as a seamless point. `left` tracks
+     --tip-arrow and transitions, so it follows the box as it glides. */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    left: var(--tip-arrow, 50%);
+    bottom: 0;
+    transform: translate(-50%, 50%) rotate(45deg);
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    border-top: 0;
+    border-left: 0;
+    transition: left 0.22s ease;
+  }
+
+  /* Flipped below the control: the arrow moves to the top edge, points up. */
+  &.is-below::after {
+    bottom: auto;
+    top: 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+    border: 1px solid var(--accent-border);
+    border-bottom: 0;
+    border-right: 0;
+  }
+}
+
+@starting-style {
+  .glyph-tooltip:popover-open {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+/* Honour reduced-motion: appear/disappear without the slide or glide. */
+@media (prefers-reduced-motion: reduce) {
+  .glyph-tooltip {
+    transform: none;
+    transition:
+      opacity 0.001s,
+      overlay 0.001s allow-discrete,
+      display 0.001s allow-discrete;
+  }
+  .glyph-tooltip::after {
+    transition: none;
+  }
+}
+
 .view {
   border: 1px solid var(--border);
   padding: 1rem 1.25rem;
   min-height: 7.5rem;
+
+  & + & {
+    margin-top: 1.25rem;
+  }
 
   /* Per-demo docs pages. */
   &.docs {
@@ -286,6 +388,7 @@ nav {
 .core-demo {
   margin-bottom: 0.5rem;
 }
+
 .glyph-stage {
   display: flex;
   align-items: center;

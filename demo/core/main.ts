@@ -20,6 +20,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTooltips } from '../shared/tooltip';
 import { createGlyphText } from './glyph-text';
 
 /** This page's own localStorage key — not shared with the other demos. */
@@ -64,11 +65,12 @@ const speed = document.getElementById('speed') as HTMLInputElement;
 const speedVal = document.getElementById('speedval')!;
 const effectSel = document.getElementById('effect') as HTMLSelectElement;
 
-// Render the snippet and the native control tooltips from the shared sources.
+// Render the snippet and wire the styled control tooltips from the shared sources.
 document.getElementById('snippet')!.innerHTML = highlight(CORE_SNIPPET);
-charsetSel.closest('label')!.title = CONTROL_TOOLTIPS.charset;
-speed.closest('label')!.title = CONTROL_TOOLTIPS.speed;
-effectSel.closest('label')!.title = CONTROL_TOOLTIPS.effect;
+charsetSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.charset;
+speed.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.speed;
+effectSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.effect;
+initTooltips();
 
 // Reflect the restored state in the controls.
 charsetSel.value = state.charset;

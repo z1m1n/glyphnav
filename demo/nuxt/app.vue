@@ -6,6 +6,7 @@ import {
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  initTooltips,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
@@ -117,6 +118,8 @@ onMounted(() => {
   path.value = currentUrl();
   apply();
   applyBackForward();
+  // Wire the styled control tooltips (delegated on document; client-only).
+  initTooltips();
 });
 watch([charset, duration, effect, commit, scope], apply);
 watch(backForward, () => {
@@ -153,7 +156,7 @@ watch(backForward, () => {
     </p>
 
     <div class="controls">
-      <label :title="tips.charset">
+      <label :data-tip="tips.charset">
         charset
         <select v-model="charset">
           <option value="url">url-safe</option>
@@ -162,7 +165,7 @@ watch(backForward, () => {
           <option value="symbols">symbols</option>
         </select>
       </label>
-      <label :title="tips.speed">
+      <label :data-tip="tips.speed">
         speed
         <input
           type="range"
@@ -174,28 +177,28 @@ watch(backForward, () => {
         />
         <span class="ms">{{ duration }}ms</span>
       </label>
-      <label :title="tips.effect">
+      <label :data-tip="tips.effect">
         effect
         <select v-model="effect">
           <option value="decode">decode</option>
           <option value="scramble">scramble</option>
         </select>
       </label>
-      <label :title="tips.commit">
+      <label :data-tip="tips.commit">
         commit
         <select v-model="commit">
           <option value="before">navigate first</option>
           <option value="after">animate first</option>
         </select>
       </label>
-      <label :title="tips.scope">
+      <label :data-tip="tips.scope">
         scope
         <select v-model="scope">
           <option value="full">full</option>
           <option value="tail">tail</option>
         </select>
       </label>
-      <label class="toggle" :title="tips.backForward">
+      <label class="toggle" :data-tip="tips.backForward">
         <input v-model="backForward" type="checkbox" />
         back/forward
       </label>

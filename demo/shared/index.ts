@@ -22,3 +22,4 @@ export {
 } from './content';
 export type { ToolbarState } from './content';
 export { highlight } from './highlight';
+export { initTooltips } from './tooltip';

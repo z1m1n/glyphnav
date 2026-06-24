@@ -106,7 +106,11 @@ export function saveToolbar(key: string, state: object): void {
   }
 }
 
-/** Native-tooltip (`title`) text describing what each toolbar control does. */
+/**
+ * Text describing what each toolbar control does. Demos set it as `data-tip`
+ * on the control's `<label>`; {@link initTooltips} renders it as a styled
+ * top-layer popover (see ./tooltip), replacing the unstyled native `title`.
+ */
 export const CONTROL_TOOLTIPS = {
   charset:
     'Pool of random glyphs used for the "noise" characters while the URL decodes. Non-URL-safe pools (matrix, symbols) get percent-encoded in the real address bar.',

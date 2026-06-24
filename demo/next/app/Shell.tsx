@@ -11,6 +11,7 @@ import {
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  initTooltips,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
@@ -90,6 +91,9 @@ function Inner({ children }: { children: ReactNode }) {
     if (backForward) return controller.enableHistoryAnimation();
   }, [controller, backForward]);
 
+  // Wire the styled control tooltips once (delegated on document; idempotent).
+  useEffect(() => initTooltips(), []);
+
   // Restore the saved toolbar on the client (after hydration), so the
   // statically prerendered markup — which has no localStorage — never mismatches.
   useEffect(() => {
@@ -142,7 +146,7 @@ function Inner({ children }: { children: ReactNode }) {
       </p>
 
       <div className="controls">
-        <label title={CONTROL_TOOLTIPS.charset}>
+        <label data-tip={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset} onChange={(e) => setCharset(e.target.value)}>
             <option value="url">url-safe</option>
@@ -151,7 +155,7 @@ function Inner({ children }: { children: ReactNode }) {
             <option value="symbols">symbols</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.speed}>
+        <label data-tip={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
@@ -163,28 +167,28 @@ function Inner({ children }: { children: ReactNode }) {
           />
           <span className="ms">{duration}ms</span>
         </label>
-        <label title={CONTROL_TOOLTIPS.effect}>
+        <label data-tip={CONTROL_TOOLTIPS.effect}>
           effect
           <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
             <option value="decode">decode</option>
             <option value="scramble">scramble</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.commit}>
+        <label data-tip={CONTROL_TOOLTIPS.commit}>
           commit
           <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
             <option value="before">navigate first</option>
             <option value="after">animate first</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.scope}>
+        <label data-tip={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
             <option value="full">full</option>
             <option value="tail">tail</option>
           </select>
         </label>
-        <label className="toggle" title={CONTROL_TOOLTIPS.backForward}>
+        <label className="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
           <input
             type="checkbox"
             checked={backForward}

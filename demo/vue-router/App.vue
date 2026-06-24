@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useGlyphnav } from 'glyphnav/vue-router';
 import type { FrameInfo } from 'glyphnav/core';
 import {
@@ -12,6 +12,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTooltips } from '../shared/tooltip';
 import logo from '../shared/logo.svg';
 
 const controller = useGlyphnav();
@@ -80,6 +81,9 @@ watch(backForward, (on) => {
   }
   persist();
 });
+
+// Wire the styled control tooltips once, after mount (delegated on document).
+onMounted(initTooltips);
 </script>
 
 <template>
@@ -109,7 +113,7 @@ watch(backForward, (on) => {
   </p>
 
   <div class="controls">
-    <label :title="tips.charset"
+    <label :data-tip="tips.charset"
       >charset
       <select v-model="charset">
         <option value="url">url-safe</option>
@@ -118,7 +122,7 @@ watch(backForward, (on) => {
         <option value="symbols">symbols</option>
       </select>
     </label>
-    <label :title="tips.speed"
+    <label :data-tip="tips.speed"
       >speed
       <input
         type="range"
@@ -130,28 +134,28 @@ watch(backForward, (on) => {
       />
       <span class="ms">{{ duration }}ms</span>
     </label>
-    <label :title="tips.effect"
+    <label :data-tip="tips.effect"
       >effect
       <select v-model="effect">
         <option value="decode">decode</option>
         <option value="scramble">scramble</option>
       </select>
     </label>
-    <label :title="tips.commit"
+    <label :data-tip="tips.commit"
       >commit
       <select v-model="commit">
         <option value="before">navigate first</option>
         <option value="after">animate first</option>
       </select>
     </label>
-    <label :title="tips.scope"
+    <label :data-tip="tips.scope"
       >scope
       <select v-model="scope">
         <option value="full">full</option>
         <option value="tail">tail</option>
       </select>
     </label>
-    <label class="toggle" :title="tips.backForward">
+    <label class="toggle" :data-tip="tips.backForward">
       <input v-model="backForward" type="checkbox" />
       back/forward
     </label>

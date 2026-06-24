@@ -16,6 +16,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTooltips } from '../shared/tooltip';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'react-router';
@@ -152,6 +153,9 @@ export default function App() {
     saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
   }, [charset, duration, effect, commit, scope, backForward]);
 
+  // Wire the styled control tooltips once (delegated on document; idempotent).
+  useEffect(() => initTooltips(), []);
+
   return (
     <>
       <h1>
@@ -180,7 +184,7 @@ export default function App() {
       </p>
 
       <div className="controls">
-        <label title={CONTROL_TOOLTIPS.charset}>
+        <label data-tip={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset} onChange={(e) => setCharset(e.target.value)}>
             <option value="url">url-safe</option>
@@ -189,7 +193,7 @@ export default function App() {
             <option value="symbols">symbols</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.speed}>
+        <label data-tip={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
@@ -201,28 +205,28 @@ export default function App() {
           />
           <span className="ms">{duration}ms</span>
         </label>
-        <label title={CONTROL_TOOLTIPS.effect}>
+        <label data-tip={CONTROL_TOOLTIPS.effect}>
           effect
           <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
             <option value="decode">decode</option>
             <option value="scramble">scramble</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.commit}>
+        <label data-tip={CONTROL_TOOLTIPS.commit}>
           commit
           <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
             <option value="before">navigate first</option>
             <option value="after">animate first</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.scope}>
+        <label data-tip={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
             <option value="full">full</option>
             <option value="tail">tail</option>
           </select>
         </label>
-        <label className="toggle" title={CONTROL_TOOLTIPS.backForward}>
+        <label className="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
           <input
             type="checkbox"
             checked={backForward}

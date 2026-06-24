@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup } from 'solid-js';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { render } from 'solid-js/web';
 import {
@@ -28,6 +28,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../../shared/content';
+import { initTooltips } from '../../shared/tooltip';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'tanstack-router/solid';
@@ -166,6 +167,9 @@ function Layout(): JSX.Element {
     });
   });
 
+  // Wire the styled control tooltips once (delegated on document; idempotent).
+  onMount(initTooltips);
+
   return (
     <>
       <h1>
@@ -200,7 +204,7 @@ function Layout(): JSX.Element {
       </p>
 
       <div class="controls">
-        <label title={CONTROL_TOOLTIPS.charset}>
+        <label data-tip={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset()} onChange={(e) => setCharset(e.currentTarget.value)}>
             <option value="url">url-safe</option>
@@ -209,7 +213,7 @@ function Layout(): JSX.Element {
             <option value="symbols">symbols</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.speed}>
+        <label data-tip={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
@@ -221,7 +225,7 @@ function Layout(): JSX.Element {
           />
           <span class="ms">{duration()}ms</span>
         </label>
-        <label title={CONTROL_TOOLTIPS.effect}>
+        <label data-tip={CONTROL_TOOLTIPS.effect}>
           effect
           <select
             value={effect()}
@@ -231,7 +235,7 @@ function Layout(): JSX.Element {
             <option value="scramble">scramble</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.commit}>
+        <label data-tip={CONTROL_TOOLTIPS.commit}>
           commit
           <select
             value={commit()}
@@ -241,14 +245,14 @@ function Layout(): JSX.Element {
             <option value="after">animate first</option>
           </select>
         </label>
-        <label title={CONTROL_TOOLTIPS.scope}>
+        <label data-tip={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope()} onChange={(e) => setScope(e.currentTarget.value as AnimateScope)}>
             <option value="full">full</option>
             <option value="tail">tail</option>
           </select>
         </label>
-        <label class="toggle" title={CONTROL_TOOLTIPS.backForward}>
+        <label class="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
           <input
             type="checkbox"
             checked={backForward()}

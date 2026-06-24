@@ -13,6 +13,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTooltips } from '../shared/tooltip';
 import logoSrc from '../shared/logo.svg';
 
 /** This page's own localStorage key — not shared with the other demos. */
@@ -56,7 +57,7 @@ const STORE_KEY = 'angular-router';
     </p>
 
     <div class="controls">
-      <label [title]="tips.charset"
+      <label [attr.data-tip]="tips.charset"
         >charset
         <select [value]="charset()" (change)="onCharset($event)">
           <option value="url">url-safe</option>
@@ -65,7 +66,7 @@ const STORE_KEY = 'angular-router';
           <option value="symbols">symbols</option>
         </select>
       </label>
-      <label [title]="tips.speed"
+      <label [attr.data-tip]="tips.speed"
         >speed
         <input
           type="range"
@@ -77,28 +78,28 @@ const STORE_KEY = 'angular-router';
         />
         <span class="ms">{{ duration() }}ms</span>
       </label>
-      <label [title]="tips.effect"
+      <label [attr.data-tip]="tips.effect"
         >effect
         <select [value]="effect()" (change)="onEffect($event)">
           <option value="decode">decode</option>
           <option value="scramble">scramble</option>
         </select>
       </label>
-      <label [title]="tips.commit"
+      <label [attr.data-tip]="tips.commit"
         >commit
         <select [value]="commit()" (change)="onCommit($event)">
           <option value="before">navigate first</option>
           <option value="after">animate first</option>
         </select>
       </label>
-      <label [title]="tips.scope"
+      <label [attr.data-tip]="tips.scope"
         >scope
         <select [value]="scope()" (change)="onScope($event)">
           <option value="full">full</option>
           <option value="tail">tail</option>
         </select>
       </label>
-      <label class="toggle" [title]="tips.backForward">
+      <label class="toggle" [attr.data-tip]="tips.backForward">
         <input type="checkbox" [checked]="backForward()" (change)="onBackForward($event)" />
         back/forward
       </label>
@@ -148,6 +149,8 @@ export class AppComponent {
 
   constructor() {
     this.apply();
+    // Wire the styled control tooltips once (delegated on document; idempotent).
+    initTooltips();
     if (this.backForward()) {
       this.stopPopState = this.nav.controller.enableHistoryAnimation();
     }

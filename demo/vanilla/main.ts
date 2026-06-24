@@ -12,6 +12,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTooltips } from '../shared/tooltip';
 
 const BASE = import.meta.env.BASE_URL + 'vanilla';
 
@@ -149,13 +150,14 @@ const commitSel = document.getElementById('commit') as HTMLSelectElement;
 const scopeSel = document.getElementById('scope') as HTMLSelectElement;
 const backforward = document.getElementById('backforward') as HTMLInputElement;
 
-// Native tooltips describing each control, from the shared source.
-charsetSel.closest('label')!.title = CONTROL_TOOLTIPS.charset;
-speed.closest('label')!.title = CONTROL_TOOLTIPS.speed;
-effectSel.closest('label')!.title = CONTROL_TOOLTIPS.effect;
-commitSel.closest('label')!.title = CONTROL_TOOLTIPS.commit;
-scopeSel.closest('label')!.title = CONTROL_TOOLTIPS.scope;
-backforward.closest('label')!.title = CONTROL_TOOLTIPS.backForward;
+// Styled tooltips describing each control, from the shared source.
+charsetSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.charset;
+speed.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.speed;
+effectSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.effect;
+commitSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.commit;
+scopeSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.scope;
+backforward.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.backForward;
+initTooltips();
 
 // Reflect the restored state in the controls.
 charsetSel.value = state.charset;
