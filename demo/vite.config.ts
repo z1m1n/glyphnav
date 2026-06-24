@@ -1,5 +1,6 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import type { Plugin, ProxyOptions } from 'vite';
@@ -13,8 +14,26 @@ const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 const nodeRequire = createRequire(import.meta.url);
 
 /** An installed dependency's version, read from its package.json. */
-const pkgVersion = (name: string): string =>
-  (nodeRequire(`${name}/package.json`) as { version: string }).version;
+const pkgVersion = (name: string): string => {
+  try {
+    return (nodeRequire(`${name}/package.json`) as { version: string }).version;
+  } catch {
+    // Some packages (e.g. `@solidjs/router`) restrict `exports` and don't expose
+    // `./package.json`, so the require above throws. Resolve the entry instead
+    // and walk up to the nearest package.json that carries a `version`.
+    let dir = dirname(nodeRequire.resolve(name));
+    for (;;) {
+      const file = join(dir, 'package.json');
+      if (existsSync(file)) {
+        const { version } = JSON.parse(readFileSync(file, 'utf8')) as { version?: string };
+        if (version) return version;
+      }
+      const parent = dirname(dir);
+      if (parent === dir) throw new Error(`[demo] cannot read version for ${name}`);
+      dir = parent;
+    }
+  }
+};
 
 /** The library's own version, from the root manifest (glyphnav itself). */
 const glyphnavVersion = (
@@ -31,6 +50,8 @@ const STACK_BY_APP: Record<string, () => string> = {
   core: () => `glyphnav ${glyphnavVersion}`,
   'vue-router': () => `vue ${pkgVersion('vue')} · vue-router ${pkgVersion('vue-router')}`,
   'react-router': () => `react ${pkgVersion('react')} · react-router ${pkgVersion('react-router')}`,
+  'solid-router': () =>
+    `solid-js ${pkgVersion('solid-js')} · @solidjs/router ${pkgVersion('@solidjs/router')}`,
   'tanstack-router/react': () =>
     `react ${pkgVersion('react')} · @tanstack/react-router ${pkgVersion('@tanstack/react-router')}`,
   'tanstack-router/solid': () =>
@@ -76,6 +97,7 @@ const APPS = [
   'vanilla',
   'vue-router',
   'react-router',
+  'solid-router',
   'tanstack-router/react',
   'tanstack-router/solid',
   'angular-router',
@@ -188,6 +210,7 @@ function staticRoutes(): Plugin {
     vanilla: ['about', 'docs', 'contact'],
     'vue-router': ['about', 'features', 'docs'],
     'react-router': ['about', 'docs', 'blog'],
+    'solid-router': ['about', 'posts', 'docs'],
     'tanstack-router/react': ['about', 'posts', 'docs'],
     'tanstack-router/solid': ['about', 'posts', 'docs'],
     'angular-router': ['about', 'docs', 'blog'],
@@ -226,6 +249,7 @@ export default defineConfig({
       { find: 'glyphnav/core', replacement: r('../src/core/index.ts') },
       { find: 'glyphnav/vue-router', replacement: r('../src/vue-router/index.ts') },
       { find: 'glyphnav/react-router', replacement: r('../src/react-router/index.tsx') },
+      { find: 'glyphnav/solid-router', replacement: r('../src/solid-router/index.ts') },
       {
         find: 'glyphnav/tanstack-router/react',
         replacement: r('../src/tanstack-router/react/index.tsx'),
@@ -238,13 +262,14 @@ export default defineConfig({
       { find: 'glyphnav', replacement: r('../src/index.ts') },
     ],
   },
-  // Don't pre-bundle the Solid router: its `solid`-condition entry is JSX source
-  // that must go through vite-plugin-solid (above), not esbuild's pre-bundler.
+  // Don't pre-bundle the Solid routers: their `solid`-condition entry is JSX
+  // source that must go through vite-plugin-solid (above), not esbuild's
+  // pre-bundler.
   optimizeDeps: {
-    exclude: ['@tanstack/solid-router'],
+    exclude: ['@tanstack/solid-router', '@solidjs/router'],
   },
-  // `pnpm demo` starts all eight demos at once (`run-p demo:vite demo:next
-  // demo:nuxt`). This Vite server hosts the six Vite-based demos; Next and Nuxt
+  // `pnpm demo` starts all nine demos at once (`run-p demo:vite demo:next
+  // demo:nuxt`). This Vite server hosts the seven Vite-based demos; Next and Nuxt
   // run on their own dev servers (5174, 5176) and are proxied here so the combined
   // picker works at one origin. `strictPort` makes a stale 5173 fail loudly rather
   // than silently moving the picker to another port. The `/next` and `/nuxt`
@@ -279,7 +304,12 @@ export default defineConfig({
     // `.jsx` files must be compiled here too (and excluded from pre-bundling
     // below, so they reach this transform instead of esbuild).
     solid({
-      include: [/demo\/tanstack-router\/solid\/.*\.[tj]sx$/, /@tanstack\/solid-router\/.*\.jsx$/],
+      include: [
+        /demo\/tanstack-router\/solid\/.*\.[tj]sx$/,
+        /@tanstack\/solid-router\/.*\.jsx$/,
+        /demo\/solid-router\/.*\.[tj]sx$/,
+        /@solidjs\/router\/.*\.jsx$/,
+      ],
     }),
     demoFallback(),
     baseAwareLinks(),
@@ -297,6 +327,7 @@ export default defineConfig({
         core: r('core/index.html'),
         'vue-router': r('vue-router/index.html'),
         'react-router': r('react-router/index.html'),
+        'solid-router': r('solid-router/index.html'),
         'tanstack-router/react': r('tanstack-router/react/index.html'),
         'tanstack-router/solid': r('tanstack-router/solid/index.html'),
         'angular-router': r('angular-router/index.html'),

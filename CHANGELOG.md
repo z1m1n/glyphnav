@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Solid Router adapter** (`glyphnav/solid-router`): `GlyphnavProvider`,
+  `GlyphnavLink`, `useGlyphnavNavigate` and `useGlyphnavController` for the
+  official Solid Router (`@solidjs/router`). `GlyphnavLink` is a drop-in for
+  `<A>` — its destination is resolved exactly like the real one (route-relative
+  via `useResolvedPath`, base-aware via `useHref`) and it `preventDefault()`s so
+  Solid Router's own delegated click handler (which bails on an already-handled
+  event) doesn't double-navigate; `useGlyphnavNavigate()` mirrors `useNavigate()`
+  (a numeric history delta is passed straight through). Like the React and
+  TanStack-Solid adapters it patches nothing globally and ships compiler-free
+  (no JSX in the build); `@solidjs/router` (`>=0.14`) and `solid-js` are optional
+  peer dependencies. Adds the tenth package entry point and a live Solid Router
+  demo to the playground.
+
 ## [2.0.0] - 2026-06-23
 
 ### Added

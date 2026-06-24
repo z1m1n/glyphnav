@@ -21,27 +21,27 @@ export default defineConfig({
           ...shared,
           name: 'node',
           include: ['test/**/*.test.{ts,tsx}'],
-          exclude: ['test/tanstack-solid-router.test.ts'],
+          exclude: ['test/tanstack-solid-router.test.ts', 'test/solid-router.test.ts'],
         },
       },
       {
-        // The Solid test is JSX-free and imports the *precompiled* builds:
-        // `@tanstack/solid-router`'s `import` condition and `solid-js`'s
-        // `browser` condition both ship ready-to-run solid-js/web calls, so no
-        // Solid compiler is needed — only these resolve conditions. Inlining the
-        // packages routes them through Vite's transform so the conditions apply
-        // (externalized deps would resolve via Node's `node` condition → the
-        // server build). Scoped to this project, so the React/Vue suites are
-        // untouched.
+        // The Solid tests are JSX-free and import the *precompiled* builds:
+        // `@tanstack/solid-router`/`@solidjs/router`'s `import` condition and
+        // `solid-js`'s `browser` condition both ship ready-to-run solid-js/web
+        // calls, so no Solid compiler is needed — only these resolve conditions.
+        // Inlining the packages routes them through Vite's transform so the
+        // conditions apply (externalized deps would resolve via Node's `node`
+        // condition → the server build). Scoped to this project, so the
+        // React/Vue suites are untouched.
         resolve: {
           conditions: ['browser', 'development', 'module', 'node', 'import', 'default'],
         },
         test: {
           ...shared,
           name: 'solid',
-          include: ['test/tanstack-solid-router.test.ts'],
+          include: ['test/tanstack-solid-router.test.ts', 'test/solid-router.test.ts'],
           server: {
-            deps: { inline: [/solid-js/, /@tanstack\/solid-router/] },
+            deps: { inline: [/solid-js/, /@tanstack\/solid-router/, /@solidjs\/router/] },
           },
         },
       },

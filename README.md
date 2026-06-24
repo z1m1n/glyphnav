@@ -23,6 +23,7 @@ Jump straight to an integration:
 [vanilla](https://z1m1n.github.io/glyphnav/vanilla/) ·
 [Vue Router](https://z1m1n.github.io/glyphnav/vue-router/) ·
 [React Router](https://z1m1n.github.io/glyphnav/react-router/) ·
+[Solid Router](https://z1m1n.github.io/glyphnav/solid-router/) ·
 [TanStack (React)](https://z1m1n.github.io/glyphnav/tanstack-router/react/) ·
 [TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-router/solid/) ·
 [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/) ·
@@ -36,8 +37,9 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 
 - 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
-  `glyphnav/react-router`, `glyphnav/tanstack-router/react`, `glyphnav/angular-router`,
-  `glyphnav/next` (App **and** Pages Router) and `glyphnav/nuxt`.
+  `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`,
+  `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`
+  (App **and** Pages Router) and `glyphnav/nuxt`.
 - ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
   instantly and the animation plays on top; switch to `commit: 'after'` for the
   classic animate‑then‑commit order.
@@ -192,7 +194,7 @@ import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } fro
 
 Each subpath is named after the router it wraps. The Vue and Nuxt plugins (and
 vanilla `install()`) intercept globally — and all can be told not to. The React,
-TanStack, Angular and Next adapters are opt‑in by design: only navigations made
+Solid, TanStack, Angular and Next adapters are opt‑in by design: only navigations made
 through their links/hooks animate. Browser back/forward animation is opt‑in for every
 adapter via `animatePopState` — except the vanilla `install()`, where it is on by
 default; see [Back/forward animation](#backforward-animation).
@@ -246,6 +248,36 @@ await navigate('/dashboard');
 `GlyphnavLink` is a drop‑in for `<Link>` (basename‑aware via `useHref`), and
 `useGlyphnavNavigate()` mirrors `useNavigate()`. The provider is optional — without it,
 hooks create their own controller.
+
+### Solid Router — `glyphnav/solid-router`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/solid-router/)**
+
+For the official Solid Router (`@solidjs/router`), with Solid components and hooks
+(`solid-js` + `@solidjs/router` as peers):
+
+```tsx
+import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate } from 'glyphnav/solid-router';
+
+<GlyphnavProvider duration={250} effect="scramble" commit="before">
+  <Router root={Layout}>{/* <Route> children */}</Router>
+</GlyphnavProvider>;
+
+// inside the router tree — a drop-in for Solid Router's <A href>:
+<GlyphnavLink href="/about?tab=2#top">About</GlyphnavLink>;
+
+// imperative, drop-in for useNavigate():
+const navigate = useGlyphnavNavigate();
+await navigate('/dashboard');
+```
+
+`GlyphnavLink` is a drop‑in for `<A>` whose destination is resolved exactly like the
+real one (route‑relative via `useResolvedPath`, base‑aware via `useHref`), then
+navigates imperatively — `preventDefault` stops Solid Router's own delegated click
+handler so the navigation happens once. `useGlyphnavNavigate()` mirrors `useNavigate()`
+(string target plus `replace`/`scroll`/`state`/`resolve`; a numeric history delta is
+passed straight through). The provider is optional — without it, hooks create their own
+controller.
 
 ### TanStack Router (React) — `glyphnav/tanstack-router/react`
 
@@ -419,14 +451,14 @@ generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
 **▶ Hosted live at <https://z1m1n.github.io/glyphnav/>** — the same playground,
 deployed to GitHub Pages.
 
-One Vite playground covers **six** integrations — vanilla, Vue Router,
-React Router, TanStack Router (React **and** Solid) and Angular Router:
+One Vite playground covers **seven** integrations — vanilla, Vue Router,
+React Router, Solid Router, TanStack Router (React **and** Solid) and Angular Router:
 
 ```bash
 pnpm install
-pnpm demo                  # → http://localhost:5173  (picker + all eight, live)
+pnpm demo                  # → http://localhost:5173  (picker + all nine, live)
 # …or run one server individually:
-pnpm demo:vite             # → http://localhost:5173  (just the six Vite demos)
+pnpm demo:vite             # → http://localhost:5173  (just the seven Vite demos)
 pnpm demo:next             # → http://localhost:5174/next   (Next.js, own dev server)
 pnpm demo:nuxt             # → http://localhost:5176/nuxt   (Nuxt, own dev server)
 ```
@@ -441,7 +473,7 @@ second Nuxt instance sharing `demo/nuxt/.nuxt` breaks dev; kill any stale `:5176
 server first. For the deployed artifact,
 `pnpm demo:build` (`run-s`) builds the Vite playground, statically exports Next
 (`output: 'export'`) and Nuxt (`nuxi generate`), and copies their output into
-`demo/dist/{next,nuxt}` so a single `demo/dist` deploys all eight. All demos — Vite,
+`demo/dist/{next,nuxt}` so a single `demo/dist` deploys all nine. All demos — Vite,
 Next and Nuxt — share one `@glyphnav-demo/shared` workspace package for the charsets,
 address‑bar helpers, syntax highlighter and styles.
 
@@ -475,10 +507,10 @@ pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
 ```
 
-The package is built with **Vite 8** in library mode with nine entry points
-(`.`, `./core`, `./vue-router`, `./react-router`, `./tanstack-router/react`,
-`./tanstack-router/solid`, `./angular-router`, `./next`, `./nuxt`); router/framework
-deps are always externalized. Declarations are
+The package is built with **Vite 8** in library mode with ten entry points
+(`.`, `./core`, `./vue-router`, `./react-router`, `./solid-router`,
+`./tanstack-router/react`, `./tanstack-router/solid`, `./angular-router`, `./next`,
+`./nuxt`); router/framework deps are always externalized. Declarations are
 generated against `tsconfig.build.json` so they mirror the entry layout in `dist/`.
 
 ---
