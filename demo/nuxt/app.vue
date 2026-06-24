@@ -6,10 +6,12 @@ import {
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  initTheme,
   initTooltips,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  THEME_INIT_SCRIPT,
 } from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
 
@@ -21,6 +23,9 @@ useHead({
     { rel: 'icon', type: 'image/svg+xml', href: 'https://z1m1n.github.io/glyphnav/favicon.svg' },
   ],
   meta: [{ name: 'theme-color', content: '#ffffff' }],
+  // Apply the saved/OS theme before first paint (no flash). `tagPriority` puts it
+  // ahead of other head tags so it runs as early as possible.
+  script: [{ innerHTML: THEME_INIT_SCRIPT, tagPosition: 'head', tagPriority: 'critical' }],
 });
 useSeoMeta({
   title: 'glyphnav — nuxt',
@@ -118,7 +123,8 @@ onMounted(() => {
   path.value = currentUrl();
   apply();
   applyBackForward();
-  // Wire the styled control tooltips (delegated on document; client-only).
+  // Wire the theme switcher + styled control tooltips (client-only).
+  initTheme();
   initTooltips();
 });
 watch([charset, duration, effect, commit, scope], apply);
@@ -141,19 +147,19 @@ watch(backForward, () => {
       Watch the address bar. Current path: <span class="path">{{ path }}</span>
     </p>
 
-    <nav>
+    <nav aria-label="demo pages">
       <NuxtLink to="/">home</NuxtLink>
       <NuxtLink to="/about">about</NuxtLink>
       <NuxtLink to="/docs">docs</NuxtLink>
       <NuxtLink to="/features">features</NuxtLink>
     </nav>
 
-    <p class="deep">
+    <nav class="deep" aria-label="deep links">
       deep links:
       <NuxtLink to="/about?ref=deep&page=2">?query</NuxtLink>
       <NuxtLink to="/docs#options">#hash</NuxtLink>
       <NuxtLink to="/about?q=glyph#results">?query+#hash</NuxtLink>
-    </p>
+    </nav>
 
     <div class="controls">
       <label :data-tip="tips.charset">
@@ -173,6 +179,7 @@ watch(backForward, () => {
           :max="1000"
           :step="10"
           :value="durationToSlider(duration)"
+          :aria-valuetext="`${duration}ms`"
           @input="duration = sliderToDuration(Number(($event.target as HTMLInputElement).value))"
         />
         <span class="ms">{{ duration }}ms</span>

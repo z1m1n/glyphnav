@@ -13,6 +13,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logoSrc from '../shared/logo.svg';
 
@@ -34,7 +35,7 @@ const STORE_KEY = 'angular-router';
       Watch the address bar. Current path: <span class="path">{{ path() }}</span>
     </p>
 
-    <nav>
+    <nav aria-label="demo pages">
       <a [href]="appBase" glyphnavLink="/" [class.active]="active() === '/'">home</a>
       <a [href]="appBase + 'about'" glyphnavLink="/about" [class.active]="active() === '/about'"
         >about</a
@@ -47,14 +48,14 @@ const STORE_KEY = 'angular-router';
       >
     </nav>
 
-    <p class="deep">
+    <nav class="deep" aria-label="deep links">
       deep links:
       <a [href]="appBase + 'about?ref=deep&page=2'" glyphnavLink="/about?ref=deep&page=2">?query</a>
       <a [href]="appBase + 'docs#options'" glyphnavLink="/docs#options">#hash</a>
       <a [href]="appBase + 'about?q=glyph#results'" glyphnavLink="/about?q=glyph#results"
         >?query+#hash</a
       >
-    </p>
+    </nav>
 
     <div class="controls">
       <label [attr.data-tip]="tips.charset"
@@ -74,6 +75,7 @@ const STORE_KEY = 'angular-router';
           max="1000"
           step="10"
           [value]="durationToSlider(duration())"
+          [attr.aria-valuetext]="duration() + 'ms'"
           (input)="onSpeed($event)"
         />
         <span class="ms">{{ duration() }}ms</span>
@@ -149,7 +151,8 @@ export class AppComponent {
 
   constructor() {
     this.apply();
-    // Wire the styled control tooltips once (delegated on document; idempotent).
+    // Wire the theme switcher + styled control tooltips once (idempotent).
+    initTheme();
     initTooltips();
     if (this.backForward()) {
       this.stopPopState = this.nav.controller.enableHistoryAnimation();

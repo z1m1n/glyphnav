@@ -3,6 +3,11 @@
    (Chrome 112+, Safari 16.5+, Firefox 117+); no build-time transform needed. */
 
 :root {
+  /* Light by default; the dark overrides live in :root[data-theme='dark'] below.
+     `color-scheme` also flips the native widgets (select, range, checkbox,
+     scrollbars) to match, so the brand palette and the UA controls stay in sync. */
+  color-scheme: light;
+
   --mono: ui-monospace, 'Cascadia Code', 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
   /* Brand palette — white, gray, blue. Defined once and reused by every demo
@@ -10,26 +15,84 @@
   --white: #ffffff;
   --fill: #f2f2f2; /* code & path fills */
   --fill-soft: #f7f7f7; /* docs code blocks */
-  --rule: #eeeeee; /* hairline dividers */
-  --border: #dddddd; /* control & view borders */
-  --gray: #888888; /* muted text: crumb, hints, footnotes */
+  --rule: #939393; /* hairline dividers — 3:1 non-text contrast on white */
+  --border: #8a8a8a; /* control & view borders — 3:1 on white, fill & fill-soft */
+  --gray: #757575; /* muted text: crumb, hints, footnotes — AA 4.6:1 on white */
   --gray-strong: #444444; /* denser copy: control labels, view text */
   --ink: #111111; /* primary text */
   --blue: #0000ee; /* links — strong, high-contrast blue */
   --blue-soft: #e8eeff; /* resolving-state path highlight (soft blue tint) */
-  --blue-hover: #4d7cff; /* link hover — the logo mark's own softer blue */
+  --blue-hover: #456ee3; /* link hover — the logo blue, darkened to clear AA 4.6:1 */
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
 
   /* Panel for the controls toolbar — the brand's soft blue tint (shared with the
      resolving path highlight) so the knobs read as the interactive block, set
      apart from the white page and the gray-bordered view/code panels. */
   --toolbar-bg: var(--blue-soft); /* soft blue tint */
-  --toolbar-border: #ccd5e6; /* greyish-blue hairline */
+  --toolbar-border: #838893; /* greyish-blue border — 3:1 on the toolbar tint */
 
   /* Accent for the control tooltips — a muted, greyish light-yellow, a warm
      contrast to the cool toolbar the tip springs from. */
   --accent-bg: #faf8ea; /* soft greyish-yellow fill */
   --accent-border: #e3dcad; /* greyish-yellow hairline */
+
+  /* Drop shadow for the floating tooltip + theme toggle. */
+  --shadow: 0 4px 14px -4px rgb(17 17 17 / 0.18);
+
+  /* One corner radius for every bordered/filled block (toolbar, view, code,
+     inputs, buttons, the path chip, tooltip, toggle) — kept in one place so the
+     rounded look stays consistent. */
+  --radius: 4px;
+
+  /* Syntax-highlight tokens (see demo/highlight.ts) — light values; the dark
+     theme overrides each one below, so the highlighter markup stays the same. */
+  --tok-keyword: #8959a8; /* control / declaration */
+  --tok-function: #2f6fb0; /* calls & definitions */
+  --tok-type: #0e7c86; /* Components / Types */
+  --tok-constant: #a3238e; /* ALL_CAPS values */
+  --tok-literal: #c0392b; /* true / false / null / this */
+  --tok-string: #357a5b;
+  --tok-number: #9e6217;
+  --tok-property: #5b6ea8; /* member after `.` */
+  --tok-operator: #717171;
+  --tok-comment: #6e6e6e;
+}
+
+/* Dark theme. The shared switcher (demo/shared/theme.ts) sets data-theme on
+   <html> — resolving the saved preference, or the OS `prefers-color-scheme` by
+   default — before first paint, so there's no flash. Only the tokens that change
+   are overridden; everything else (layout, the --toolbar-bg = --blue-soft link,
+   the tooltip arrow) inherits and re-resolves automatically. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --white: #16181c; /* page + input surface */
+  --fill: #262a30; /* code & path fills */
+  --fill-soft: #1d2025; /* docs code blocks */
+  --rule: #63666b; /* hairline dividers — 3:1 on the dark page */
+  --border: #70747a; /* control & view borders — 3:1 on page, fill & fill-soft */
+  --gray: #8d939c; /* muted text */
+  --gray-strong: #b9bec6; /* denser copy */
+  --ink: #e7e9ec; /* primary text */
+  --blue: #7aa2ff; /* links — bright enough on the dark surface */
+  --blue-soft: #1d2740; /* resolving-state path highlight + toolbar tint */
+  --blue-hover: #a9c2ff; /* link hover */
+  --toolbar-border: #677287; /* greyish-blue border — 3:1 on the toolbar tint */
+  --accent-bg: #2b2920; /* dark greyish-yellow tooltip fill */
+  --accent-border: #4d4730; /* greyish-yellow hairline */
+
+  --shadow: 0 6px 18px -6px rgb(0 0 0 / 0.6);
+
+  --tok-keyword: #c792ea;
+  --tok-function: #82aaff;
+  --tok-type: #5fd0c5;
+  --tok-constant: #f78fdf;
+  --tok-literal: #ff8b7c;
+  --tok-string: #9ece6a;
+  --tok-number: #e0a458;
+  --tok-property: #9aa9e0;
+  --tok-operator: #8b929c;
+  --tok-comment: #84898f;
 }
 
 * {
@@ -105,6 +168,13 @@ h1 {
      of relying on inline vertical-align. Spacing is handled by the h1 gap. */
   align-self: center;
 }
+/* The default mark is a dark badge with light glyphs — it disappears on the dark
+   page. Swap it for the inverted variant (light badge, dark glyphs, same blue)
+   via `content`, which replaces the rendered <img> regardless of how its src was
+   set, so it follows the theme toggle (not just the OS). */
+:root[data-theme='dark'] .glyph-mark {
+  content: url('./logo-dark.svg');
+}
 
 h2 {
   font-size: 1rem;
@@ -136,6 +206,7 @@ input {
   margin-top: 0.35rem;
   background: var(--fill);
   padding: 2px 6px;
+  border-radius: var(--radius);
   white-space: pre;
   overflow: hidden;
 
@@ -176,7 +247,7 @@ nav {
   padding: 0.8rem 1rem;
   background: var(--toolbar-bg);
   border: 1px solid var(--toolbar-border);
-  border-radius: 4px;
+  border-radius: var(--radius);
 
   label {
     display: flex;
@@ -216,11 +287,11 @@ nav {
   background: var(--accent-bg);
   color: var(--gray-strong);
   border: 1px solid var(--accent-border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   /* The UA popover default is `overflow: auto`, which adds a stray scrollbar and
      clips the arrow (it sits half outside the box) — a tooltip never scrolls. */
   overflow: visible;
-  box-shadow: 0 4px 14px -4px rgb(17 17 17 / 0.18);
+  box-shadow: var(--shadow);
   font: 0.78rem / 1.4 var(--mono);
   text-align: left;
   /* Never intercept pointer events — it must not eat clicks on the controls
@@ -297,6 +368,7 @@ nav {
 
 .view {
   border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 1rem 1.25rem;
   min-height: 7.5rem;
 
@@ -311,6 +383,7 @@ nav {
       padding: 0.7rem 0.9rem;
       background: var(--fill-soft);
       border: 1px solid var(--border);
+      border-radius: var(--radius);
       overflow-x: auto;
       font-size: 0.8rem;
       line-height: 1.55;
@@ -321,36 +394,37 @@ nav {
       }
     }
 
-    /* Light-theme syntax highlighting (see demo/highlight.ts). */
+    /* Syntax highlighting (see demo/highlight.ts). Colours come from the --tok-*
+       custom properties so the same markup themes light and dark. */
     .tok-keyword {
-      color: #8959a8; /* control / declaration */
+      color: var(--tok-keyword);
     }
     .tok-function {
-      color: #2f6fb0; /* calls & definitions */
+      color: var(--tok-function);
     }
     .tok-type {
-      color: #0e7c86; /* Components / Types */
+      color: var(--tok-type);
     }
     .tok-constant {
-      color: #a3238e; /* ALL_CAPS values */
+      color: var(--tok-constant);
     }
     .tok-literal {
-      color: #c0392b; /* true / false / null / this */
+      color: var(--tok-literal);
     }
     .tok-string {
-      color: #357a5b;
+      color: var(--tok-string);
     }
     .tok-number {
-      color: #b06d1a;
+      color: var(--tok-number);
     }
     .tok-property {
-      color: #5b6ea8; /* member after `.` */
+      color: var(--tok-property);
     }
     .tok-operator {
-      color: #8a8a8a;
+      color: var(--tok-operator);
     }
     .tok-comment {
-      color: #9a9a9a;
+      color: var(--tok-comment);
       font-style: italic;
     }
   }
@@ -395,6 +469,7 @@ nav {
   min-height: 2.2em;
   padding: 0.5rem 0.7rem;
   background: var(--fill);
+  border-radius: var(--radius);
   /* Monospace, only a notch larger than body copy — the glyph grid stays
      legible and the stage sits comfortably among the surrounding text. */
   font-family: var(--mono);
@@ -415,6 +490,7 @@ nav {
     min-width: 0;
     padding: 0.35rem 0.5rem;
     border: 1px solid var(--border);
+    border-radius: var(--radius);
     background: var(--white);
     color: var(--ink);
   }
@@ -422,6 +498,7 @@ nav {
   button {
     padding: 0.35rem 0.9rem;
     border: 1px solid var(--border);
+    border-radius: var(--radius);
     background: var(--fill);
     color: var(--ink);
     cursor: pointer;
@@ -482,4 +559,46 @@ nav {
 code {
   background: var(--fill);
   padding: 1px 4px;
+  border-radius: 3px; /* a touch tighter than --radius for the tiny inline chip */
+}
+
+/* Floating light / dark / system theme switcher — one element injected into the
+   body by demo/shared/theme.ts (like the tooltip), so every demo gets it without
+   per-page markup. It themes itself from the same tokens it toggles. */
+.theme-toggle {
+  position: fixed;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: var(--white);
+  color: var(--gray-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    color: var(--blue);
+    border-color: var(--blue);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    display: block;
+  }
 }

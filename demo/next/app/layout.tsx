@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Metadata, Viewport } from 'next';
+import { THEME_INIT_SCRIPT } from '@glyphnav-demo/shared';
 import '@glyphnav-demo/shared/styles.css';
 import { Shell } from './Shell';
 
@@ -38,8 +39,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the pre-paint script sets data-theme on <html>
+    // before React hydrates, which would otherwise trip an attribute mismatch.
+    <html lang="en" suppressHydrationWarning>
       <body>
+        {/* Apply the saved/OS theme before first paint, so no flash. First in
+            <body> so it runs before the app markup is parsed. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <Shell>{children}</Shell>
       </body>
     </html>

@@ -36,19 +36,19 @@
       Watch the address bar. Current path: <span class="path" id="path">/</span>
     </p>
 
-    <nav id="nav">
+    <nav id="nav" aria-label="demo pages">
       <a href="/vanilla/">home</a>
       <a href="/vanilla/about">about</a>
       <a href="/vanilla/docs">docs</a>
       <a href="/vanilla/contact">contact</a>
     </nav>
 
-    <p class="deep">
+    <nav class="deep" aria-label="deep links">
       deep links:
       <a href="/vanilla/about?ref=deep&page=2">?query</a>
       <a href="/vanilla/docs#options">#hash</a>
       <a href="/vanilla/about?q=glyph#results">?query+#hash</a>
-    </p>
+    </nav>
 
     <div class="controls">
       <label
@@ -62,7 +62,15 @@
       </label>
       <label
         >speed
-        <input id="speed" type="range" min="20" max="1000" step="10" value="770" />
+        <input
+          id="speed"
+          type="range"
+          min="20"
+          max="1000"
+          step="10"
+          value="770"
+          aria-valuetext="250ms"
+        />
         <span class="ms" id="speedval">250ms</span>
       </label>
       <label

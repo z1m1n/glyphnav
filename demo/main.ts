@@ -9,6 +9,10 @@ import {
   SYMBOLS,
 } from 'glyphnav';
 import type { FrameInfo, GlyphEffect } from 'glyphnav';
+import { initTheme } from './shared/theme';
+
+// Mount the light/dark/system theme switcher (shared across every demo).
+initTheme();
 
 const bar = document.getElementById('bar')!;
 const el = document.getElementById('path')!;

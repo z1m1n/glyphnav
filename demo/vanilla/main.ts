@@ -12,7 +12,11 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
+
+// Mount the light/dark/system theme switcher (shared across every demo).
+initTheme();
 
 const BASE = import.meta.env.BASE_URL + 'vanilla';
 
@@ -166,6 +170,9 @@ commitSel.value = state.commit;
 scopeSel.value = state.scope;
 speed.value = String(durationToSlider(state.duration));
 speedVal.textContent = `${state.duration}ms`;
+// The slider's raw value is inverted (20 = fastest), so expose the real duration
+// to assistive tech instead of the meaningless slider number.
+speed.setAttribute('aria-valuetext', `${state.duration}ms`);
 backforward.checked = state.backForward;
 
 function apply(): void {
@@ -181,6 +188,7 @@ speed.addEventListener('input', () => {
   // Slider is inverted: full right = 20 ms (fastest whole animation).
   state.duration = sliderToDuration(Number(speed.value));
   speedVal.textContent = `${state.duration}ms`;
+  speed.setAttribute('aria-valuetext', `${state.duration}ms`);
   apply();
 });
 effectSel.addEventListener('change', () => {

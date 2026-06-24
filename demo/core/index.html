@@ -51,7 +51,15 @@
       </label>
       <label id="ctl-speed"
         >speed
-        <input id="speed" type="range" min="20" max="1000" step="10" value="770" />
+        <input
+          id="speed"
+          type="range"
+          min="20"
+          max="1000"
+          step="10"
+          value="770"
+          aria-valuetext="250ms"
+        />
         <span class="ms" id="speedval">250ms</span>
       </label>
       <label id="ctl-effect"
@@ -65,7 +73,9 @@
 
     <div class="view">
       <section class="core-demo">
-        <output class="glyph-stage" id="stage" for="coreinput"></output>
+        <!-- aria-live="off": the stage scrambles continuously, so don't announce
+             every intermediate frame; the resting text is still read on demand. -->
+        <output class="glyph-stage" id="stage" for="coreinput" aria-live="off"></output>
         <form class="core-form" id="coretext">
           <input
             id="coreinput"

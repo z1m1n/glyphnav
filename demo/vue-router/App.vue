@@ -12,6 +12,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logo from '../shared/logo.svg';
 
@@ -82,8 +83,11 @@ watch(backForward, (on) => {
   persist();
 });
 
-// Wire the styled control tooltips once, after mount (delegated on document).
-onMounted(initTooltips);
+// Wire the theme switcher and styled control tooltips once, after mount.
+onMounted(() => {
+  initTheme();
+  initTooltips();
+});
 </script>
 
 <template>
@@ -98,19 +102,19 @@ onMounted(initTooltips);
     Watch the address bar. Current path: <span class="path">{{ displayPath }}</span>
   </p>
 
-  <nav>
+  <nav aria-label="demo pages">
     <router-link to="/">home</router-link>
     <router-link to="/about">about</router-link>
     <router-link to="/features">features</router-link>
     <router-link to="/docs">docs</router-link>
   </nav>
 
-  <p class="deep">
+  <nav class="deep" aria-label="deep links">
     deep links:
     <router-link to="/about?ref=deep&page=2">?query</router-link>
     <router-link to="/docs#options">#hash</router-link>
     <router-link to="/about?q=glyph#results">?query+#hash</router-link>
-  </p>
+  </nav>
 
   <div class="controls">
     <label :data-tip="tips.charset"
@@ -130,6 +134,7 @@ onMounted(initTooltips);
         max="1000"
         step="10"
         :value="durationToSlider(duration)"
+        :aria-valuetext="`${duration}ms`"
         @input="duration = sliderToDuration(Number(($event.target as HTMLInputElement).value))"
       />
       <span class="ms">{{ duration }}ms</span>

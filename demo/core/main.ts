@@ -20,8 +20,12 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import { createGlyphText } from './glyph-text';
+
+// Mount the light/dark/system theme switcher (shared across every demo).
+initTheme();
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'core';
@@ -77,6 +81,8 @@ charsetSel.value = state.charset;
 effectSel.value = state.effect;
 speed.value = String(durationToSlider(state.duration));
 speedVal.textContent = `${state.duration}ms`;
+// Slider value is inverted (20 = fastest), so announce the real duration.
+speed.setAttribute('aria-valuetext', `${state.duration}ms`);
 
 const glyphText = createGlyphText(stage);
 
@@ -103,6 +109,7 @@ speed.addEventListener('input', () => {
   // Slider is inverted: full right = 20 ms (fastest whole animation).
   state.duration = sliderToDuration(Number(speed.value));
   speedVal.textContent = `${state.duration}ms`;
+  speed.setAttribute('aria-valuetext', `${state.duration}ms`);
   saveToolbar(STORE_KEY, state);
   rerun();
 });

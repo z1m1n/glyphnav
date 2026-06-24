@@ -28,6 +28,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../../shared/content';
+import { initTheme } from '../../shared/theme';
 import { initTooltips } from '../../shared/tooltip';
 
 /** This page's own localStorage key — not shared with the other demos. */
@@ -167,8 +168,11 @@ function Layout(): JSX.Element {
     });
   });
 
-  // Wire the styled control tooltips once (delegated on document; idempotent).
-  onMount(initTooltips);
+  // Wire the theme switcher + styled control tooltips once (idempotent).
+  onMount(() => {
+    initTheme();
+    initTooltips();
+  });
 
   return (
     <>
@@ -183,14 +187,14 @@ function Layout(): JSX.Element {
         Watch the address bar. Current path: <span class="path">{path()}</span>
       </p>
 
-      <nav>
+      <nav aria-label="demo pages">
         <NavItem to="/">home</NavItem>
         <NavItem to="/about">about</NavItem>
         <NavItem to="/posts">posts</NavItem>
         <NavItem to="/docs">docs</NavItem>
       </nav>
 
-      <p class="deep">
+      <nav class="deep" aria-label="deep links">
         deep links:
         <GlyphnavLink to="/about" search={{ ref: 'deep', page: 2 }}>
           ?query
@@ -201,7 +205,7 @@ function Layout(): JSX.Element {
         <GlyphnavLink to="/about" search={{ q: 'glyph' }} hash="results">
           ?query+#hash
         </GlyphnavLink>
-      </p>
+      </nav>
 
       <div class="controls">
         <label data-tip={CONTROL_TOOLTIPS.charset}>
@@ -221,6 +225,7 @@ function Layout(): JSX.Element {
             max={1000}
             step={10}
             value={durationToSlider(duration())}
+            aria-valuetext={`${duration()}ms`}
             onInput={(e) => setDuration(sliderToDuration(Number(e.currentTarget.value)))}
           />
           <span class="ms">{duration()}ms</span>

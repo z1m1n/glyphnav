@@ -6,6 +6,7 @@ import type { Plugin, ProxyOptions } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import react from '@vitejs/plugin-react';
 import solid from 'vite-plugin-solid';
+import { THEME_INIT_SCRIPT } from './shared/theme';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 
@@ -156,6 +157,21 @@ function injectVersions(): Plugin {
 }
 
 /**
+ * Inline the pre-paint theme script at the very top of every demo's `<head>`,
+ * so an explicit light/dark choice (or the OS default) is applied before first
+ * paint — no flash. Injected as a tag descriptor (not a string splice) so Vite
+ * emits it verbatim and never treats it as a module entry to bundle.
+ */
+function injectThemeInit(): Plugin {
+  return {
+    name: 'demo-inject-theme',
+    transformIndexHtml() {
+      return [{ tag: 'script', children: THEME_INIT_SCRIPT, injectTo: 'head-prepend' }];
+    },
+  };
+}
+
+/**
  * GitHub Pages serves only static files: a cold reload of a client route such
  * as `/react-router/docs` has no matching file and would 404. Each demo has a
  * fixed, known set of routes, so after the bundle we copy every app's built
@@ -268,6 +284,7 @@ export default defineConfig({
     demoFallback(),
     baseAwareLinks(),
     injectVersions(),
+    injectThemeInit(),
     staticRoutes(),
   ],
   build: {

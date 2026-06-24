@@ -16,6 +16,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 
 /** This page's own localStorage key — not shared with the other demos. */
@@ -153,8 +154,11 @@ export default function App() {
     saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
   }, [charset, duration, effect, commit, scope, backForward]);
 
-  // Wire the styled control tooltips once (delegated on document; idempotent).
-  useEffect(() => initTooltips(), []);
+  // Wire the theme switcher + styled control tooltips once (idempotent).
+  useEffect(() => {
+    initTheme();
+    initTooltips();
+  }, []);
 
   return (
     <>
@@ -169,19 +173,19 @@ export default function App() {
         Watch the address bar. Current path: <span className="path">{path}</span>
       </p>
 
-      <nav>
+      <nav aria-label="demo pages">
         <NavLink to="/">home</NavLink>
         <NavLink to="/about">about</NavLink>
         <NavLink to="/docs">docs</NavLink>
         <NavLink to="/blog">blog</NavLink>
       </nav>
 
-      <p className="deep">
+      <nav className="deep" aria-label="deep links">
         deep links:
         <GlyphnavLink to="/about?ref=deep&page=2">?query</GlyphnavLink>
         <GlyphnavLink to="/docs#options">#hash</GlyphnavLink>
         <GlyphnavLink to="/about?q=glyph#results">?query+#hash</GlyphnavLink>
-      </p>
+      </nav>
 
       <div className="controls">
         <label data-tip={CONTROL_TOOLTIPS.charset}>
@@ -201,6 +205,7 @@ export default function App() {
             max={1000}
             step={10}
             value={durationToSlider(duration)}
+            aria-valuetext={`${duration}ms`}
             onChange={(e) => setDuration(sliderToDuration(Number(e.target.value)))}
           />
           <span className="ms">{duration}ms</span>

@@ -11,6 +11,7 @@ import {
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  initTheme,
   initTooltips,
   loadToolbar,
   saveToolbar,
@@ -91,8 +92,11 @@ function Inner({ children }: { children: ReactNode }) {
     if (backForward) return controller.enableHistoryAnimation();
   }, [controller, backForward]);
 
-  // Wire the styled control tooltips once (delegated on document; idempotent).
-  useEffect(() => initTooltips(), []);
+  // Wire the theme switcher + styled control tooltips once (idempotent).
+  useEffect(() => {
+    initTheme();
+    initTooltips();
+  }, []);
 
   // Restore the saved toolbar on the client (after hydration), so the
   // statically prerendered markup — which has no localStorage — never mismatches.
@@ -131,19 +135,19 @@ function Inner({ children }: { children: ReactNode }) {
         Watch the address bar. Current path: <span className="path">{path}</span>
       </p>
 
-      <nav>
+      <nav aria-label="demo pages">
         <NavLink href="/">home</NavLink>
         <NavLink href="/about">about</NavLink>
         <NavLink href="/docs">docs</NavLink>
         <NavLink href="/blog">blog</NavLink>
       </nav>
 
-      <p className="deep">
+      <nav className="deep" aria-label="deep links">
         deep links:
         <GlyphnavLink href="/about?ref=deep&page=2">?query</GlyphnavLink>
         <GlyphnavLink href="/docs#options">#hash</GlyphnavLink>
         <GlyphnavLink href="/about?q=glyph#results">?query+#hash</GlyphnavLink>
-      </p>
+      </nav>
 
       <div className="controls">
         <label data-tip={CONTROL_TOOLTIPS.charset}>
@@ -163,6 +167,7 @@ function Inner({ children }: { children: ReactNode }) {
             max={1000}
             step={10}
             value={durationToSlider(duration)}
+            aria-valuetext={`${duration}ms`}
             onChange={(e) => setDuration(sliderToDuration(Number(e.target.value)))}
           />
           <span className="ms">{duration}ms</span>
