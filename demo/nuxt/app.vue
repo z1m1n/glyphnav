@@ -135,7 +135,7 @@ watch(backForward, () => {
 </script>
 
 <template>
-  <div>
+  <div class="app-shell">
     <h1>
       <img class="glyph-mark" :src="logo" alt="" />
       <a :href="rootHref">glyphnav</a>

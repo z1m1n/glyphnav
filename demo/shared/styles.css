@@ -44,6 +44,13 @@
      rounded look stays consistent. */
   --radius: 4px;
 
+  /* Responsive breakpoint (≈ the centred column width + room for the toggle).
+     Heads-up: native CSS can't read a custom property inside an @media
+     condition, so the @media rule below repeats the literal — this token is the
+     single documented source of the value; keep the two in sync. (No
+     preprocessor / build transform here, by design.) */
+  --bp-mobile: 48rem;
+
   /* Syntax-highlight tokens (see demo/highlight.ts) — light values; the dark
      theme overrides each one below, so the highlighter markup stays the same. */
   --tok-keyword: #8959a8; /* control / declaration */
@@ -99,6 +106,12 @@
   box-sizing: border-box;
 }
 
+/* Paint the canvas (the area outside the centred column / above the margins) in
+   the surface colour so the body margins blend seamlessly in both themes. */
+html {
+  background: var(--white);
+}
+
 body {
   max-width: 44rem;
   margin: 2.5rem auto;
@@ -106,6 +119,14 @@ body {
   background: var(--white);
   color: var(--ink);
   font: 15px/1.6 var(--mono);
+
+  /* Sticky footer: fill at least the viewport (minus the 2.5rem top+bottom
+     margins) and stack as a column, so .site-footer's `margin-top: auto` sinks
+     it to the bottom on short pages instead of floating mid-screen. */
+  min-height: calc(100vh - 5rem);
+  min-height: calc(100dvh - 5rem);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Links use --blue, visited and unvisited alike (no violet fade). Declared
@@ -538,12 +559,14 @@ nav {
   font-size: 0.8rem;
 }
 
-/* Shared site footer: GitHub + npm links on every demo page. */
+/* Shared site footer: GitHub + npm links on every demo page. `margin-top: auto`
+   makes the flex-column body (or the Nuxt mount chain) push it to the bottom on
+   short pages; the border-top + padding keep it separated when content is tall. */
 .site-footer {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem 1rem;
-  margin-top: 2rem;
+  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid var(--rule);
   color: var(--gray);
@@ -554,6 +577,18 @@ nav {
   .stack {
     margin-left: auto;
   }
+}
+
+/* Nuxt mounts the app one level deeper than the other demos (#__nuxt → the
+   app-shell root), so its footer isn't a direct child of the flex-column body.
+   Let that chain grow to full height so the nested footer can still sink to the
+   bottom. Harmless for the other demos (no #__nuxt / .app-shell there). */
+#__nuxt,
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-width: 0;
 }
 
 code {
@@ -600,5 +635,28 @@ code {
     width: 1.05rem;
     height: 1.05rem;
     display: block;
+  }
+}
+
+/* Narrow screens — at/below --bp-mobile (48rem; literal repeated here because a
+   @media condition can't read a custom property). A viewport-fixed toggle would
+   float over the content as the page scrolls and crowd the title row, so pin it
+   to the top-right of the page instead — it scrolls away with the header rather
+   than overlapping anything — and reserve room for it in the masthead h1. */
+@media (max-width: 48rem) {
+  body {
+    position: relative;
+  }
+
+  .theme-toggle {
+    position: absolute;
+    top: 0;
+    right: 1.25rem;
+  }
+
+  /* Only the masthead h1 (the one carrying the brand mark) reserves room for the
+     toggle — not any heading generally. */
+  h1:has(.glyph-mark) {
+    padding-right: 2.75rem;
   }
 }
