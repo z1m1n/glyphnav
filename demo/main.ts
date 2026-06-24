@@ -36,6 +36,7 @@ const targets = [
   '/core',
   '/vue-router',
   '/react-router',
+  '/solid-router',
   '/tanstack-router/react',
   '/tanstack-router/solid',
   '/angular-router',

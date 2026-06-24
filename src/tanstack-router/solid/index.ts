@@ -99,8 +99,11 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
 }
 
 export interface GlyphnavLinkProps
+  // `state` is also omitted: if `@solidjs/router` is present it augments the
+  // anchor's `state` to `string`, which would clash with the one picked from
+  // TanStack's `NavigateOptions` (a no-op omit otherwise).
   extends
-    Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
+    Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'state'>,
     Pick<NavigateOptions, 'to' | 'params' | 'search' | 'hash' | 'state' | 'replace'> {
   /** Per-link option overrides. */
   glyphOptions?: GlyphnavOptions;

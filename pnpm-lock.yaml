@@ -30,6 +30,9 @@ importers:
       '@microsoft/api-extractor':
         specifier: 7.58.9
         version: 7.58.9(@types/node@26.0.0)
+      '@solidjs/router':
+        specifier: 0.16.1
+        version: 0.16.1(solid-js@1.9.13)
       '@tanstack/react-router':
         specifier: 1.170.16
         version: 1.170.16(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2262,6 +2265,11 @@ packages:
     resolution: {integrity: sha512-zdIWBGpR9zGx1p1bzIPqF5Gs+Ks/BH8R6fWhmUa/dcK1L2rUC8BAcZJzNRYBQv74kScf1TSOs0EY//Vd/I0V8g==}
     peerDependencies:
       solid-js: '>=1.8.4'
+
+  '@solidjs/router@0.16.1':
+    resolution: {integrity: sha512-IhyjedgC6LRpw/8CPGGI89FrV+r0xTHzOl2c4CRyzYQ1bLepJxbVI1LLKvsavMWY5TRBRacV7hAeOhuTXkjiqg==}
+    peerDependencies:
+      solid-js: ^1.8.6
 
   '@speed-highlight/core@1.2.16':
     resolution: {integrity: sha512-yNm/fYEcnpRjYduLMaddTK9XKYil6xB88+qFg79ZdZhHu1PadfoQmFW7pVTx7FZqMBNcUuThiAhxhENgtAO2/w==}
@@ -6858,6 +6866,10 @@ snapshots:
       solid-js: 1.9.13
 
   '@solidjs/meta@0.29.4(solid-js@1.9.13)':
+    dependencies:
+      solid-js: 1.9.13
+
+  '@solidjs/router@0.16.1(solid-js@1.9.13)':
     dependencies:
       solid-js: 1.9.13
 

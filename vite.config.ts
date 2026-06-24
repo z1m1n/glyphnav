@@ -13,6 +13,7 @@ export default defineConfig({
         core: 'src/core/index.ts',
         'vue-router': 'src/vue-router/index.ts',
         'react-router': 'src/react-router/index.tsx',
+        'solid-router': 'src/solid-router/index.ts',
         'tanstack-router/react': 'src/tanstack-router/react/index.tsx',
         'tanstack-router/solid': 'src/tanstack-router/solid/index.ts',
         'angular-router': 'src/angular-router/index.ts',
@@ -23,7 +24,15 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: [/^vue/, /^react/, /^solid-js/, /^@angular\//, /^@tanstack\//, /^next/],
+      external: [
+        /^vue/,
+        /^react/,
+        /^solid-js/,
+        /^@solidjs\//,
+        /^@angular\//,
+        /^@tanstack\//,
+        /^next/,
+      ],
     },
   },
   plugins: [
