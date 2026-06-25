@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Pre-paint theme (mirrors THEME_INIT_SCRIPT in demo/shared/theme.ts): set
+         data-theme from the saved/OS preference before first paint, no flash. -->
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem('glyphnav-theme');
+          var t =
+            p === 'light' || p === 'dark'
+              ? p
+              : matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    %sveltekit.head%
+  </head>
+  <body>
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>

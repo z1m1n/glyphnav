@@ -1,7 +1,7 @@
 {
   "name": "glyphnav",
   "version": "2.1.0",
-  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, Solid Router, TanStack Router (React & Solid), Angular Router, Next.js and Nuxt adapters.",
+  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, Solid Router, TanStack Router (React & Solid), Angular Router, Next.js, Nuxt and SvelteKit adapters.",
   "keywords": [
     "address-bar",
     "angular-router",
@@ -19,6 +19,8 @@
     "solid-js",
     "solid-router",
     "spa",
+    "svelte",
+    "sveltekit",
     "tanstack-router",
     "text-effect",
     "url",
@@ -92,6 +94,11 @@
       "import": "./dist/nuxt.js",
       "require": "./dist/nuxt.cjs"
     },
+    "./sveltekit": {
+      "types": "./dist/sveltekit.d.ts",
+      "import": "./dist/sveltekit.js",
+      "require": "./dist/sveltekit.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -105,14 +112,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "demo": "run-p demo:vite demo:next demo:nuxt",
+    "demo": "run-p demo:vite demo:next demo:nuxt demo:sveltekit",
     "demo:vite": "vite --config demo/vite.config.ts",
     "demo:next": "pnpm --filter @glyphnav-demo/next dev",
     "demo:nuxt": "pnpm --filter @glyphnav-demo/nuxt dev",
-    "demo:build": "run-s build demo:build:vite demo:build:next demo:build:nuxt",
+    "demo:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit dev",
+    "demo:build": "run-s build demo:build:vite demo:build:next demo:build:nuxt demo:build:sveltekit",
     "demo:build:vite": "vite build --config demo/vite.config.ts",
     "demo:build:next": "pnpm --filter @glyphnav-demo/next build && cp -rT demo/next/out demo/dist/next",
     "demo:build:nuxt": "pnpm --filter @glyphnav-demo/nuxt generate && cp -rT demo/nuxt/.output/public demo/dist/nuxt",
+    "demo:build:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit build && cp -rT demo/sveltekit/build demo/dist/sveltekit",
     "demo:preview": "vite preview --config demo/vite.config.ts",
     "prepublishOnly": "pnpm run build"
   },
@@ -156,6 +165,7 @@
     "@angular/core": ">=16",
     "@angular/router": ">=16",
     "@solidjs/router": ">=0.14",
+    "@sveltejs/kit": ">=2",
     "@tanstack/react-router": ">=1",
     "@tanstack/solid-router": ">=1",
     "next": ">=14",
@@ -164,6 +174,7 @@
     "react-dom": ">=18",
     "react-router": ">=6",
     "solid-js": ">=1.9",
+    "svelte": ">=4",
     "vue": ">=3",
     "vue-router": ">=4"
   },
@@ -175,6 +186,9 @@
       "optional": true
     },
     "@solidjs/router": {
+      "optional": true
+    },
+    "@sveltejs/kit": {
       "optional": true
     },
     "@tanstack/react-router": {
@@ -199,6 +213,9 @@
       "optional": true
     },
     "solid-js": {
+      "optional": true
+    },
+    "svelte": {
       "optional": true
     },
     "vue": {

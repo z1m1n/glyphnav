@@ -79,10 +79,7 @@ export const currentPath = (): string => {
  * @returns A promise that settles once the URL changes or the budget elapses,
  * or `void` when there is no `window` to observe.
  */
-export const settleAfter = (
-  navigate: () => void,
-  timeoutMs: number,
-): void | Promise<void> => {
+export const settleAfter = (navigate: () => void, timeoutMs: number): void | Promise<void> => {
   if (typeof window === 'undefined' || !window.location) {
     navigate();
     return;
@@ -101,4 +98,34 @@ export const settleAfter = (
     };
     tick();
   });
+};
+
+/**
+ * Decide whether a click should be turned into an animated navigation, and
+ * return the eligible anchor (or `null`). Skips modified clicks, new-tab and
+ * download links, cross-origin links, `rel="external"` links and
+ * `data-glyphnav="off"` links — the same rules a good SPA link interceptor uses.
+ * Shared by the vanilla `install()` and the SvelteKit adapter so the safety
+ * rails are defined once.
+ *
+ * @param event - The click event to evaluate.
+ * @returns The anchor to animate, or `null` if the click should pass through.
+ */
+export const eligibleAnchor = (event: MouseEvent): HTMLAnchorElement | null => {
+  if (isModifiedClick(event)) return null;
+
+  const target = event.target as Element | null;
+  const anchor = target?.closest?.('a') as HTMLAnchorElement | null;
+  if (!anchor || !anchor.getAttribute('href')) return null;
+  if (anchor.target && anchor.target !== '_self') return null;
+  if (anchor.hasAttribute('download')) return null;
+  if (anchor.dataset.glyphnav === 'off') return null;
+
+  const rel = anchor.getAttribute('rel');
+  if (rel && rel.split(/\s+/).includes('external')) return null;
+
+  const url = new URL(anchor.href, window.location.href);
+  if (url.origin !== window.location.origin) return null;
+
+  return anchor;
 };

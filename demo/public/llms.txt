@@ -24,6 +24,7 @@ below. Install with `pnpm add glyphnav` (npm/yarn work too).
 - [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/): `provideGlyphnav` + the `[glyphnavLink]` directive
 - [Next.js (App Router)](https://z1m1n.github.io/glyphnav/next/): `GlyphnavLink` + `useGlyphnavNavigate`
 - [Nuxt](https://z1m1n.github.io/glyphnav/nuxt/): a client plugin wraps `router.push` / `navigateTo`
+- [SvelteKit](https://z1m1n.github.io/glyphnav/sveltekit/): `attachGlyphnav(goto)` intercepts `<a>` clicks and drives `goto`
 
 ## Install & source
 
@@ -36,4 +37,4 @@ below. Install with `pnpm add glyphnav` (npm/yarn work too).
 - `install(options)` — vanilla: hijack in-page link clicks and animate via the History API
 - `generateFrames(from, to, { charset, effect })` — produce the per-frame URL strings the animation steps through
 - Options: `duration` (ms), `effect` (`decode` | `scramble`), `charset` (`url` | `hex` | `matrix` | `symbols`), `commit` (`before` | `after` — navigate first vs. animate first), `scope` (`full` | `tail`)
-- Adapter entry points: `glyphnav/core`, `glyphnav/vue-router`, `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`, `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`, `glyphnav/nuxt`
+- Adapter entry points: `glyphnav/core`, `glyphnav/vue-router`, `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`, `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`, `glyphnav/nuxt`, `glyphnav/sveltekit`

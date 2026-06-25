@@ -8,7 +8,9 @@
  */
 import { GlyphnavController } from '../core';
 import type { ControllerDeps, GlyphnavOptions, RunResult } from '../core';
-import { isModifiedClick } from '../internal/links';
+import { eligibleAnchor } from '../internal/links';
+
+export { eligibleAnchor } from '../internal/links';
 
 export interface NavigateOptions extends GlyphnavOptions {
   /**
@@ -141,34 +143,6 @@ export const navigate = (to: string, options: NavigateOptions = {}): Promise<Run
   // navigate-first silently falls back to the classic animate-then-commit.
   const perCall: GlyphnavOptions = reload ? { ...glyph, commit: 'after' } : glyph;
   return controller.run(path, () => commit(path, reload, replace), perCall);
-};
-
-/**
- * Decide whether a click should be turned into an animated navigation, and
- * return the eligible anchor (or `null`). Skips modified clicks, new-tab and
- * download links, cross-origin links and `data-glyphnav="off"` links — the
- * same rules a good SPA link interceptor uses.
- *
- * @param event - The click event to evaluate.
- * @returns The anchor to animate, or `null` if the click should pass through.
- */
-export const eligibleAnchor = (event: MouseEvent): HTMLAnchorElement | null => {
-  if (isModifiedClick(event)) return null;
-
-  const target = event.target as Element | null;
-  const anchor = target?.closest?.('a') as HTMLAnchorElement | null;
-  if (!anchor || !anchor.getAttribute('href')) return null;
-  if (anchor.target && anchor.target !== '_self') return null;
-  if (anchor.hasAttribute('download')) return null;
-  if (anchor.dataset.glyphnav === 'off') return null;
-
-  const rel = anchor.getAttribute('rel');
-  if (rel && rel.split(/\s+/).includes('external')) return null;
-
-  const url = new URL(anchor.href, window.location.href);
-  if (url.origin !== window.location.origin) return null;
-
-  return anchor;
 };
 
 /**

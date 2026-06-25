@@ -31,7 +31,8 @@ Jump straight to an integration:
 [TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-router/solid/) ·
 [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/) ·
 [Next.js](https://z1m1n.github.io/glyphnav/next/) ·
-[Nuxt](https://z1m1n.github.io/glyphnav/nuxt/)
+[Nuxt](https://z1m1n.github.io/glyphnav/nuxt/) ·
+[SvelteKit](https://z1m1n.github.io/glyphnav/sveltekit/)
 
 `glyphnav` rewrites `history.replaceState` frame by frame: it fills the destination
 path with random glyphs (the **grow** phase), then resolves the real characters
@@ -42,7 +43,7 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
   `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`,
   `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`
-  (App **and** Pages Router) and `glyphnav/nuxt`.
+  (App **and** Pages Router), `glyphnav/nuxt` and `glyphnav/sveltekit`.
 - ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
   instantly and the animation plays on top; switch to `commit: 'after'` for the
   classic animate‑then‑commit order.
@@ -165,6 +166,7 @@ browser already did that).
     owns the listener for the subtree's lifetime).
   - Vue / Nuxt: `attachGlyphnav(router, { animatePopState: true })` /
     `installGlyphnav(app, { animatePopState: true })` — `detach()` removes the listener.
+  - SvelteKit: `attachGlyphnav(goto, { animatePopState: true })` — `detach()` removes the listener.
   - Angular: `provideGlyphnav({ animatePopState: true })`.
 
 Under the hood the core controller exposes `enableHistoryAnimation()` (wire up the
@@ -206,10 +208,10 @@ import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } fro
 
 ## Router adapters
 
-Each subpath is named after the router it wraps. The Vue and Nuxt plugins (and
-vanilla `install()`) intercept globally — and all can be told not to. The React,
-Solid, TanStack, Angular and Next adapters are opt‑in by design: only navigations made
-through their links/hooks animate. Browser back/forward animation is opt‑in for every
+Each subpath is named after the router it wraps. The Vue and Nuxt plugins, the
+SvelteKit adapter, and vanilla `install()` intercept globally — and all can be told
+not to. The React, Solid, TanStack, Angular and Next adapters are opt‑in by design:
+only navigations made through their links/hooks animate. Browser back/forward animation is opt‑in for every
 adapter via `animatePopState` — except the vanilla `install()`, where it is on by
 default; see [Back/forward animation](#backforward-animation).
 
@@ -435,6 +437,59 @@ export default defineNuxtPlugin((nuxtApp) => {
 `navigate()`/`push()`/`replace()` animate. Attach to a router manually with
 `attachGlyphnav(router, options)`.
 
+### SvelteKit — `glyphnav/sveltekit`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/sveltekit/)**
+
+SvelteKit — Svelte's official framework and router — exposes no patchable router
+object: programmatic navigation goes through `goto`, and internal `<a>` clicks are
+handled by SvelteKit itself. So `attachGlyphnav(goto, …)` installs a capture‑phase
+click listener that animates every eligible same‑origin link — it `preventDefault()`s
+the click (SvelteKit's own handler then stands down) and `goto` performs the real
+navigation, so every link animates with **no per‑link wiring**, like the Nuxt plugin.
+Call it once on the client (it rewrites the address bar, so it must not run during
+prerender):
+
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { attachGlyphnav } from 'glyphnav/sveltekit';
+
+  // Every <a> click and goto() now animates first.
+  onMount(() => attachGlyphnav(goto, { duration: 250, commit: 'before' }).detach);
+</script>
+```
+
+`goto` is passed in because `$app/navigation` is a virtual module only resolvable
+inside a SvelteKit app — the adapter never imports SvelteKit and stays compiler‑free.
+With the default `commit: 'before'` the navigation goes out first and the bar decodes
+on top of the path that actually landed (redirects included): `goto` resolves a tick
+before the address bar settles, so the adapter waits for the URL to land — the same
+approach the Next App Router adapter uses.
+
+Pass `intercept: 'none'` to leave clicks to SvelteKit and animate only the instance's
+own `navigate()` — a drop‑in for `goto` — or links you opt in with the `use:link`
+action:
+
+```svelte
+<script>
+  import { goto } from '$app/navigation';
+  import { attachGlyphnav } from 'glyphnav/sveltekit';
+
+  const { navigate, link } = attachGlyphnav(goto, { intercept: 'none' });
+  // await navigate('/dashboard', { replace: true });
+</script>
+
+<a href="/about" use:link>About</a>
+```
+
+Links opt out with `data-glyphnav="off"` (new‑tab, `download`, `rel="external"` and
+cross‑origin links are skipped automatically). Apps served under a `base` need no
+extra config: SvelteKit's hrefs already include it and `goto` resolves against the
+live URL, so the animated path always matches the address bar.
+
 ---
 
 ## Core API — `glyphnav/core`
@@ -470,25 +525,28 @@ React Router, Solid Router, TanStack Router (React **and** Solid) and Angular Ro
 
 ```bash
 pnpm install
-pnpm demo                  # → http://localhost:5173  (picker + all nine, live)
+pnpm demo                  # → http://localhost:5173  (picker + all ten, live)
 # …or run one server individually:
 pnpm demo:vite             # → http://localhost:5173  (just the seven Vite demos)
 pnpm demo:next             # → http://localhost:5174/next   (Next.js, own dev server)
 pnpm demo:nuxt             # → http://localhost:5176/nuxt   (Nuxt, own dev server)
+pnpm demo:sveltekit        # → http://localhost:5177/sveltekit   (SvelteKit, own dev server)
 ```
 
-Next.js and Nuxt have their own build systems, so they're separate workspace
-projects under `demo/next` and `demo/nuxt` rather than Vite entries — each runs on
-its own dev server. `pnpm demo` (`run-p` via `npm-run-all2`) starts all three
-together, and the Vite dev server proxies `/next` and `/nuxt` to them, so the picker
-at `:5173` reaches every demo from one origin (run just `pnpm demo:vite` and those two
+Next.js, Nuxt and SvelteKit have their own build systems, so they're separate
+workspace projects under `demo/next`, `demo/nuxt` and `demo/sveltekit` rather than
+Vite entries — each runs on its own dev server. `pnpm demo` (`run-p` via
+`npm-run-all2`) starts all four together, and the Vite dev server proxies `/next`,
+`/nuxt` and `/sveltekit` to them, so the picker
+at `:5173` reaches every demo from one origin (run just `pnpm demo:vite` and those three
 links show a hint pointing at their own server). Run a **single** `pnpm demo` — a
 second Nuxt instance sharing `demo/nuxt/.nuxt` breaks dev; kill any stale `:5176`
 server first. For the deployed artifact,
 `pnpm demo:build` (`run-s`) builds the Vite playground, statically exports Next
-(`output: 'export'`) and Nuxt (`nuxi generate`), and copies their output into
-`demo/dist/{next,nuxt}` so a single `demo/dist` deploys all nine. All demos — Vite,
-Next and Nuxt — share one `@glyphnav-demo/shared` workspace package for the charsets,
+(`output: 'export'`), Nuxt (`nuxi generate`) and SvelteKit (`adapter-static`), and
+copies their output into `demo/dist/{next,nuxt,sveltekit}` so a single `demo/dist`
+deploys all ten. All demos — Vite, Next, Nuxt and SvelteKit — share one
+`@glyphnav-demo/shared` workspace package for the charsets,
 address‑bar helpers, syntax highlighter and styles.
 
 The Angular demo runs in **JIT mode** inside the same dev server: it imports
@@ -511,7 +569,7 @@ The demos alias `glyphnav` to `src/`, so editing the library updates them live.
 ## Development
 
 The repo is a [pnpm](https://pnpm.io) **11.5** workspace: the library is the root
-package, with the Next.js and Nuxt demos as members under `demo/` (the other demos
+package, with the Next.js, Nuxt and SvelteKit demos as members under `demo/` (the other demos
 are plain files in the root package).
 
 ```bash
@@ -521,10 +579,10 @@ pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
 ```
 
-The package is built with **Vite 8** in library mode with ten entry points
+The package is built with **Vite 8** in library mode with eleven entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./solid-router`,
 `./tanstack-router/react`, `./tanstack-router/solid`, `./angular-router`, `./next`,
-`./nuxt`); router/framework deps are always externalized. Declarations are
+`./nuxt`, `./sveltekit`); router/framework deps are always externalized. Declarations are
 generated against `tsconfig.build.json` so they mirror the entry layout in `dist/`.
 
 ---

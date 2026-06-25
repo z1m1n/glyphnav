@@ -10,6 +10,8 @@ demo/next/next-env.d.ts
 demo/nuxt/.nuxt/
 demo/nuxt/.output/
 demo/nuxt/.data/
+demo/sveltekit/.svelte-kit/
+demo/sveltekit/build/
 *.local
 *.log
 .DS_Store
