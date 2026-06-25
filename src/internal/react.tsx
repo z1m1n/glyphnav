@@ -4,11 +4,65 @@
  * directly so the controller-lifecycle and link-click boilerplate is written
  * once instead of being re-implemented per adapter.
  */
-import { useEffect, useRef } from 'react';
+import { createContext, createElement, useContext, useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions } from '../core';
 import { isModifiedClick } from './links';
 import type { ClickModifiers } from './links';
+
+export interface GlyphnavProviderProps extends GlyphnavOptions {
+  children: ReactNode;
+  /**
+   * Also animate browser back/forward (popstate) traversals for the subtree.
+   * Off by design — the adapter patches nothing globally until you opt in here.
+   * @defaultValue `false`
+   */
+  animatePopState?: boolean;
+}
+
+/** A context-backed `<GlyphnavProvider>` plus the hook that reads it. */
+export interface ReactControllerContext {
+  /**
+   * Provide a shared controller (and base options) to the subtree. Optional —
+   * the hooks work without it, each creating their own controller.
+   */
+  GlyphnavProvider: (props: GlyphnavProviderProps) => ReactNode;
+  /** Get the controller from context, or a stable per-component fallback. */
+  useGlyphnavController: (options?: GlyphnavOptions) => GlyphnavController;
+}
+
+/**
+ * Build a context-backed provider/hook pair for a React adapter. Each adapter
+ * calls this once at module load so the adapters never share a single
+ * controller context. (Next.js keeps its own context — it also carries the
+ * router mode and base path — so it does not use this.)
+ *
+ * @returns The `<GlyphnavProvider>` and its `useGlyphnavController` reader.
+ */
+export const createControllerContext = (): ReactControllerContext => {
+  const GlyphnavContext = createContext<GlyphnavController | null>(null);
+
+  const GlyphnavProvider = ({
+    children,
+    animatePopState = false,
+    ...options
+  }: GlyphnavProviderProps): ReactNode => {
+    const controller = useSharedController(options);
+    useHistoryAnimation(controller, animatePopState);
+
+    return createElement(GlyphnavContext.Provider, { value: controller }, children);
+  };
+
+  const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavController => {
+    const fromContext = useContext(GlyphnavContext);
+    const fallback = useFallbackController(!fromContext, options);
+
+    return fromContext ?? (fallback as GlyphnavController);
+  };
+
+  return { GlyphnavProvider, useGlyphnavController };
+};
 
 /**
  * The controller behind a `<GlyphnavProvider>`: created once and re-`update()`d

@@ -14,7 +14,7 @@
 import type { Router, RouteLocationRaw } from 'vue-router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
-import { wrapRouterMethod } from '../internal/vue-router';
+import { attachRouter } from '../internal/vue-router';
 
 /** Which Vue Router history mode Nuxt is configured with. */
 export type NuxtHistoryMode = 'history' | 'hash';
@@ -96,24 +96,15 @@ export const attachGlyphnav = (
     ...glyph
   } = options;
   const controller = new GlyphnavController(glyph);
-  const originalPush = router.push.bind(router) as Router['push'];
-  const originalReplace = router.replace.bind(router) as Router['push'];
   const resolveHref = (to: RouteLocationRaw): string => resolveTarget(router, to, historyMode);
   // Skip the animation when navigating to the path already on screen.
   const shouldSkip = (target: string): boolean =>
     samePathForm(resolveTarget(router, router.currentRoute.value.fullPath, historyMode), target);
-  const push = wrapRouterMethod(controller, router, originalPush, { resolveHref, shouldSkip });
-  const replace = wrapRouterMethod(controller, router, originalReplace, {
-    resolveHref,
-    shouldSkip,
-  });
-
-  if (intercept === 'router') {
-    router.push = push;
-    router.replace = replace;
-  }
-
-  const stopPopState = animatePopState ? controller.enableHistoryAnimation() : (): void => {};
+  const { push, replace, originalPush, originalReplace, detach } = attachRouter(
+    controller,
+    router,
+    { resolveHref, shouldSkip, intercept: intercept === 'router', animatePopState },
+  );
 
   return {
     controller,
@@ -125,14 +116,7 @@ export const attachGlyphnav = (
         await original.call(router, to);
       });
     },
-    detach() {
-      if (intercept === 'router') {
-        router.push = originalPush;
-        router.replace = originalReplace;
-      }
-      stopPopState();
-      controller.cancel();
-    },
+    detach,
   };
 };
 

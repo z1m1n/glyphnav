@@ -13,7 +13,7 @@ import type { App, InjectionKey } from 'vue';
 import type { Router, RouteLocationRaw } from 'vue-router';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions } from '../core';
-import { wrapRouterMethod } from '../internal/vue-router';
+import { attachRouter } from '../internal/vue-router';
 
 export interface VueGlyphnavOptions extends GlyphnavOptions {
   /**
@@ -63,33 +63,15 @@ export const attachGlyphnav = (
 ): GlyphnavVueInstance => {
   const { intercept = 'router', animatePopState = false, ...glyph } = options;
   const controller = new GlyphnavController(glyph);
-  const originalPush = router.push.bind(router) as Router['push'];
-  const originalReplace = router.replace.bind(router) as Router['push'];
   // `.href` is base-aware (matches the real address bar); `.fullPath` is not.
   const resolveHref = (to: RouteLocationRaw): string => router.resolve(to).href;
-  const push = wrapRouterMethod(controller, router, originalPush, { resolveHref });
-  const replace = wrapRouterMethod(controller, router, originalReplace, { resolveHref });
+  const { push, replace, detach } = attachRouter(controller, router, {
+    resolveHref,
+    intercept: intercept === 'router',
+    animatePopState,
+  });
 
-  if (intercept === 'router') {
-    router.push = push;
-    router.replace = replace;
-  }
-
-  const stopPopState = animatePopState ? controller.enableHistoryAnimation() : (): void => {};
-
-  return {
-    controller,
-    push,
-    replace,
-    detach() {
-      if (intercept === 'router') {
-        router.push = originalPush;
-        router.replace = originalReplace;
-      }
-      stopPopState();
-      controller.cancel();
-    },
-  };
+  return { controller, push, replace, detach };
 };
 
 /**

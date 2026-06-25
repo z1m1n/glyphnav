@@ -23,7 +23,7 @@ import { useRouter as useAppRouter } from 'next/navigation';
 import { useRouter as usePagesRouter } from 'next/compat/router';
 import type { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
-import { currentPath, toPath } from '../internal/links';
+import { settleAfter, toPath } from '../internal/links';
 import {
   runLinkClick,
   useFallbackController,
@@ -94,38 +94,13 @@ interface NextNav {
   replace: (href: string, extras?: NextNavigateExtras) => void | Promise<void>;
 }
 
-/** How long to wait for an App Router navigation to land before giving up. */
-const APP_ROUTER_COMMIT_TIMEOUT_MS = 1200;
-
 /**
- * Run an App Router navigation and resolve only once the URL actually changes
- * (or a short budget elapses). The App Router commits navigations
- * asynchronously — `router.push` returns *before* `window.location` updates — so
- * with `commit: 'before'` (navigate first) the core would read the old path back
- * and skip the on-top animation. Awaiting the settle lets it animate to the
- * landed path, the same as a synchronous router. A no-op navigation never
- * changes the URL and falls through after the budget, exactly as before.
+ * How long to wait for an App Router navigation to land before giving up. The
+ * App Router commits navigations asynchronously — `router.push` returns before
+ * `window.location` updates — so the bar is animated to the settled path; see
+ * {@link settleAfter}.
  */
-const commitAppRouter = (navigate: () => void): void | Promise<void> => {
-  if (typeof window === 'undefined' || !window.location) {
-    navigate();
-    return;
-  }
-  const before = currentPath();
-  navigate();
-
-  return new Promise<void>((resolve) => {
-    const start = Date.now();
-    const tick = (): void => {
-      if (currentPath() !== before || Date.now() - start >= APP_ROUTER_COMMIT_TIMEOUT_MS) {
-        resolve();
-        return;
-      }
-      setTimeout(tick, 16);
-    };
-    tick();
-  });
-};
+const APP_ROUTER_SETTLE_MS = 1200;
 
 /**
  * Resolve the active Next router's `push`/`replace`. `routerMode` is a static
@@ -149,8 +124,9 @@ const useNextNav = (mode: NextRouterMode): NextNav => {
   // oxlint-disable-next-line react-hooks/rules-of-hooks
   const router = useAppRouter();
   return {
-    push: (href, extras) => commitAppRouter(() => router.push(href, extras)),
-    replace: (href, extras) => commitAppRouter(() => router.replace(href, extras)),
+    push: (href, extras) => settleAfter(() => router.push(href, extras), APP_ROUTER_SETTLE_MS),
+    replace: (href, extras) =>
+      settleAfter(() => router.replace(href, extras), APP_ROUTER_SETTLE_MS),
   };
 };
 

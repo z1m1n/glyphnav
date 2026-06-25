@@ -51,3 +51,73 @@ export const wrapRouterMethod = (
     return result;
   }) as RouterMethod;
 };
+
+/** How {@link attachRouter} wraps a router and whether it patches it in place. */
+export interface AttachConfig extends WrapOptions {
+  /** Patch `router.push`/`router.replace` in place (vs. only exposing wrapped ones). */
+  intercept: boolean;
+  /** Also animate browser back/forward (popstate) traversals. */
+  animatePopState: boolean;
+}
+
+/** The wrapped methods, the captured originals, and a teardown. */
+export interface AttachedRouter {
+  /** Animated `router.push`. */
+  push: RouterMethod;
+  /** Animated `router.replace`. */
+  replace: RouterMethod;
+  /** The router's original `push`, bound — for `navigateTo`-style helpers. */
+  originalPush: RouterMethod;
+  /** The router's original `replace`, bound. */
+  originalReplace: RouterMethod;
+  /** Restore the router's original methods, stop popstate, cancel any animation. */
+  detach: () => void;
+}
+
+/**
+ * Wire a controller to a Vue Router instance: build animated `push`/`replace`,
+ * optionally patch them in place, optionally animate popstate, and return a
+ * `detach()` that undoes all of it. Shared by the Vue Router and Nuxt adapters,
+ * which differ only in how they resolve the animated href and whether they skip
+ * same-path navigations.
+ *
+ * @param controller - The controller driving the animation.
+ * @param router - The Vue Router instance to wrap.
+ * @param config - How to resolve/skip, and whether to intercept and animate popstate.
+ * @returns The animated methods, the captured originals, and `detach()`.
+ */
+export const attachRouter = (
+  controller: GlyphnavController,
+  router: Router,
+  config: AttachConfig,
+): AttachedRouter => {
+  const originalPush = router.push.bind(router) as RouterMethod;
+  const originalReplace = router.replace.bind(router) as RouterMethod;
+  const wrap: WrapOptions = { resolveHref: config.resolveHref, shouldSkip: config.shouldSkip };
+  const push = wrapRouterMethod(controller, router, originalPush, wrap);
+  const replace = wrapRouterMethod(controller, router, originalReplace, wrap);
+
+  if (config.intercept) {
+    router.push = push;
+    router.replace = replace;
+  }
+
+  const stopPopState = config.animatePopState
+    ? controller.enableHistoryAnimation()
+    : (): void => {};
+
+  return {
+    push,
+    replace,
+    originalPush,
+    originalReplace,
+    detach() {
+      if (config.intercept) {
+        router.push = originalPush;
+        router.replace = originalReplace;
+      }
+      stopPopState();
+      controller.cancel();
+    },
+  };
+};

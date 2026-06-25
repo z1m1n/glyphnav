@@ -8,47 +8,26 @@
  * Nothing is patched globally: only navigations made through these entry
  * points animate.
  */
-import { createContext, createElement, useCallback, useContext, useMemo } from 'react';
-import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from 'react';
+import { createElement, useCallback, useMemo } from 'react';
+import type { AnchorHTMLAttributes, MouseEvent } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
-import type { GlyphnavController, GlyphnavOptions, RunResult } from '../../core';
-import {
-  runLinkClick,
-  useFallbackController,
-  useHistoryAnimation,
-  useSharedController,
-} from '../../internal/react';
+import type { GlyphnavOptions, RunResult } from '../../core';
+import { createControllerContext, runLinkClick } from '../../internal/react';
+import type { GlyphnavProviderProps } from '../../internal/react';
+
+export type { GlyphnavProviderProps };
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
 
-const GlyphnavContext = createContext<GlyphnavController | null>(null);
-
-export interface GlyphnavProviderProps extends GlyphnavOptions {
-  children: ReactNode;
-  /**
-   * Also animate browser back/forward (popstate) traversals for the subtree.
-   * Off by design — the adapter patches nothing globally until you opt in here.
-   * @defaultValue `false`
-   */
-  animatePopState?: boolean;
-}
+const context = createControllerContext();
 
 /**
  * Provide a shared controller (and base options) to the subtree. Optional —
  * the hooks work without it, each creating their own controller.
  */
-export const GlyphnavProvider = ({
-  children,
-  animatePopState = false,
-  ...options
-}: GlyphnavProviderProps) => {
-  const controller = useSharedController(options);
-  useHistoryAnimation(controller, animatePopState);
-
-  return createElement(GlyphnavContext.Provider, { value: controller }, children);
-};
+export const GlyphnavProvider = context.GlyphnavProvider;
 
 /**
  * Get the controller from context, or a stable per-component fallback.
@@ -57,12 +36,7 @@ export const GlyphnavProvider = ({
  * provider is present).
  * @returns The shared or per-component {@link GlyphnavController}.
  */
-export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavController => {
-  const fromContext = useContext(GlyphnavContext);
-  const fallback = useFallbackController(!fromContext, options);
-
-  return fromContext ?? (fallback as GlyphnavController);
-};
+export const useGlyphnavController = context.useGlyphnavController;
 
 /**
  * A `useNavigate()` replacement that plays the glyph animation before handing

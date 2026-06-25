@@ -11,59 +11,27 @@
  * `Dynamic`), so the library build needs no Solid compiler. Nothing is patched
  * globally: only navigations made through these entry points animate.
  */
-import {
-  createComponent,
-  createContext,
-  createMemo,
-  createRenderEffect,
-  mergeProps,
-  onCleanup,
-  splitProps,
-  useContext,
-} from 'solid-js';
+import { createComponent, createMemo, mergeProps, splitProps } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import { useRouter } from '@tanstack/solid-router';
 import type { NavigateOptions } from '@tanstack/solid-router';
-import { GlyphnavController } from '../../core';
 import type { GlyphnavOptions, RunResult } from '../../core';
-import { isModifiedClick } from '../../internal/links';
+import { createSolidControllerContext, runSolidLinkClick } from '../../internal/solid';
+import type { GlyphnavProviderProps } from '../../internal/solid';
+
+export type { GlyphnavProviderProps };
 
 /** Imperative navigate function returned by {@link useGlyphnavNavigate}. */
 export type GlyphnavNavigateFn = (opts: NavigateOptions) => Promise<RunResult>;
 
-const GlyphnavContext = createContext<GlyphnavController | null>(null);
-
-export interface GlyphnavProviderProps extends GlyphnavOptions {
-  children?: JSX.Element;
-  /**
-   * Also animate browser back/forward (popstate) traversals for the subtree.
-   * Off by design — the adapter patches nothing globally until you opt in here.
-   * @defaultValue `false`
-   */
-  animatePopState?: boolean;
-}
+const context = createSolidControllerContext();
 
 /**
  * Provide a shared controller (and base options) to the subtree. Optional —
  * the hooks work without it, each creating their own controller.
  */
-export function GlyphnavProvider(props: GlyphnavProviderProps): JSX.Element {
-  const controller = new GlyphnavController();
-  const [, options] = splitProps(props, ['children', 'animatePopState']);
-  // Keep the base options in sync as the (reactive) provider props change.
-  createRenderEffect(() => controller.update({ ...options }));
-  // The flag is treated as static; wire the listener once and tear it down with
-  // the provider.
-  if (props.animatePopState) onCleanup(controller.enableHistoryAnimation());
-
-  return createComponent(GlyphnavContext.Provider, {
-    value: controller,
-    get children() {
-      return props.children;
-    },
-  });
-}
+export const GlyphnavProvider = context.GlyphnavProvider;
 
 /**
  * Get the controller from context, or a stable per-component fallback.
@@ -72,11 +40,7 @@ export function GlyphnavProvider(props: GlyphnavProviderProps): JSX.Element {
  * provider is present).
  * @returns The shared or per-component {@link GlyphnavController}.
  */
-export function useGlyphnavController(options?: GlyphnavOptions): GlyphnavController {
-  // Solid component bodies run once, so a fresh controller here is already
-  // stable for the component's lifetime — no ref needed.
-  return useContext(GlyphnavContext) ?? new GlyphnavController(options);
-}
+export const useGlyphnavController = context.useGlyphnavController;
 
 /**
  * A `useNavigate()` replacement that plays the glyph animation before handing
@@ -141,18 +105,14 @@ export function GlyphnavLink(props: GlyphnavLinkProps): JSX.Element {
 
   const href = createMemo(() => router.buildLocation(navOpts()).href);
 
-  const handleClick: JSX.EventHandler<HTMLAnchorElement, MouseEvent> = (event) => {
-    // Forward to a user-supplied handler first (Solid's function or bound-tuple
-    // form), then bail like a good link interceptor on modified clicks.
-    const userClick = local.onClick;
-    if (Array.isArray(userClick)) userClick[0](userClick[1], event);
-    else if (typeof userClick === 'function') userClick(event);
-
-    if (isModifiedClick(event)) return; // let the browser handle modified clicks
-
-    event.preventDefault();
-    void controller.run(href(), () => router.navigate(navOpts()) as Promise<void>);
-  };
+  const handleClick: JSX.EventHandler<HTMLAnchorElement, MouseEvent> = (event) =>
+    runSolidLinkClick(
+      event,
+      local.onClick,
+      controller,
+      href(),
+      () => router.navigate(navOpts()) as Promise<void>,
+    );
 
   return createComponent(
     Dynamic,

@@ -63,3 +63,42 @@ export const currentPath = (): string => {
   const { pathname, search, hash } = window.location;
   return pathname + search + hash;
 };
+
+/**
+ * Run `navigate`, then resolve only once the address-bar path actually changes
+ * (or a short budget elapses). Some routers commit navigations asynchronously —
+ * `navigate()` returns *before* `window.location` updates (Next's App Router,
+ * Solid Router) — so with the default `commit: 'before'` the core would read the
+ * old path back and skip the on-top animation. Awaiting the settle lets it
+ * animate to the landed path, the same as a synchronous router. A no-op
+ * navigation never changes the URL and falls through after the budget. Safe in
+ * non-browser environments (runs `navigate` and returns).
+ *
+ * @param navigate - Performs the real navigation; may resolve before the URL updates.
+ * @param timeoutMs - How long to wait for the URL to change before giving up.
+ * @returns A promise that settles once the URL changes or the budget elapses,
+ * or `void` when there is no `window` to observe.
+ */
+export const settleAfter = (
+  navigate: () => void,
+  timeoutMs: number,
+): void | Promise<void> => {
+  if (typeof window === 'undefined' || !window.location) {
+    navigate();
+    return;
+  }
+  const before = currentPath();
+  navigate();
+
+  return new Promise<void>((resolve) => {
+    const start = Date.now();
+    const tick = (): void => {
+      if (currentPath() !== before || Date.now() - start >= timeoutMs) {
+        resolve();
+        return;
+      }
+      setTimeout(tick, 16);
+    };
+    tick();
+  });
+};
