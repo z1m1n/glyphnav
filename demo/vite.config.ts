@@ -278,9 +278,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    open: true,
     proxy: {
       '/next': devProxy('http://localhost:5174', 'next', 'pnpm demo:next'),
       '/nuxt': devProxy('http://localhost:5176', 'nuxt', 'pnpm demo:nuxt'),
+      '/sveltekit': devProxy('http://localhost:5177', 'sveltekit', 'pnpm demo:sveltekit'),
     },
   },
   // `vite preview` serves the built demo/dist, which already contains the
@@ -291,6 +293,7 @@ export default defineConfig({
   // "isn't running" 502 instead of the real static page. Override with an empty
   // proxy so those paths fall through to the static files.
   preview: {
+    open: true,
     proxy: {},
   },
   plugins: [

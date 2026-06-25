@@ -1,0 +1,24 @@
+{
+  "name": "@glyphnav-demo/sveltekit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SvelteKit demo for glyphnav, part of the combined demo deploy.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5177",
+    "build": "vite build",
+    "preview": "vite preview --port 5177"
+  },
+  "dependencies": {
+    "@glyphnav-demo/shared": "workspace:*",
+    "glyphnav": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "3.0.10",
+    "@sveltejs/kit": "2.67.0",
+    "@sveltejs/vite-plugin-svelte": "7.1.2",
+    "svelte": "5.56.4",
+    "typescript": "6.0.3",
+    "vite": "8.1.0"
+  }
+}

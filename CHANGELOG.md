@@ -5,6 +5,30 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased] 
+
+### Added
+
+- **SvelteKit adapter** (`glyphnav/sveltekit`): `attachGlyphnav(goto, options)`
+  for Svelte's official application framework and router. SvelteKit exposes no
+  patchable router object, so by default the adapter installs a capture-phase
+  `<a>` click listener that `preventDefault()`s eligible same-origin links —
+  making SvelteKit's own handler stand down (it bails on an already-defaulted
+  click) — and drives the real navigation through `goto` (passed in by the
+  caller, since `$app/navigation` is a virtual module only resolvable inside a
+  SvelteKit app). Every internal link therefore animates with no per-link
+  wiring, like the Nuxt plugin. Because `goto` resolves a tick before the address
+  bar settles, the adapter waits for the URL to land (like the Next App Router
+  adapter) so the default `commit: 'before'` decodes the path that actually
+  landed rather than the old one. Also exposes an animated
+  `navigate()`, a `use:link` Svelte action for opt-in per-link animation under
+  `intercept: 'none'`, and an opt-in `animatePopState`. Ships compiler-free (a
+  structurally-typed `goto`, no Svelte import); `@sveltejs/kit` (`>=2`) and
+  `svelte` (`>=4`) are optional peer dependencies. The shared `eligibleAnchor`
+  link-eligibility rules move into the internal module so the vanilla `install()`
+  and the SvelteKit adapter define them once. Adds the eleventh package entry
+  point and a live SvelteKit demo to the playground.
+
 ## [2.1.0] - 2026-06-24
 
 ### Added

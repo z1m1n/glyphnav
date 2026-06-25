@@ -42,6 +42,7 @@ const targets = [
   '/angular-router',
   '/next',
   '/nuxt',
+  '/sveltekit',
 ];
 // Each pass picks the next style, so successive links never scramble the same
 // way twice: a different glyph pool, effect and per-frame speed every time.
