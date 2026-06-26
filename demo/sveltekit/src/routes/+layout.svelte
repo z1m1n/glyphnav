@@ -233,7 +233,11 @@
 
   <footer class="site-footer">
     <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
-    <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">npm package</a>
+    <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">NPM</a>
+    <!-- The changelog is part of the combined demo site (one level up from this
+         app's base); `data-glyphnav="off"` opts it out of the link animation so
+         it does a real full-page navigation out of the SPA, like the home link. -->
+    <a href="{rootHref}changelog/" data-glyphnav="off">Changelog</a>
     <span class="stack">{stack}</span>
   </footer>
 </div>

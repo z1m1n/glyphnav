@@ -17,3 +17,10 @@ declare module '*.svg' {
   const src: string;
   export default src;
 }
+
+// Vite's `?raw` suffix inlines a file's contents as a string — the changelog
+// demo imports the project CHANGELOG.md this way to render it as markdown.
+declare module '*?raw' {
+  const content: string;
+  export default content;
+}

@@ -44,12 +44,17 @@
      rounded look stays consistent. */
   --radius: 4px;
 
-  /* Responsive breakpoint (≈ the centred column width + room for the toggle).
-     Heads-up: native CSS can't read a custom property inside an @media
-     condition, so the @media rule below repeats the literal — this token is the
-     single documented source of the value; keep the two in sync. (No
-     preprocessor / build transform here, by design.) */
-  --bp-mobile: 48rem;
+  /* Responsive breakpoints, in pixels. Heads-up: native CSS can't read a custom
+     property inside an @media condition, so each @media rule below repeats the
+     literal px value — these tokens are the single documented source, so keep the
+     two in sync. (No preprocessor / build transform here, by design.) Of the four,
+     `--bp-md` (single-column grid + in-flow theme toggle) and `--bp-xl` (the wider
+     reading column) are the ones currently driving media queries; `--bp-xs` and
+     `--bp-sm` are defined for completeness. */
+  --bp-xs: 480px;
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-xl: 1280px;
 
   /* Syntax-highlight tokens (see demo/highlight.ts) — light values; the dark
      theme overrides each one below, so the highlighter markup stays the same. */
@@ -127,6 +132,15 @@ body {
   min-height: calc(100dvh - 5rem);
   display: flex;
   flex-direction: column;
+}
+
+/* Roomier reading column on large screens (≥ --bp-xl): the demo-picker card grid
+   and the code panels get more breathing space, while narrower viewports keep the
+   compact 44rem column above. */
+@media (min-width: 1280px) {
+  body {
+    max-width: 60rem;
+  }
 }
 
 /* Links use --blue, visited and unvisited alike (no violet fade). Declared
@@ -531,25 +545,215 @@ nav {
   }
 }
 
-/* Landing page demo picker. */
+/* Landing page demo picker — 2-column card grid. */
 .pick {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.875rem;
   margin: 1.5rem 0;
   padding: 0;
   list-style: none;
 
-  li {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: baseline;
+  & li {
+    /* Become transparent to the grid so the <a> card is the direct grid item. */
+    display: contents;
+  }
+}
+
+/* Demo picker card — the <a> itself is the grid cell. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  text-decoration: none;
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+  /* Hover only recolours the border and lifts a soft shadow — the card stays put
+     (no translate), so the icon and title never shift or spring on enter/leave. */
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+
+  /* One-shot shimmer sweep on hover enter. */
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -80%;
+    width: 55%;
+    height: 200%;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 70%
+    );
+    transform: skewX(-20deg);
+    pointer-events: none;
   }
 
-  .hint {
-    color: var(--gray);
-    font-size: 0.85rem;
+  &:hover {
+    border-color: var(--card-accent, var(--blue));
+    box-shadow:
+      0 12px 36px -10px color-mix(in srgb, var(--card-accent, var(--blue)) 28%, transparent),
+      0 3px 10px -4px rgba(0, 0, 0, 0.08);
+
+    &::after {
+      animation: card-shimmer 0.55s ease forwards;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--card-accent, var(--blue));
+    outline-offset: 3px;
+  }
+}
+
+@keyframes card-shimmer {
+  from {
+    left: -80%;
+  }
+  to {
+    left: 120%;
+  }
+}
+
+/* Dim the shimmer on dark backgrounds — pure white is too punchy. */
+:root[data-theme='dark'] .card::after {
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 70%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Drop the shimmer sweep; the border/shadow recolour stays (it doesn't move). */
+  .card::after {
+    display: none;
+  }
+}
+
+/* Card internals. */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  flex-shrink: 0;
+}
+/* The /core card uses the glyphnav mark itself (an <img>). The default badge is
+   dark with light glyphs and would vanish on the dark page, so swap it for the
+   inverted variant via `content` — same trick the masthead .glyph-mark uses. */
+:root[data-theme='dark'] [data-fw='core'] .card-icon {
+  content: url('./logo-dark.svg');
+}
+
+.card-router {
+  font-size: 0.72rem;
+  color: var(--gray);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.card-desc {
+  font-size: 0.78rem;
+  color: var(--gray);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Per-framework accent colours.
+   Light-mode values are darkened enough for AA contrast on white (#ffffff).
+   Dark-mode overrides are brighter so they clear AA on the dark surface (#16181c). */
+[data-fw='vanilla'] {
+  --card-accent: #b08e00;
+}
+[data-fw='core'] {
+  --card-accent: #4d7cff;
+}
+[data-fw='vue-router'] {
+  --card-accent: #2e9b68;
+}
+[data-fw='react-router'] {
+  --card-accent: #0891b0;
+}
+[data-fw='solid-router'] {
+  --card-accent: #3a6096;
+}
+[data-fw='tanstack-react'] {
+  --card-accent: #c55e00;
+}
+[data-fw='tanstack-solid'] {
+  --card-accent: #c55e00;
+}
+[data-fw='angular-router'] {
+  --card-accent: #aa0026;
+}
+[data-fw='next'] {
+  --card-accent: var(--ink);
+}
+[data-fw='nuxt'] {
+  --card-accent: #008f60;
+}
+[data-fw='sveltekit'] {
+  --card-accent: #c23000;
+}
+
+:root[data-theme='dark'] {
+  [data-fw='vanilla'] {
+    --card-accent: #e8c000;
+  }
+  [data-fw='vue-router'] {
+    --card-accent: #4ec990;
+  }
+  [data-fw='react-router'] {
+    --card-accent: #22c4e6;
+  }
+  [data-fw='solid-router'] {
+    --card-accent: #7aaee0;
+  }
+  [data-fw='tanstack-react'] {
+    --card-accent: #ff8c30;
+  }
+  [data-fw='tanstack-solid'] {
+    --card-accent: #ff8c30;
+  }
+  [data-fw='angular-router'] {
+    --card-accent: #ff5070;
+  }
+  [data-fw='nuxt'] {
+    --card-accent: #00dc82;
+  }
+  [data-fw='sveltekit'] {
+    --card-accent: #ff5e2e;
+  }
+}
+
+/* Mobile (≤ --bp-md): single column. */
+@media (max-width: 768px) {
+  .pick {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -638,12 +842,12 @@ code {
   }
 }
 
-/* Narrow screens — at/below --bp-mobile (48rem; literal repeated here because a
+/* Narrow screens — at/below --bp-md (768px; literal repeated here because a
    @media condition can't read a custom property). A viewport-fixed toggle would
    float over the content as the page scrolls and crowd the title row, so pin it
    to the top-right of the page instead — it scrolls away with the header rather
    than overlapping anything — and reserve room for it in the masthead h1. */
-@media (max-width: 48rem) {
+@media (max-width: 768px) {
   body {
     position: relative;
   }

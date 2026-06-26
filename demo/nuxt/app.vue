@@ -222,9 +222,10 @@ watch(backForward, () => {
 
     <footer class="site-footer">
       <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener"
-        >npm package</a
-      >
+      <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">NPM</a>
+      <!-- The changelog lives in the combined demo site, one level up from this
+           app's base — a plain anchor so it does a full navigation. -->
+      <a :href="`${rootHref}changelog/`">Changelog</a>
       <span class="stack">{{ stack }}</span>
     </footer>
   </div>

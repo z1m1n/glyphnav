@@ -32,6 +32,7 @@
   },
   "include": [
     "main.ts",
+    "changelog/main.ts",
     "shared/content.ts",
     "shared/highlight.ts",
     "shims-vue.d.ts",

@@ -83,48 +83,241 @@
 
     <ul class="pick">
       <li>
-        <a href="/vanilla/">→ /vanilla</a
-        ><span class="hint">no framework — install() hijacks links</span>
+        <a class="card" href="/vanilla/" data-fw="vanilla">
+          <div class="card-header">
+            <!-- JavaScript -->
+            <svg class="card-icon" viewBox="0 0 128 128" aria-hidden="true">
+              <path fill="#f0db4f" d="M1.408 1.408h125.184v125.185H1.408z" />
+              <path
+                fill="#323330"
+                d="M116.347 96.736c-.917-5.711-4.641-10.508-15.672-14.981-3.832-1.761-8.104-3.022-9.377-5.926-.452-1.69-.512-2.642-.226-3.665.821-3.32 4.784-4.355 7.925-3.403 2.023.678 3.938 2.237 5.093 4.724 5.402-3.498 5.391-3.475 9.163-5.879-1.381-2.141-2.118-3.129-3.022-4.045-3.249-3.629-7.676-5.498-14.756-5.355l-3.688.477c-3.534.893-6.902 2.748-8.877 5.235-5.926 6.724-4.236 18.492 2.975 23.335 7.104 5.332 17.54 6.545 18.873 11.531 1.297 6.104-4.486 8.08-10.234 7.378-4.236-.881-6.592-3.034-9.139-6.949-4.688 2.713-4.688 2.713-9.508 5.485 1.143 2.499 2.344 3.63 4.26 5.795 9.068 9.198 31.76 8.746 35.83-5.176.165-.478 1.261-3.666.38-8.581zM69.462 58.943H57.753l-.048 30.272c0 6.438.333 12.34-.714 14.149-1.713 3.558-6.152 3.117-8.175 2.427-2.059-1.012-3.106-2.451-4.319-4.485-.333-.584-.583-1.036-.667-1.071l-9.52 5.83c1.583 3.249 3.915 6.069 6.902 7.901 4.462 2.678 10.459 3.499 16.731 2.059 4.082-1.189 7.604-3.652 9.448-7.401 2.666-4.915 2.094-10.864 2.07-17.444.06-10.735.001-21.468.001-32.237z"
+              />
+            </svg>
+            <span class="card-router">install() · no framework</span>
+          </div>
+          <strong class="card-name">vanilla</strong>
+          <p class="card-desc">
+            Hijacks plain &lt;a&gt; clicks via the History API — zero dependencies, no build step
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/core/">→ /core</a
-        ><span class="hint">just the engine — decode any text, not just URLs</span>
+        <a class="card" href="/core/" data-fw="core">
+          <div class="card-header">
+            <!-- glyphnav's own mark — the engine behind every adapter -->
+            <img class="card-icon" src="./shared/logo.svg" alt="" />
+            <span class="card-router">core · framework-agnostic</span>
+          </div>
+          <strong class="card-name">core</strong>
+          <p class="card-desc">
+            Decode any DOM text — animate content directly, not just address bar URLs
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/vue-router/">→ /vue-router</a
-        ><span class="hint">plugin wraps router.push / router.replace</span>
+        <a class="card" href="/vue-router/" data-fw="vue-router">
+          <div class="card-header">
+            <!-- Vue.js -->
+            <svg class="card-icon" viewBox="0 0 255 221" aria-hidden="true">
+              <polygon fill="#41B883" points="127.5,221 0,0 63.75,0 127.5,110.5 191.25,0 255,0" />
+              <polygon fill="#35495E" points="127.5,144 85,70 107,70 127.5,107 148,70 170,70" />
+            </svg>
+            <span class="card-router">Vue Router · plugin</span>
+          </div>
+          <strong class="card-name">vue-router</strong>
+          <p class="card-desc">
+            Plugin wraps router.push and router.replace — useGlyphnav() composable
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/react-router/">→ /react-router</a
-        ><span class="hint">GlyphnavLink + useGlyphnavNavigate</span>
+        <a class="card" href="/react-router/" data-fw="react-router">
+          <div class="card-header">
+            <!-- React -->
+            <svg class="card-icon" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+              <g stroke="#61DAFB" stroke-width="4.5">
+                <ellipse cx="50" cy="50" rx="47" ry="17.5" />
+                <ellipse cx="50" cy="50" rx="47" ry="17.5" transform="rotate(60 50 50)" />
+                <ellipse cx="50" cy="50" rx="47" ry="17.5" transform="rotate(120 50 50)" />
+              </g>
+              <circle cx="50" cy="50" r="6" fill="#61DAFB" />
+            </svg>
+            <span class="card-router">React Router · hooks</span>
+          </div>
+          <strong class="card-name">react-router</strong>
+          <p class="card-desc">
+            &lt;GlyphnavLink&gt; + useGlyphnavNavigate() — drop-ins for &lt;Link&gt; and useNavigate
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/solid-router/">→ /solid-router</a
-        ><span class="hint">Solid — drop-in &lt;A&gt; via GlyphnavLink</span>
+        <a class="card" href="/solid-router/" data-fw="solid-router">
+          <div class="card-header">
+            <!-- SolidJS -->
+            <svg class="card-icon" viewBox="0 0 128 128" aria-hidden="true">
+              <path
+                fill="#76b3e1"
+                d="M128 29.683S85.333-1.713 52.327 5.532l-2.415.805c-4.83 1.61-8.855 4.025-11.27 7.245l-1.61 2.415-12.076 20.931 20.93 4.025c8.856 5.636 20.127 8.05 30.592 5.636l37.031 7.245z"
+              />
+              <path
+                fill="#518ac8"
+                d="m38.642 29.683-3.22.805C21.735 34.513 17.71 47.394 24.955 58.664c8.05 10.465 24.956 16.1 38.641 12.076l49.912-16.906S70.843 22.438 38.642 29.683z"
+              />
+              <path
+                fill="#4377bb"
+                d="M104.654 65.91a36.226 36.226 0 0 0-38.641-12.076L16.1 69.934 0 98.111l90.164 15.295 16.1-28.981c3.22-5.635 2.415-12.075-1.61-18.516z"
+              />
+              <path
+                fill="#1f3b77"
+                d="M88.553 94.085A36.226 36.226 0 0 0 49.912 82.01L0 98.11s42.667 32.202 75.673 24.152l2.415-.806c13.686-4.025 18.516-16.905 10.465-27.37z"
+              />
+            </svg>
+            <span class="card-router">Solid Router · component</span>
+          </div>
+          <strong class="card-name">solid-router</strong>
+          <p class="card-desc">
+            Drop-in &lt;A&gt; replacement via &lt;GlyphnavLink&gt; — reactive signals, no VDOM
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/tanstack-router/react/">→ /tanstack-router/react</a
-        ><span class="hint">React — GlyphnavLink + useGlyphnavNavigate</span>
+        <a class="card" href="/tanstack-router/react/" data-fw="tanstack-react">
+          <div class="card-header">
+            <!-- React -->
+            <svg class="card-icon" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+              <g stroke="#61DAFB" stroke-width="4.5">
+                <ellipse cx="50" cy="50" rx="47" ry="17.5" />
+                <ellipse cx="50" cy="50" rx="47" ry="17.5" transform="rotate(60 50 50)" />
+                <ellipse cx="50" cy="50" rx="47" ry="17.5" transform="rotate(120 50 50)" />
+              </g>
+              <circle cx="50" cy="50" r="6" fill="#61DAFB" />
+            </svg>
+            <span class="card-router">TanStack Router</span>
+          </div>
+          <strong class="card-name">tanstack-router/react</strong>
+          <p class="card-desc">
+            &lt;GlyphnavLink&gt; + useGlyphnavNavigate() for TanStack's fully type-safe router
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/tanstack-router/solid/">→ /tanstack-router/solid</a
-        ><span class="hint">Solid — same engine, Solid bindings</span>
+        <a class="card" href="/tanstack-router/solid/" data-fw="tanstack-solid">
+          <div class="card-header">
+            <!-- SolidJS -->
+            <svg class="card-icon" viewBox="0 0 128 128" aria-hidden="true">
+              <path
+                fill="#76b3e1"
+                d="M128 29.683S85.333-1.713 52.327 5.532l-2.415.805c-4.83 1.61-8.855 4.025-11.27 7.245l-1.61 2.415-12.076 20.931 20.93 4.025c8.856 5.636 20.127 8.05 30.592 5.636l37.031 7.245z"
+              />
+              <path
+                fill="#518ac8"
+                d="m38.642 29.683-3.22.805C21.735 34.513 17.71 47.394 24.955 58.664c8.05 10.465 24.956 16.1 38.641 12.076l49.912-16.906S70.843 22.438 38.642 29.683z"
+              />
+              <path
+                fill="#4377bb"
+                d="M104.654 65.91a36.226 36.226 0 0 0-38.641-12.076L16.1 69.934 0 98.111l90.164 15.295 16.1-28.981c3.22-5.635 2.415-12.075-1.61-18.516z"
+              />
+              <path
+                fill="#1f3b77"
+                d="M88.553 94.085A36.226 36.226 0 0 0 49.912 82.01L0 98.11s42.667 32.202 75.673 24.152l2.415-.806c13.686-4.025 18.516-16.905 10.465-27.37z"
+              />
+            </svg>
+            <span class="card-router">TanStack Router</span>
+          </div>
+          <strong class="card-name">tanstack-router/solid</strong>
+          <p class="card-desc">
+            Same engine, Solid signals — TanStack's type-safe routing with reactive primitives
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/angular-router/">→ /angular-router</a
-        ><span class="hint">provideGlyphnav + [glyphnavLink] directive (JIT)</span>
+        <a class="card" href="/angular-router/" data-fw="angular-router">
+          <div class="card-header">
+            <!-- Angular -->
+            <svg class="card-icon" viewBox="0 0 250 266" aria-hidden="true">
+              <path fill="#E23237" d="M125 3L5 45l17.5 150L125 263l102.5-68L245 45z" />
+              <path fill="#B52E31" d="M125 3v260l102.5-68L245 45z" />
+              <path fill="white" d="M125 37L63 185h22l13-31h54l13 31h22L125 37zm0 44l18 44h-36z" />
+            </svg>
+            <span class="card-router">Angular Router · directive</span>
+          </div>
+          <strong class="card-name">angular-router</strong>
+          <p class="card-desc">
+            provideGlyphnav() + [glyphnavLink] attribute directive — JIT mode, standalone
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/next/">→ /next</a
-        ><span class="hint">Next.js App Router — GlyphnavLink + useGlyphnavNavigate</span>
+        <a class="card" href="/next/" data-fw="next">
+          <div class="card-header">
+            <!-- Next.js -->
+            <svg class="card-icon" viewBox="0 0 180 180" aria-hidden="true">
+              <circle cx="90" cy="90" r="90" fill="#000" />
+              <path
+                fill="white"
+                d="M149 153.5L70 54H54v72h13.5V73.5l73 94.5c4.5-4.2 7-8.5 8.5-14.5zM116 54h13.5v72H116z"
+              />
+            </svg>
+            <span class="card-router">Next.js · App Router</span>
+          </div>
+          <strong class="card-name">next</strong>
+          <p class="card-desc">
+            &lt;GlyphnavProvider&gt; in root layout + &lt;GlyphnavLink&gt; and useGlyphnavNavigate()
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/nuxt/">→ /nuxt</a
-        ><span class="hint">Nuxt — client plugin wraps router.push / navigateTo</span>
+        <a class="card" href="/nuxt/" data-fw="nuxt">
+          <div class="card-header">
+            <!-- Nuxt -->
+            <svg class="card-icon" viewBox="0 0 128 128" aria-hidden="true">
+              <path
+                fill="#00c58e"
+                d="M39.267 108.97l-.284-.567c-.567-1.135-.567-2.27-.283-3.689H8.059L53.454 24.14l19.009 34.33 6.241-4.54L59.695 19.6c-.283-.567-2.553-3.971-6.241-3.971-1.703 0-4.256.567-6.242 4.255L1.25 101.31c-.284.852-2.27 4.54-.568 7.66 1.135 1.703 2.838 3.405 6.81 3.405h38.585c-3.972 0-5.958-1.702-6.81-3.404z"
+              />
+              <path
+                fill="#108775"
+                d="M126.65 101.59L89.767 35.201c-.567-.567-2.553-4.256-6.242-4.256-1.702 0-4.255.851-6.241 4.256l-4.823 7.944v15.321l11.065-19.009 36.599 65.254h-13.902a6.525 6.525 0 01-.568 3.972l-.284.284c-1.702 3.12-5.958 3.404-6.525 3.404h21.562c.851 0 4.823-.283 6.809-3.404.851-1.419 1.419-3.972-.567-7.377z"
+              />
+              <path
+                fill="#2f495e"
+                d="M106.51 108.97v-.284l.284-.567c.283-1.135.567-2.27.283-3.405l-1.134-3.404-28.938-50.501-4.256-7.66h-.284l-4.256 7.66-28.938 50.5-1.134 3.405a6.81 6.81 0 00.567 4.256c1.135 1.702 2.837 3.405 6.809 3.405h53.906c.851 0 5.107-.284 7.093-3.405zM72.464 58.469l26.386 46.245H46.079z"
+              />
+            </svg>
+            <span class="card-router">Nuxt · client plugin</span>
+          </div>
+          <strong class="card-name">nuxt</strong>
+          <p class="card-desc">
+            Client plugin wraps router.push and navigateTo — $glyphnav injected into NuxtApp
+          </p>
+        </a>
       </li>
       <li>
-        <a href="/sveltekit/">→ /sveltekit</a
-        ><span class="hint">SvelteKit — attachGlyphnav(goto) intercepts &lt;a&gt; clicks</span>
+        <a class="card" href="/sveltekit/" data-fw="sveltekit">
+          <div class="card-header">
+            <!-- Svelte -->
+            <svg class="card-icon" viewBox="0 0 98.1 118" aria-hidden="true">
+              <path
+                fill="#FF3E00"
+                d="M91.8 15.6C80.9-.1 59.2-4.7 43.6 5.2L16.1 22.8C8.6 27.5 3.4 35.2 2 44c-1.3 7.4.8 15 5.7 20.8-.8 1.4-1.4 2.9-1.9 4.5-1.3 7.4.8 15 5.7 20.8 11 15.7 32.6 20.3 48.2 10.4l27.5-17.5c7.5-4.7 12.7-12.4 14.1-21.2 1.3-7.4-.8-15-5.7-20.8.8-1.4 1.4-2.9 1.9-4.5 1.2-7.4-.9-15-5.7-20.9z"
+              />
+              <path
+                fill="white"
+                d="M60.2 95.8c-6.2 3.9-13.7 5.1-20.8 3.2-5.6-1.6-10.3-5.5-13-10.9-4.3-8.6-1.2-19.1 6.9-24.2l.3-.2 5.5 9.6-.3.2c-2.1 1.3-3.5 3.4-4 5.7-.5 2.5.1 5.1 1.6 7.1 3 3.7 8.2 4.7 12.5 2.4l27.5-17.5c1.9-1.2 3.2-3.1 3.6-5.2.5-2.2.1-4.5-1.1-6.4-3-3.9-8.4-5-12.7-2.7l-.3.2-5.5-9.6.3-.2c9.7-6.1 22.3-3.1 28.4 6.7 3.1 5 4.2 11.1 3 16.9-1.2 5.8-4.6 10.9-9.4 14.1z"
+              />
+              <path
+                fill="white"
+                d="M37.9 22.2c6.2-3.9 13.7-5.1 20.8-3.2 5.6 1.6 10.3 5.5 13 10.9 4.3 8.6 1.2 19.1-6.9 24.2l-.3.2-5.5-9.6.3-.2c2.1-1.3 3.5-3.4 4-5.7.5-2.5-.1-5.1-1.6-7.1-3-3.7-8.2-4.7-12.5-2.4L22.7 54.8c-1.9 1.2-3.2 3.1-3.6 5.2-.5 2.2-.1 4.5 1.1 6.4 3 3.9 8.4 5 12.7 2.7l.3-.2 5.6 9.6-.3.2C28 84.8 15.4 81.8 9.3 72c-3.1-5-4.2-11.1-3-16.9 1.2-5.8 4.6-10.9 9.4-14.1z"
+              />
+            </svg>
+            <span class="card-router">SvelteKit · goto wrapper</span>
+          </div>
+          <strong class="card-name">sveltekit</strong>
+          <p class="card-desc">
+            attachGlyphnav(goto) intercepts &lt;a&gt; clicks — use:link action, compiler-free, no
+            build-time transform
+          </p>
+        </a>
       </li>
     </ul>
 
@@ -137,9 +330,8 @@
 
     <footer class="site-footer">
       <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener"
-        >npm package</a
-      >
+      <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">NPM</a>
+      <a href="/changelog/">Changelog</a>
     </footer>
 
     <!--

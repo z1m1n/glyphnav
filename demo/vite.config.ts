@@ -48,6 +48,7 @@ const glyphnavVersion = (
 const STACK_BY_APP: Record<string, () => string> = {
   vanilla: () => `glyphnav ${glyphnavVersion}`,
   core: () => `glyphnav ${glyphnavVersion}`,
+  changelog: () => `glyphnav ${glyphnavVersion}`,
   'vue-router': () => `vue ${pkgVersion('vue')} · vue-router ${pkgVersion('vue-router')}`,
   'react-router': () => `react ${pkgVersion('react')} · react-router ${pkgVersion('react-router')}`,
   'solid-router': () =>
@@ -328,6 +329,7 @@ export default defineConfig({
         main: r('index.html'),
         vanilla: r('vanilla/index.html'),
         core: r('core/index.html'),
+        changelog: r('changelog/index.html'),
         'vue-router': r('vue-router/index.html'),
         'react-router': r('react-router/index.html'),
         'solid-router': r('solid-router/index.html'),

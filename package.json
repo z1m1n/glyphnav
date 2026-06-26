@@ -144,6 +144,7 @@
     "@vitejs/plugin-vue": "6.0.7",
     "@vitest/coverage-v8": "4.1.9",
     "jsdom": "29.1.1",
+    "marked": "18.0.5",
     "next": "16.2.9",
     "npm-run-all2": "9.0.2",
     "oxfmt": "0.56.0",

@@ -30,7 +30,7 @@ below. Install with `pnpm add glyphnav` (npm/yarn work too).
 
 - [npm package](https://www.npmjs.com/package/glyphnav): `pnpm add glyphnav`
 - [Source & full README](https://github.com/z1m1n/glyphnav): API reference, options and per-adapter setup
-- [Changelog](https://github.com/z1m1n/glyphnav/blob/master/CHANGELOG.md)
+- [Changelog](https://z1m1n.github.io/glyphnav/changelog/): every release's added/changed/fixed notes, rendered from the project CHANGELOG
 
 ## API at a glance
 

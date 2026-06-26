@@ -3,34 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>glyphnav — angular-router</title>
+    <title>glyphnav — changelog</title>
     <meta
       name="description"
-      content="glyphnav for Angular Router: provideGlyphnav and the [glyphnavLink] directive animate the destination URL in the address bar. Live, interactive demo."
+      content="Release history for glyphnav — every version's added, changed and fixed notes, rendered from the project CHANGELOG."
     />
-    <link rel="canonical" href="https://z1m1n.github.io/glyphnav/angular-router/" />
+    <link rel="canonical" href="https://z1m1n.github.io/glyphnav/changelog/" />
     <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="https://z1m1n.github.io/glyphnav/favicon.svg" type="image/svg+xml" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="glyphnav" />
-    <meta property="og:title" content="glyphnav — Angular Router demo" />
+    <meta property="og:title" content="glyphnav — changelog" />
     <meta
       property="og:description"
-      content="provideGlyphnav and the [glyphnavLink] directive animate the destination URL in the address bar on Angular Router navigation."
+      content="Release history for glyphnav — every version's added, changed and fixed notes."
     />
-    <meta property="og:url" content="https://z1m1n.github.io/glyphnav/angular-router/" />
+    <meta property="og:url" content="https://z1m1n.github.io/glyphnav/changelog/" />
     <meta property="og:image" content="https://z1m1n.github.io/glyphnav/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://z1m1n.github.io/glyphnav/og.png" />
     <link rel="stylesheet" href="../shared/styles.css" />
   </head>
   <body>
-    <app-root></app-root>
+    <h1>
+      <img class="glyph-mark" src="../shared/logo.svg" alt="" />
+      <a href="/">glyphnav</a>
+      <span class="sep">/</span>
+      <span class="crumb">changelog</span>
+    </h1>
+
+    <p>
+      Every release of glyphnav, rendered from the project's
+      <a
+        href="https://github.com/z1m1n/glyphnav/blob/master/CHANGELOG.md"
+        target="_blank"
+        rel="noopener"
+        >CHANGELOG.md</a
+      >. Newest first.
+    </p>
+
+    <!-- The markdown is parsed and injected here at runtime (demo/changelog/main.ts). -->
+    <article class="view docs" id="changelog"></article>
 
     <footer class="site-footer">
       <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">NPM</a>
-      <a href="/changelog/" data-glyphnav="off">Changelog</a>
       <span class="stack">__STACK__</span>
     </footer>
 

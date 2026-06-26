@@ -216,8 +216,11 @@ function Inner({ children }: { children: ReactNode }) {
           GitHub
         </a>
         <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">
-          npm package
+          NPM
         </a>
+        {/* The changelog page is part of the combined demo site, one level up
+            from this app's base path — a plain anchor (full navigation). */}
+        <a href={`${ROOT_HREF}changelog/`}>Changelog</a>
         <span className="stack">{process.env.NEXT_PUBLIC_STACK}</span>
       </footer>
     </>
