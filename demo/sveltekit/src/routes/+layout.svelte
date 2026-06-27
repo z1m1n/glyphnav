@@ -2,7 +2,8 @@
   import '@glyphnav-demo/shared/styles.css';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
+  import { page } from '$app/state';
   import { attachGlyphnav } from 'glyphnav/sveltekit';
   import type { SvelteKitGlyphnavInstance } from 'glyphnav/sveltekit';
   import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -25,8 +26,24 @@
   const tips = CONTROL_TOOLTIPS;
   const stack = GLYPHNAV_STACK;
 
-  // The picker lives one level up from this app's base (`…/sveltekit` → `…/`).
-  const rootHref = base.replace(/\/sveltekit$/, '') + '/' || '/';
+  // `resolve` prefixes the configured `paths.base` (the non-deprecated successor
+  // to the `base` string). The picker lives one level up from this app's base
+  // (`…/sveltekit/` → `…/`).
+  const rootHref = resolve('/').replace(/sveltekit\/?$/, '');
+
+  // Base-prefixed nav targets, resolved once so each link's `href` and its
+  // active-state check below compare the exact same path.
+  const homeHref = resolve('/');
+  const aboutHref = resolve('/about/');
+  const docsHref = resolve('/docs/');
+  const featuresHref = resolve('/features/');
+
+  // A nav link is active when it points at the current page (trailing slash
+  // ignored, so `/sveltekit/` matches home). Called from the template's
+  // `class:active` so the `$app/state` page signal is tracked at runtime — a
+  // legacy `$:` block wouldn't react to its internal mutation.
+  const isActive = (href: string): boolean =>
+    page.url.pathname.replace(/\/+$/, '') === href.replace(/\/+$/, '');
 
   // State starts at the defaults so the prerendered markup is stable; the saved
   // toolbar is restored on the client after mount.
@@ -159,17 +176,17 @@
   </p>
 
   <nav aria-label="demo pages">
-    <a href="{base}/">home</a>
-    <a href="{base}/about/">about</a>
-    <a href="{base}/docs/">docs</a>
-    <a href="{base}/features/">features</a>
+    <a href={homeHref} class:active={isActive(homeHref)}>home</a>
+    <a href={aboutHref} class:active={isActive(aboutHref)}>about</a>
+    <a href={docsHref} class:active={isActive(docsHref)}>docs</a>
+    <a href={featuresHref} class:active={isActive(featuresHref)}>features</a>
   </nav>
 
   <nav class="deep" aria-label="deep links">
     deep links:
-    <a href="{base}/about/?ref=deep&amp;page=2">?query</a>
-    <a href="{base}/docs/#options">#hash</a>
-    <a href="{base}/about/?q=glyph#results">?query+#hash</a>
+    <a href={resolve('/about/?ref=deep&page=2')}>?query</a>
+    <a href={resolve('/docs/#options')}>#hash</a>
+    <a href={resolve('/about/?q=glyph#results')}>?query+#hash</a>
   </nav>
 
   <div class="controls">

@@ -48,8 +48,13 @@ export interface GotoOptions {
   keepFocus?: boolean;
   /** Re-run all `load` functions for the new page. */
   invalidateAll?: boolean;
-  /** State to associate with the new history entry (`page.state`). */
-  state?: unknown;
+  /**
+   * State to associate with the new history entry (`page.state`). Typed `object`
+   * — assignable to SvelteKit's app-augmented `App.PageState` — so the real
+   * `goto` stays assignable to {@link Goto} without the adapter importing
+   * `@sveltejs/kit`.
+   */
+  state?: object;
 }
 
 /** Per-navigation overrides forwarded to SvelteKit's `goto`. */
@@ -62,8 +67,8 @@ export interface SvelteKitNavigateExtras {
   keepFocus?: boolean;
   /** Forwarded to `goto` as `invalidateAll`. */
   invalidateAll?: boolean;
-  /** Forwarded to `goto` as `state`. */
-  state?: unknown;
+  /** Forwarded to `goto` as `state` (SvelteKit's `App.PageState`). */
+  state?: object;
 }
 
 export interface SvelteKitGlyphnavOptions extends GlyphnavOptions {
