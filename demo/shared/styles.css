@@ -649,8 +649,8 @@ nav {
 }
 
 .card-icon {
-  width: 1.3rem;
-  height: 1.3rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex-shrink: 0;
 }
 /* The /core card uses the glyphnav mark itself (an <img>). The default badge is
