@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Smaller type declarations (~74%).** The published `.d.ts` dropped from
+  ~270 KB to ~70 KB. They are now emitted per source file (`vite-plugin-dts`
+  with `bundleTypes: false`) so the core API is shared by reference across the
+  framework adapters instead of being inlined into every entry point. Inferred
+  inline `import('react').X` references are hoisted to top-level imports
+  (`staticImport`), and the two React `<GlyphnavLink>` components annotate their
+  return type as `ReactElement` so each no longer emits a ~24 KB inferred anchor
+  type. Full TSDoc is preserved for editor hover.
+- **`dist` layout.** Each entry point now ships as
+  `dist/<name>/index.{js,cjs,d.ts}` (previously a flat `dist/<name>.{js,cjs}`
+  plus a bundled `.d.ts`), so every entry's JavaScript sits next to its
+  declaration file. This is wired through the package `exports` map, so the
+  import specifiers (`glyphnav`, `glyphnav/core`, `glyphnav/react-router`, …)
+  are unchanged. The declaration files target bundler module resolution
+  (`moduleResolution: "bundler"`), not `node16`/`nodenext`.
+
 ## [2.2.0] - 2026-06-25
 
 ### Added

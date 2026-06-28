@@ -50,54 +50,54 @@
       "require": "./dist/index.cjs"
     },
     "./core": {
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js",
-      "require": "./dist/core.cjs"
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
     },
     "./vue-router": {
-      "types": "./dist/vue-router.d.ts",
-      "import": "./dist/vue-router.js",
-      "require": "./dist/vue-router.cjs"
+      "types": "./dist/vue-router/index.d.ts",
+      "import": "./dist/vue-router/index.js",
+      "require": "./dist/vue-router/index.cjs"
     },
     "./react-router": {
-      "types": "./dist/react-router.d.ts",
-      "import": "./dist/react-router.js",
-      "require": "./dist/react-router.cjs"
+      "types": "./dist/react-router/index.d.ts",
+      "import": "./dist/react-router/index.js",
+      "require": "./dist/react-router/index.cjs"
     },
     "./solid-router": {
-      "types": "./dist/solid-router.d.ts",
-      "import": "./dist/solid-router.js",
-      "require": "./dist/solid-router.cjs"
+      "types": "./dist/solid-router/index.d.ts",
+      "import": "./dist/solid-router/index.js",
+      "require": "./dist/solid-router/index.cjs"
     },
     "./tanstack-router/react": {
-      "types": "./dist/tanstack-router/react.d.ts",
-      "import": "./dist/tanstack-router/react.js",
-      "require": "./dist/tanstack-router/react.cjs"
+      "types": "./dist/tanstack-router/react/index.d.ts",
+      "import": "./dist/tanstack-router/react/index.js",
+      "require": "./dist/tanstack-router/react/index.cjs"
     },
     "./tanstack-router/solid": {
-      "types": "./dist/tanstack-router/solid.d.ts",
-      "import": "./dist/tanstack-router/solid.js",
-      "require": "./dist/tanstack-router/solid.cjs"
+      "types": "./dist/tanstack-router/solid/index.d.ts",
+      "import": "./dist/tanstack-router/solid/index.js",
+      "require": "./dist/tanstack-router/solid/index.cjs"
     },
     "./angular-router": {
-      "types": "./dist/angular-router.d.ts",
-      "import": "./dist/angular-router.js",
-      "require": "./dist/angular-router.cjs"
+      "types": "./dist/angular-router/index.d.ts",
+      "import": "./dist/angular-router/index.js",
+      "require": "./dist/angular-router/index.cjs"
     },
     "./next": {
-      "types": "./dist/next.d.ts",
-      "import": "./dist/next.js",
-      "require": "./dist/next.cjs"
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js",
+      "require": "./dist/next/index.cjs"
     },
     "./nuxt": {
-      "types": "./dist/nuxt.d.ts",
-      "import": "./dist/nuxt.js",
-      "require": "./dist/nuxt.cjs"
+      "types": "./dist/nuxt/index.d.ts",
+      "import": "./dist/nuxt/index.js",
+      "require": "./dist/nuxt/index.cjs"
     },
     "./sveltekit": {
-      "types": "./dist/sveltekit.d.ts",
-      "import": "./dist/sveltekit.js",
-      "require": "./dist/sveltekit.cjs"
+      "types": "./dist/sveltekit/index.d.ts",
+      "import": "./dist/sveltekit/index.js",
+      "require": "./dist/sveltekit/index.cjs"
     },
     "./package.json": "./package.json"
   },

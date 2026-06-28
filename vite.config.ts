@@ -8,18 +8,23 @@ export default defineConfig({
     sourcemap: false,
     emptyOutDir: true,
     lib: {
+      // Entries emit as `dist/<name>/index.{js,cjs}` so each subpath's JS sits
+      // next to its `index.d.ts` (the dts plugin mirrors `src/`). Co-locating
+      // them lets the extensionless relative imports inside the emitted `.d.ts`
+      // (`from '../core'`) resolve to the directory index instead of being
+      // shadowed by a flat `core.js` that has no sibling declaration file.
       entry: {
         index: 'src/index.ts',
-        core: 'src/core/index.ts',
-        'vue-router': 'src/vue-router/index.ts',
-        'react-router': 'src/react-router/index.tsx',
-        'solid-router': 'src/solid-router/index.ts',
-        'tanstack-router/react': 'src/tanstack-router/react/index.tsx',
-        'tanstack-router/solid': 'src/tanstack-router/solid/index.ts',
-        'angular-router': 'src/angular-router/index.ts',
-        next: 'src/next/index.tsx',
-        nuxt: 'src/nuxt/index.ts',
-        sveltekit: 'src/sveltekit/index.ts',
+        'core/index': 'src/core/index.ts',
+        'vue-router/index': 'src/vue-router/index.ts',
+        'react-router/index': 'src/react-router/index.tsx',
+        'solid-router/index': 'src/solid-router/index.ts',
+        'tanstack-router/react/index': 'src/tanstack-router/react/index.tsx',
+        'tanstack-router/solid/index': 'src/tanstack-router/solid/index.ts',
+        'angular-router/index': 'src/angular-router/index.ts',
+        'next/index': 'src/next/index.tsx',
+        'nuxt/index': 'src/nuxt/index.ts',
+        'sveltekit/index': 'src/sveltekit/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
@@ -42,7 +47,10 @@ export default defineConfig({
     dts({
       include: ['src'],
       tsconfigPath: './tsconfig.build.json',
-      bundleTypes: true,
+      bundleTypes: false,
+      // Hoist inferred `import('react').ReactNode`-style references to
+      // top-of-file static imports instead of inline dynamic imports.
+      staticImport: true,
     }),
   ],
 });

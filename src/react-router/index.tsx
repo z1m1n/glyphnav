@@ -16,7 +16,7 @@
  * points animate.
  */
 import { createElement, useCallback } from 'react';
-import type { AnchorHTMLAttributes, MouseEvent } from 'react';
+import type { AnchorHTMLAttributes, MouseEvent, ReactElement } from 'react';
 import { useHref, useNavigate } from 'react-router';
 import type { NavigateOptions, To } from 'react-router';
 import type { GlyphnavOptions, RunResult } from '../core';
@@ -99,7 +99,7 @@ export const GlyphnavLink = ({
   state,
   glyphOptions,
   ...rest
-}: GlyphnavLinkProps) => {
+}: GlyphnavLinkProps): ReactElement => {
   const navigate = useNavigate();
   const controller = useGlyphnavController(glyphOptions);
   // `useHref` resolves `to` to a basename-aware path, so the rendered href and

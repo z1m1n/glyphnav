@@ -9,7 +9,7 @@
  * points animate.
  */
 import { createElement, useCallback, useMemo } from 'react';
-import type { AnchorHTMLAttributes, MouseEvent } from 'react';
+import type { AnchorHTMLAttributes, MouseEvent, ReactElement } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import type { NavigateOptions } from '@tanstack/react-router';
 import type { GlyphnavOptions, RunResult } from '../../core';
@@ -85,7 +85,7 @@ export const GlyphnavLink = ({
   onClick,
   children,
   ...rest
-}: GlyphnavLinkProps) => {
+}: GlyphnavLinkProps): ReactElement => {
   const router = useRouter();
   const controller = useGlyphnavController(glyphOptions);
   const navOpts = useMemo(
