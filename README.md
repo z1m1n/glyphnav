@@ -533,6 +533,12 @@ pnpm demo:nuxt             # → http://localhost:5176/nuxt   (Nuxt, own dev ser
 pnpm demo:sveltekit        # → http://localhost:5177/sveltekit   (SvelteKit, own dev server)
 ```
 
+The ports above are defined in [`demo/.env`](demo/.env) (`GLYPHNAV_PORT_VITE`,
+`GLYPHNAV_PORT_NEXT`, `GLYPHNAV_PORT_NUXT`, `GLYPHNAV_PORT_SVELTEKIT`) as the
+single source of truth — each demo's own dev server **and** the picker proxy that
+forwards to it read the same value via `demo/ports.ts`, so changing one there
+moves both together.
+
 Next.js, Nuxt and SvelteKit have their own build systems, so they're separate
 workspace projects under `demo/next`, `demo/nuxt` and `demo/sveltekit` rather than
 Vite entries — each runs on its own dev server. `pnpm demo` (`run-p` via

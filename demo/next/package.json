@@ -5,7 +5,7 @@
   "description": "Next.js (App Router) demo for glyphnav, part of the combined demo deploy.",
   "type": "module",
   "scripts": {
-    "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --port 5174",
+    "dev": "node dev.mjs",
     "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "NEXT_TELEMETRY_DISABLED=1 next start"
   },

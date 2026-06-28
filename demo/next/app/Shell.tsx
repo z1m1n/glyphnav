@@ -18,6 +18,7 @@ import {
   sliderToDuration,
 } from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
+import nextIcon from '@glyphnav-demo/shared/icons/nextjs.svg';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'next';
@@ -29,19 +30,15 @@ const ROOT_HREF = BASE_PATH.replace(/next$/, '') || '/';
 
 const norm = (p: string): string => (p !== '/' && p.endsWith('/') ? p.slice(0, -1) : p);
 
-function NavLink({ href, children }: { href: string; children: string }) {
-  const pathname = usePathname();
-
-  return (
-    <GlyphnavLink href={href} className={norm(pathname) === norm(href) ? 'active' : undefined}>
-      {children}
-    </GlyphnavLink>
-  );
-}
-
 function Inner({ children }: { children: ReactNode }) {
   const controller = useGlyphnavController();
   const pathname = usePathname();
+  // The current URL's query+hash, kept in sync so a deep link (?query / #hash)
+  // never lights up a plain tab. usePathname covers cross-path navigations; the
+  // listeners (and the controller's onComplete below) cover same-path hash and
+  // query changes and browser back/forward.
+  const [extra, setExtra] = useState('');
+  const isActive = (href: string): boolean => norm(pathname) === norm(href) && extra === '';
   const [path, setPath] = useState('/');
   const [resolving, setResolving] = useState(false);
   const [charset, setCharset] = useState('url');
@@ -66,6 +63,18 @@ function Inner({ children }: { children: ReactNode }) {
     setResolving(false);
   }, [pathname]);
 
+  // Keep `extra` (query+hash) in sync for the exact tab-active check above.
+  useEffect(() => {
+    const sync = (): void => setExtra(window.location.search + window.location.hash);
+    sync();
+    window.addEventListener('hashchange', sync);
+    window.addEventListener('popstate', sync);
+    return () => {
+      window.removeEventListener('hashchange', sync);
+      window.removeEventListener('popstate', sync);
+    };
+  }, [pathname]);
+
   useEffect(() => {
     controller.update({
       charset: charsets[charset],
@@ -81,6 +90,9 @@ function Inner({ children }: { children: ReactNode }) {
         onComplete: () => {
           setResolving(false);
           setPath(currentUrl());
+          // Same-path query navigations (router.push, no pathname change) settle
+          // here — refresh `extra` so the active check stays exact.
+          setExtra(window.location.search + window.location.hash);
         },
       },
     });
@@ -128,6 +140,8 @@ function Inner({ children }: { children: ReactNode }) {
         <img className="glyph-mark" src={logo.src} alt="" />
         <a href={ROOT_HREF}>glyphnav</a>
         <span className="sep">/</span>
+        {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
+        <img className="crumb-icon" src={nextIcon.src} alt="" />
         <span className="crumb">next</span>
       </h1>
 
@@ -136,10 +150,18 @@ function Inner({ children }: { children: ReactNode }) {
       </p>
 
       <nav aria-label="demo pages">
-        <NavLink href="/">home</NavLink>
-        <NavLink href="/about">about</NavLink>
-        <NavLink href="/docs">docs</NavLink>
-        <NavLink href="/blog">blog</NavLink>
+        <GlyphnavLink href="/" className={isActive('/') ? 'active' : undefined}>
+          Home
+        </GlyphnavLink>
+        <GlyphnavLink href="/about" className={isActive('/about') ? 'active' : undefined}>
+          About
+        </GlyphnavLink>
+        <GlyphnavLink href="/docs" className={isActive('/docs') ? 'active' : undefined}>
+          Docs
+        </GlyphnavLink>
+        <GlyphnavLink href="/blog" className={isActive('/blog') ? 'active' : undefined}>
+          Blog
+        </GlyphnavLink>
       </nav>
 
       <nav className="deep" aria-label="deep links">

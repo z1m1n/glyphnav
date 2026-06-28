@@ -7,6 +7,7 @@ import { GlyphnavLink, GlyphnavProvider, useGlyphnavController } from 'glyphnav/
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
 import logo from '../shared/logo.svg';
+import solidIcon from '../shared/icons/solid.svg';
 import {
   charsets,
   CONTROL_TOOLTIPS,
@@ -75,7 +76,7 @@ function Docs(): JSX.Element {
     <div class="view docs">
       <article>
         <header class="lead">
-          <h2>docs</h2>
+          <h2>Docs</h2>
           Install the package — Solid Router stays a peer dependency:
         </header>
         <Figure code={DOCS_INSTALL} />
@@ -99,11 +100,13 @@ function Docs(): JSX.Element {
 }
 
 function NavItem(props: { href: string; children: JSX.Element }): JSX.Element {
-  // Match Solid Router's <A> active styling: compare the route-resolved path
-  // (base-less) to the current location.
+  // Active only on an exact match: the route-resolved path (base-less) equals
+  // the current path AND there's no query/hash, so a deep link like
+  // /about?ref=deep never lights up the plain "About" tab.
   const resolved = useResolvedPath(() => props.href);
   const location = useLocation();
-  const active = (): boolean => resolved() === location.pathname;
+  const active = (): boolean =>
+    resolved() === location.pathname && !location.search && !location.hash;
   return (
     <GlyphnavLink href={props.href} class={active() ? 'active' : undefined}>
       {props.children}
@@ -173,6 +176,7 @@ function Layout(props: RouteSectionProps): JSX.Element {
         <img class="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span class="sep">/</span>
+        <img class="crumb-icon" src={solidIcon} alt="" />
         <span class="crumb">solid-router</span>
       </h1>
 
@@ -181,10 +185,10 @@ function Layout(props: RouteSectionProps): JSX.Element {
       </p>
 
       <nav aria-label="demo pages">
-        <NavItem href="/">home</NavItem>
-        <NavItem href="/about">about</NavItem>
-        <NavItem href="/posts">posts</NavItem>
-        <NavItem href="/docs">docs</NavItem>
+        <NavItem href="/">Home</NavItem>
+        <NavItem href="/about">About</NavItem>
+        <NavItem href="/posts">Posts</NavItem>
+        <NavItem href="/docs">Docs</NavItem>
       </nav>
 
       <nav class="deep" aria-label="deep links">
@@ -273,7 +277,7 @@ render(
           path="/"
           component={() => (
             <View
-              title="home"
+              title="Home"
               body="Solid Router (@solidjs/router). A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
             />
           )}
@@ -282,7 +286,7 @@ render(
           path="/about"
           component={() => (
             <View
-              title="about"
+              title="About"
               body="useGlyphnavNavigate() mirrors useNavigate(); GlyphnavLink is a drop-in for <A>. Deep links with ?search and #hash animate too — they are just part of the path."
             />
           )}
@@ -291,7 +295,7 @@ render(
           path="/posts"
           component={() => (
             <View
-              title="posts"
+              title="Posts"
               body="The animation rides on history.replaceState; Solid Router performs the real navigation. Try scope: tail — only the part of the path that differs gets scrambled."
             />
           )}

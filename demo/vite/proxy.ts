@@ -1,4 +1,5 @@
 import type { ProxyOptions } from 'vite';
+import { ports } from '../ports';
 
 /**
  * A dev-server proxy for a demo that runs on its own server (Next, Nuxt,
@@ -47,9 +48,9 @@ export function devProxy(target: string, name: string, command: string): ProxyOp
  * `_next`/`_nuxt` assets) are unique, so nothing else is caught.
  */
 export const crossServerProxy: Record<string, ProxyOptions> = {
-  '/next': devProxy('http://localhost:5174', 'next', 'pnpm demo:next'),
-  '/nuxt': devProxy('http://localhost:5176', 'nuxt', 'pnpm demo:nuxt'),
-  '/sveltekit': devProxy('http://localhost:5177', 'sveltekit', 'pnpm demo:sveltekit'),
+  '/next': devProxy(`http://localhost:${ports.next}`, 'next', 'pnpm demo:next'),
+  '/nuxt': devProxy(`http://localhost:${ports.nuxt}`, 'nuxt', 'pnpm demo:nuxt'),
+  '/sveltekit': devProxy(`http://localhost:${ports.sveltekit}`, 'sveltekit', 'pnpm demo:sveltekit'),
 };
 
 /**

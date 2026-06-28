@@ -203,6 +203,15 @@ h1 {
      of relying on inline vertical-align. Spacing is handled by the h1 gap. */
   align-self: center;
 }
+/* The framework (stack) mark, shown inline before the breadcrumb name on each
+   demo page — the same brand icons the landing-page cards use. A touch smaller
+   than the glyphnav mark so it reads as a tag for the crumb, not a second logo.
+   Centered against the wordmark line; the h1 gap owns the spacing. */
+.crumb-icon {
+  width: 1.1em;
+  height: 1.1em;
+  align-self: center;
+}
 /* The default mark is a dark badge with light glyphs — it disappears on the dark
    page. Swap it for the inverted variant (light badge, dark glyphs, same blue)
    via `content`, which replaces the rendered <img> regardless of how its src was
@@ -256,8 +265,11 @@ nav {
   gap: 0.25rem 1.25rem;
   margin: 0 0 0.5rem;
 
-  a.active,
-  a.router-link-exact-active {
+  /* Active tab styling keys off a plain `.active` class each demo sets itself
+     (exact full-URL match), not the routers' built-in active classes: those
+     ignore the query/hash, so a deep link like `/about?ref=deep` would wrongly
+     light up the "About" tab. The deep-links row never gets `.active`. */
+  a.active {
     font-weight: 700;
     text-decoration: none;
     color: inherit;

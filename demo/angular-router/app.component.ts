@@ -16,6 +16,7 @@ import {
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logoSrc from '../shared/logo.svg';
+import stackIconSrc from '../shared/icons/angular.svg';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'angular-router';
@@ -28,6 +29,7 @@ const STORE_KEY = 'angular-router';
       <img class="glyph-mark" [src]="logo" alt="" />
       <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
+      <img class="crumb-icon" [src]="stackIcon" alt="" />
       <span class="crumb">angular-router</span>
     </h1>
 
@@ -36,15 +38,15 @@ const STORE_KEY = 'angular-router';
     </p>
 
     <nav aria-label="demo pages">
-      <a [href]="appBase" glyphnavLink="/" [class.active]="active() === '/'">home</a>
+      <a [href]="appBase" glyphnavLink="/" [class.active]="active() === '/'">Home</a>
       <a [href]="appBase + 'about'" glyphnavLink="/about" [class.active]="active() === '/about'"
-        >about</a
+        >About</a
       >
       <a [href]="appBase + 'docs'" glyphnavLink="/docs" [class.active]="active() === '/docs'"
-        >docs</a
+        >Docs</a
       >
       <a [href]="appBase + 'blog'" glyphnavLink="/blog" [class.active]="active() === '/blog'"
-        >blog</a
+        >Blog</a
       >
     </nav>
 
@@ -125,6 +127,8 @@ export class AppComponent {
   readonly appBase = `${this.base}angular-router/`;
   // The shared glyphnav logo mark, shown before the wordmark in the breadcrumb.
   readonly logo = logoSrc;
+  // The Angular brand mark, shown before the breadcrumb name (the stack's logo).
+  readonly stackIcon = stackIconSrc;
 
   // Restore this page's toolbar (charset is the option key; resolved to a glyph
   // pool only when handing options to the controller). Not shared with other demos.
@@ -159,7 +163,9 @@ export class AppComponent {
     }
     inject(Router).events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        this.active.set(event.urlAfterRedirects.split(/[?#]/)[0]);
+        // Keep the full URL (incl. query/hash) so a deep link like
+        // /about?ref=deep never matches a plain tab target ('/about') below.
+        this.active.set(event.urlAfterRedirects);
       }
     });
   }

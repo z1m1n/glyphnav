@@ -63,15 +63,15 @@ const DOCS_OPTIONS = `install({
 
 const pages: Record<string, Page> = {
   '/': {
-    title: 'home',
+    title: 'Home',
     lead: 'No framework here. install() hijacks the links above; with commit: "navigate first" the page swaps instantly and the address bar decodes on top (mirrored in the line above).',
   },
   '/about': {
-    title: 'about',
+    title: 'About',
     lead: 'glyphnav rewrites history.replaceState frame by frame. The decode effect grows the path and resolves it left to right; the scramble effect bursts to full length and locks characters in random order.',
   },
   '/docs': {
-    title: 'docs',
+    title: 'Docs',
     lead: 'Install the package, then pick an integration: hijack links, or animate only programmatic calls.',
     html:
       figure(DOCS_INSTALL) +
@@ -80,7 +80,7 @@ const pages: Record<string, Page> = {
       '<aside class="note">Prefer to leave links alone? Pass <code>intercept: "none"</code> and call <code>navigate()</code> yourself. Curious about the engine on its own? See the <a href="/core/" data-glyphnav="off">/core</a> demo.</aside>',
   },
   '/contact': {
-    title: 'contact',
+    title: 'Contact',
     lead: 'Try the controls — your choices are remembered per page. "matrix" and "symbols" get percent-encoded by the browser in the real bar (expected for non-URL-safe glyphs). Deep links with ?query and #hash animate too: they are just part of the path.',
   },
 };
@@ -104,9 +104,12 @@ function render(): void {
     (page.html ?? '') +
     '</article>';
   pathEl.textContent = currentUrl();
+  // A tab is active only on an exact match: same path AND no query/hash, so a
+  // deep link (e.g. /about?ref=deep) never lights up the plain "About" tab.
+  const onPlainPath = !location.search && !location.hash;
   document.querySelectorAll<HTMLAnchorElement>('#nav a').forEach((a) => {
     const here = new URL(a.href).pathname.replace(/\/$/, '');
-    a.classList.toggle('active', here === location.pathname.replace(/\/$/, ''));
+    a.classList.toggle('active', onPlainPath && here === location.pathname.replace(/\/$/, ''));
   });
 }
 

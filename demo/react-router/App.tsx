@@ -5,6 +5,7 @@ import { GlyphnavLink, useGlyphnavController } from 'glyphnav/react-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
 import logo from '../shared/logo.svg';
+import reactIcon from '../shared/icons/react.svg';
 import {
   charsets,
   CONTROL_TOOLTIPS,
@@ -79,7 +80,7 @@ function Docs() {
     <div className="view docs">
       <article>
         <header className="lead">
-          <h2>docs</h2>
+          <h2>Docs</h2>
           Install the package — React Router stays a peer dependency:
         </header>
         <Figure code={DOCS_INSTALL} />
@@ -103,9 +104,12 @@ function Docs() {
 }
 
 function NavLink({ to, children }: { to: string; children: string }) {
-  const { pathname } = useLocation();
+  // Active only on an exact match — same path with no query/hash — so a deep
+  // link (e.g. /about?ref=deep) never lights up the plain "About" tab.
+  const { pathname, search, hash } = useLocation();
+  const active = pathname === to && !search && !hash;
   return (
-    <GlyphnavLink to={to} className={pathname === to ? 'active' : undefined}>
+    <GlyphnavLink to={to} className={active ? 'active' : undefined}>
       {children}
     </GlyphnavLink>
   );
@@ -166,6 +170,7 @@ export default function App() {
         <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>
+        <img className="crumb-icon" src={reactIcon} alt="" />
         <span className="crumb">react-router</span>
       </h1>
 
@@ -174,10 +179,10 @@ export default function App() {
       </p>
 
       <nav aria-label="demo pages">
-        <NavLink to="/">home</NavLink>
-        <NavLink to="/about">about</NavLink>
-        <NavLink to="/docs">docs</NavLink>
-        <NavLink to="/blog">blog</NavLink>
+        <NavLink to="/">Home</NavLink>
+        <NavLink to="/about">About</NavLink>
+        <NavLink to="/docs">Docs</NavLink>
+        <NavLink to="/blog">Blog</NavLink>
       </nav>
 
       <nav className="deep" aria-label="deep links">
@@ -246,7 +251,7 @@ export default function App() {
           path="/"
           element={
             <View
-              title="home"
+              title="Home"
               body="React Router edition. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
             />
           }
@@ -255,7 +260,7 @@ export default function App() {
           path="/about"
           element={
             <View
-              title="about"
+              title="About"
               body="GlyphnavLink is a drop-in for <Link>; useGlyphnavNavigate() is the imperative equivalent of useNavigate(). Deep links with ?query and #hash animate too — they are just part of the path."
             />
           }
@@ -265,7 +270,7 @@ export default function App() {
           path="/blog"
           element={
             <View
-              title="blog"
+              title="Blog"
               body="The animation rides on history.replaceState; React Router performs the real navigation. Modified clicks (⌘/Ctrl/middle) fall through to the browser, exactly like a normal link."
             />
           }

@@ -8,6 +8,7 @@
 // deep-link reloads serve a real file.
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { ports } from '../ports';
 
 const base = process.env.DEMO_BASE ?? '/';
 const baseURL = (base === '/' ? '/' : base) + 'nuxt/';
@@ -30,10 +31,11 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   // No phoning home from the demo.
   telemetry: false,
-  // Pin the dev server to the port the picker proxies (`/nuxt` → :5176). Listhen
-  // still silently falls back if 5176 is held by a stale instance — see the note
-  // in the README about running a single `pnpm demo`.
-  devServer: { port: 5176 },
+  // Pin the dev server to the port the picker proxies (`/nuxt`), read from
+  // demo/.env via demo/ports.ts so the server and the proxy can't drift. Listhen
+  // still silently falls back if the port is held by a stale instance — see the
+  // note in the README about running a single `pnpm demo`.
+  devServer: { port: ports.nuxt },
   compatibilityDate: '2024-11-01',
   // This is a plain prerendered demo: no route rules and no client-side payload
   // cache, so the app manifest buys nothing. Disabling it removes the `#app-manifest`

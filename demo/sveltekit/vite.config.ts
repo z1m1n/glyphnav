@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import { ports } from '../ports';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 const nodeRequire = createRequire(import.meta.url);
@@ -34,8 +35,10 @@ export default defineConfig({
   plugins: [sveltekit()],
   // Surfaced to the client so the footer can show which stack this demo runs.
   define: { GLYPHNAV_STACK: JSON.stringify(stack) },
-  server: { port: 5177, strictPort: true, open: false },
-  preview: { port: 5177, open: false },
+  // Port read from demo/.env via demo/ports.ts, so it and the picker proxy
+  // (`/sveltekit`) always point at the same place.
+  server: { port: ports.sveltekit, strictPort: true, open: false },
+  preview: { port: ports.sveltekit, open: false },
   // Alias the glyphnav entry points to the live src (like the Vite playground),
   // so the demo reflects the working tree rather than the published dist.
   resolve: {

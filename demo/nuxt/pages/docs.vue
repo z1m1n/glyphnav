@@ -34,7 +34,7 @@ const DOCS_OPTIONS = `installGlyphnav(app, {
   <div class="view docs">
     <article>
       <header class="lead">
-        <h2>docs</h2>
+        <h2>Docs</h2>
         Install the package — Nuxt stays a peer dependency:
       </header>
       <figure>

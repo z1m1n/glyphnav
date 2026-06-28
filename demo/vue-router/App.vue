@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useGlyphnav } from 'glyphnav/vue-router';
 import type { FrameInfo } from 'glyphnav/core';
 import {
@@ -15,8 +16,15 @@ import {
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logo from '../shared/logo.svg';
+import vueIcon from '../shared/icons/vue.svg';
 
 const controller = useGlyphnav();
+
+// A tab is active only on an exact match (full path incl. query/hash), instead
+// of <router-link>'s built-in active class which ignores the query — so a deep
+// link like /about?ref=deep never lights up the plain "About" tab.
+const route = useRoute();
+const isActive = (to: string): boolean => route.fullPath === to;
 
 // '/' in dev, '/glyphnav/' on the deployed project page.
 const base = import.meta.env.BASE_URL;
@@ -95,6 +103,7 @@ onMounted(() => {
     <img class="glyph-mark" :src="logo" alt="" />
     <a :href="base">glyphnav</a>
     <span class="sep">/</span>
+    <img class="crumb-icon" :src="vueIcon" alt="" />
     <span class="crumb">vue-router</span>
   </h1>
 
@@ -103,10 +112,10 @@ onMounted(() => {
   </p>
 
   <nav aria-label="demo pages">
-    <router-link to="/">home</router-link>
-    <router-link to="/about">about</router-link>
-    <router-link to="/features">features</router-link>
-    <router-link to="/docs">docs</router-link>
+    <router-link to="/" :class="{ active: isActive('/') }">Home</router-link>
+    <router-link to="/about" :class="{ active: isActive('/about') }">About</router-link>
+    <router-link to="/features" :class="{ active: isActive('/features') }">Features</router-link>
+    <router-link to="/docs" :class="{ active: isActive('/docs') }">Docs</router-link>
   </nav>
 
   <nav class="deep" aria-label="deep links">

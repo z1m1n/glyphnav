@@ -14,6 +14,7 @@ import {
   THEME_INIT_SCRIPT,
 } from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
+import nuxtIcon from '@glyphnav-demo/shared/icons/nuxt.svg';
 
 // SEO / social + AI link previews. Absolute URLs so the tags stay correct in the
 // statically generated output served from the GitHub Pages project subpath.
@@ -52,6 +53,12 @@ const stack = config.public.stack;
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'nuxt';
 const tips = CONTROL_TOOLTIPS;
+
+// A tab is active only on an exact match (full path incl. query/hash), instead
+// of <NuxtLink>'s built-in active class which ignores the query — so a deep link
+// like /about?ref=deep never lights up the plain "About" tab.
+const route = useRoute();
+const isActive = (to: string): boolean => route.fullPath === to;
 
 // Refs start at the defaults so the prerendered markup is stable; the saved
 // toolbar is restored on the client in onMounted (after hydration).
@@ -140,6 +147,7 @@ watch(backForward, () => {
       <img class="glyph-mark" :src="logo" alt="" />
       <a :href="rootHref">glyphnav</a>
       <span class="sep">/</span>
+      <img class="crumb-icon" :src="nuxtIcon" alt="" />
       <span class="crumb">nuxt</span>
     </h1>
 
@@ -148,10 +156,10 @@ watch(backForward, () => {
     </p>
 
     <nav aria-label="demo pages">
-      <NuxtLink to="/">home</NuxtLink>
-      <NuxtLink to="/about">about</NuxtLink>
-      <NuxtLink to="/docs">docs</NuxtLink>
-      <NuxtLink to="/features">features</NuxtLink>
+      <NuxtLink to="/" :class="{ active: isActive('/') }">Home</NuxtLink>
+      <NuxtLink to="/about" :class="{ active: isActive('/about') }">About</NuxtLink>
+      <NuxtLink to="/docs" :class="{ active: isActive('/docs') }">Docs</NuxtLink>
+      <NuxtLink to="/features" :class="{ active: isActive('/features') }">Features</NuxtLink>
     </nav>
 
     <nav class="deep" aria-label="deep links">

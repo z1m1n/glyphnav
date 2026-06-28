@@ -20,6 +20,7 @@
     sliderToDuration,
   } from '@glyphnav-demo/shared';
   import logo from '@glyphnav-demo/shared/logo.svg';
+  import svelteIcon from '@glyphnav-demo/shared/icons/svelte.svg';
 
   /** This page's own localStorage key — not shared with the other demos. */
   const STORE_KEY = 'sveltekit';
@@ -39,11 +40,14 @@
   const featuresHref = resolve('/features/');
 
   // A nav link is active when it points at the current page (trailing slash
-  // ignored, so `/sveltekit/` matches home). Called from the template's
-  // `class:active` so the `$app/state` page signal is tracked at runtime — a
-  // legacy `$:` block wouldn't react to its internal mutation.
+  // ignored, so `/sveltekit/` matches home) AND there's no query/hash — so a
+  // deep link like /about?ref=deep never lights up the plain "About" tab.
+  // Called from the template's `class:active` so the `$app/state` page signal is
+  // tracked at runtime — a legacy `$:` block wouldn't react to its mutation.
   const isActive = (href: string): boolean =>
-    page.url.pathname.replace(/\/+$/, '') === href.replace(/\/+$/, '');
+    page.url.pathname.replace(/\/+$/, '') === href.replace(/\/+$/, '') &&
+    page.url.search === '' &&
+    page.url.hash === '';
 
   // State starts at the defaults so the prerendered markup is stable; the saved
   // toolbar is restored on the client after mount.
@@ -168,6 +172,7 @@
     <img class="glyph-mark" src={logo} alt="" />
     <a href={rootHref} data-glyphnav="off">glyphnav</a>
     <span class="sep">/</span>
+    <img class="crumb-icon" src={svelteIcon} alt="" />
     <span class="crumb">sveltekit</span>
   </h1>
 
@@ -176,10 +181,10 @@
   </p>
 
   <nav aria-label="demo pages">
-    <a href={homeHref} class:active={isActive(homeHref)}>home</a>
-    <a href={aboutHref} class:active={isActive(aboutHref)}>about</a>
-    <a href={docsHref} class:active={isActive(docsHref)}>docs</a>
-    <a href={featuresHref} class:active={isActive(featuresHref)}>features</a>
+    <a href={homeHref} class:active={isActive(homeHref)}>Home</a>
+    <a href={aboutHref} class:active={isActive(aboutHref)}>About</a>
+    <a href={docsHref} class:active={isActive(docsHref)}>Docs</a>
+    <a href={featuresHref} class:active={isActive(featuresHref)}>Features</a>
   </nav>
 
   <nav class="deep" aria-label="deep links">

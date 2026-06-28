@@ -5,9 +5,9 @@
   "description": "SvelteKit demo for glyphnav, part of the combined demo deploy.",
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 5177",
+    "dev": "vite dev",
     "build": "vite build",
-    "preview": "vite preview --port 5177"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",

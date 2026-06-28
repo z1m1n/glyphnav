@@ -31,7 +31,7 @@ await navigate('/dashboard', { replace: true });
 <div class="view docs">
   <article>
     <header class="lead">
-      <h2>docs</h2>
+      <h2>Docs</h2>
       Install the package — SvelteKit stays a peer dependency:
     </header>
     <figure>

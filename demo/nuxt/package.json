@@ -5,7 +5,7 @@
   "description": "Nuxt demo for glyphnav, part of the combined demo deploy.",
   "type": "module",
   "scripts": {
-    "dev": "nuxi dev --port 5176 --no-open",
+    "dev": "nuxi dev --no-open",
     "build": "nuxi build",
     "generate": "nuxi generate"
   },

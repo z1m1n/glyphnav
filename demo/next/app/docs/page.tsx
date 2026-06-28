@@ -53,7 +53,7 @@ export default function Docs() {
     <div className="view docs">
       <article>
         <header className="lead">
-          <h2>docs</h2>
+          <h2>Docs</h2>
           Install the package — Next.js stays a peer dependency:
         </header>
         <Figure code={DOCS_INSTALL} />

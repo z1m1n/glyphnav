@@ -25,7 +25,7 @@ export class PageComponent {
     <div class="view docs">
       <article>
         <header class="lead">
-          <h2>docs</h2>
+          <h2>Docs</h2>
           Install the package — the Angular Router stays a peer dependency:
         </header>
         <figure>
@@ -89,7 +89,7 @@ export const routes: Routes = [
     path: '',
     component: PageComponent,
     data: {
-      title: 'home',
+      title: 'Home',
       body: 'Angular Router edition. provideGlyphnav() registers a navigator you inject as GLYPHNAV; the [glyphnavLink] directive uses it. With commit: "before" the route swaps instantly and the bar animates on top.',
     },
   },
@@ -97,7 +97,7 @@ export const routes: Routes = [
     path: 'about',
     component: PageComponent,
     data: {
-      title: 'about',
+      title: 'About',
       body: 'This demo runs inside the shared Vite playground using Angular JIT: @angular/compiler is loaded in the browser, so no separate ngtsc build is needed. The package itself stays compiler-free.',
     },
   },
@@ -106,7 +106,7 @@ export const routes: Routes = [
     path: 'blog',
     component: PageComponent,
     data: {
-      title: 'blog',
+      title: 'Blog',
       body: 'The real navigation is still the Angular Router’s — glyphnav only animates the address bar on the way there. Deep links with ?query and #hash animate too: they are just part of the path.',
     },
   },

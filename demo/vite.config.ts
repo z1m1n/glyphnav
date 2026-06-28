@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { ports } from './ports';
 import { frameworkPlugins, SOLID_OPTIMIZE_EXCLUDE } from './vite/framework';
 import { base, fromDemoRoot } from './vite/paths';
 import {
@@ -47,7 +48,7 @@ export default defineConfig({
     exclude: SOLID_OPTIMIZE_EXCLUDE,
   },
   server: {
-    port: 5173,
+    port: ports.vite,
     strictPort: true,
     open: true,
     proxy: crossServerProxy,

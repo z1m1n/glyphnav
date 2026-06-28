@@ -7,6 +7,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  useLocation,
   useMatchRoute,
 } from '@tanstack/react-router';
 import {
@@ -17,6 +18,7 @@ import {
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../../shared/highlight';
 import logo from '../../shared/logo.svg';
+import reactIcon from '../../shared/icons/react.svg';
 import {
   charsets,
   CONTROL_TOOLTIPS,
@@ -93,7 +95,7 @@ function Docs() {
     <div className="view docs">
       <article>
         <header className="lead">
-          <h2>docs</h2>
+          <h2>Docs</h2>
           Install the package — TanStack Router stays a peer dependency:
         </header>
         <Figure code={DOCS_INSTALL} />
@@ -117,8 +119,11 @@ function Docs() {
 }
 
 function NavItem({ to, children }: { to: string; children: string }) {
+  // Active only on an exact match: the route matches AND there's no query/hash,
+  // so a deep link like /about?ref=deep never lights up the plain "About" tab.
   const matchRoute = useMatchRoute();
-  const active = Boolean(matchRoute({ to }));
+  const { searchStr, hash } = useLocation();
+  const active = Boolean(matchRoute({ to })) && !searchStr && !hash;
   return (
     <GlyphnavLink to={to} className={active ? 'active' : undefined}>
       {children}
@@ -181,6 +186,7 @@ function Layout() {
         <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>
+        <img className="crumb-icon" src={reactIcon} alt="" />
         <span className="crumb">tanstack-router/react</span>
       </h1>
 
@@ -189,10 +195,10 @@ function Layout() {
       </p>
 
       <nav aria-label="demo pages">
-        <NavItem to="/">home</NavItem>
-        <NavItem to="/about">about</NavItem>
-        <NavItem to="/posts">posts</NavItem>
-        <NavItem to="/docs">docs</NavItem>
+        <NavItem to="/">Home</NavItem>
+        <NavItem to="/about">About</NavItem>
+        <NavItem to="/posts">Posts</NavItem>
+        <NavItem to="/docs">Docs</NavItem>
       </nav>
 
       <nav className="deep" aria-label="deep links">
@@ -281,7 +287,7 @@ const routeTree = rootRoute.addChildren([
     path: '/',
     component: () => (
       <View
-        title="home"
+        title="Home"
         body="TanStack Router edition. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
       />
     ),
@@ -291,7 +297,7 @@ const routeTree = rootRoute.addChildren([
     path: '/about',
     component: () => (
       <View
-        title="about"
+        title="About"
         body="useGlyphnavNavigate() mirrors useNavigate(); GlyphnavLink renders a plain anchor. Deep links with ?search and #hash animate too — they are just part of the path."
       />
     ),
@@ -301,7 +307,7 @@ const routeTree = rootRoute.addChildren([
     path: '/posts',
     component: () => (
       <View
-        title="posts"
+        title="Posts"
         body="The animation rides on history.replaceState; TanStack Router performs the real navigation. Try scope: tail — only the part of the path that differs gets scrambled."
       />
     ),
