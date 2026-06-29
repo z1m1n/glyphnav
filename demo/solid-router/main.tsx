@@ -7,7 +7,6 @@ import { GlyphnavLink, GlyphnavProvider, useGlyphnavController } from 'glyphnav/
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
 import logo from '../shared/logo.svg';
-import solidIcon from '../shared/icons/solid.svg';
 import {
   charsets,
   CONTROL_TOOLTIPS,
@@ -19,6 +18,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 
@@ -164,19 +164,19 @@ function Layout(props: RouteSectionProps): JSX.Element {
     });
   });
 
-  // Wire the theme switcher + styled control tooltips once (idempotent).
+  // Wire the theme switcher + styled control tooltips + code-block helpers once.
   onMount(() => {
     initTheme();
     initTooltips();
+    initCodeBlocks();
   });
 
   return (
     <>
-      <h1>
+      <h1 data-fw="solid-router">
         <img class="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span class="sep">/</span>
-        <img class="crumb-icon" src={solidIcon} alt="" />
         <span class="crumb">solid-router</span>
       </h1>
 

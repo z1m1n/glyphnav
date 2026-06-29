@@ -18,7 +18,6 @@ import {
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../../shared/highlight';
 import logo from '../../shared/logo.svg';
-import reactIcon from '../../shared/icons/react.svg';
 import {
   charsets,
   CONTROL_TOOLTIPS,
@@ -30,6 +29,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../../shared/content';
+import { initCodeBlocks } from '../../shared/code-blocks';
 import { initTheme } from '../../shared/theme';
 import { initTooltips } from '../../shared/tooltip';
 
@@ -174,19 +174,19 @@ function Layout() {
     saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
   }, [charset, duration, effect, commit, scope, backForward]);
 
-  // Wire the theme switcher + styled control tooltips once (idempotent).
+  // Wire the theme switcher + styled control tooltips + code-block helpers once.
   useEffect(() => {
     initTheme();
     initTooltips();
+    initCodeBlocks();
   }, []);
 
   return (
     <>
-      <h1>
+      <h1 data-fw="tanstack-react">
         <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>
-        <img className="crumb-icon" src={reactIcon} alt="" />
         <span className="crumb">tanstack-router/react</span>
       </h1>
 

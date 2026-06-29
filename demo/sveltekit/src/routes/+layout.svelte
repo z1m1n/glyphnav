@@ -13,6 +13,7 @@
     currentUrl,
     DEFAULT_TOOLBAR,
     durationToSlider,
+    initCodeBlocks,
     initTheme,
     initTooltips,
     loadToolbar,
@@ -20,7 +21,6 @@
     sliderToDuration,
   } from '@glyphnav-demo/shared';
   import logo from '@glyphnav-demo/shared/logo.svg';
-  import svelteIcon from '@glyphnav-demo/shared/icons/svelte.svg';
 
   /** This page's own localStorage key — not shared with the other demos. */
   const STORE_KEY = 'sveltekit';
@@ -113,9 +113,10 @@
     scope = saved.scope;
     backForward = saved.backForward;
     path = currentUrl();
-    // Wire the theme switcher + styled control tooltips (client-only).
+    // Wire the theme switcher + styled control tooltips + code-block helpers.
     initTheme();
     initTooltips();
+    initCodeBlocks();
     // Flip last so the reactive blocks below first run with the restored values
     // (and never clobber the saved state with the defaults on the first render).
     mounted = true;
@@ -168,11 +169,10 @@
 </svelte:head>
 
 <div class="app-shell">
-  <h1>
+  <h1 data-fw="sveltekit">
     <img class="glyph-mark" src={logo} alt="" />
     <a href={rootHref} data-glyphnav="off">glyphnav</a>
     <span class="sep">/</span>
-    <img class="crumb-icon" src={svelteIcon} alt="" />
     <span class="crumb">sveltekit</span>
   </h1>
 

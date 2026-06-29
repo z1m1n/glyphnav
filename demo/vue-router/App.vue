@@ -13,10 +13,10 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logo from '../shared/logo.svg';
-import vueIcon from '../shared/icons/vue.svg';
 
 const controller = useGlyphnav();
 
@@ -91,19 +91,19 @@ watch(backForward, (on) => {
   persist();
 });
 
-// Wire the theme switcher and styled control tooltips once, after mount.
+// Wire the theme switcher, styled control tooltips and code-block helpers once.
 onMounted(() => {
   initTheme();
   initTooltips();
+  initCodeBlocks();
 });
 </script>
 
 <template>
-  <h1>
+  <h1 data-fw="vue-router">
     <img class="glyph-mark" :src="logo" alt="" />
     <a :href="base">glyphnav</a>
     <span class="sep">/</span>
-    <img class="crumb-icon" :src="vueIcon" alt="" />
     <span class="crumb">vue-router</span>
   </h1>
 

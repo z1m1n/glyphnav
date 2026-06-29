@@ -6,6 +6,7 @@ import {
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  initCodeBlocks,
   initTheme,
   initTooltips,
   loadToolbar,
@@ -14,7 +15,6 @@ import {
   THEME_INIT_SCRIPT,
 } from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
-import nuxtIcon from '@glyphnav-demo/shared/icons/nuxt.svg';
 
 // SEO / social + AI link previews. Absolute URLs so the tags stay correct in the
 // statically generated output served from the GitHub Pages project subpath.
@@ -130,9 +130,10 @@ onMounted(() => {
   path.value = currentUrl();
   apply();
   applyBackForward();
-  // Wire the theme switcher + styled control tooltips (client-only).
+  // Wire the theme switcher + styled control tooltips + code-block helpers.
   initTheme();
   initTooltips();
+  initCodeBlocks();
 });
 watch([charset, duration, effect, commit, scope], apply);
 watch(backForward, () => {
@@ -143,11 +144,10 @@ watch(backForward, () => {
 
 <template>
   <div class="app-shell">
-    <h1>
+    <h1 data-fw="nuxt">
       <img class="glyph-mark" :src="logo" alt="" />
       <a :href="rootHref">glyphnav</a>
       <span class="sep">/</span>
-      <img class="crumb-icon" :src="nuxtIcon" alt="" />
       <span class="crumb">nuxt</span>
     </h1>
 

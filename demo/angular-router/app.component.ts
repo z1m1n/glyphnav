@@ -13,10 +13,10 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logoSrc from '../shared/logo.svg';
-import stackIconSrc from '../shared/icons/angular.svg';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'angular-router';
@@ -25,11 +25,10 @@ const STORE_KEY = 'angular-router';
   selector: 'app-root',
   imports: [RouterOutlet, GlyphnavLinkDirective],
   template: `
-    <h1>
+    <h1 data-fw="angular-router">
       <img class="glyph-mark" [src]="logo" alt="" />
       <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
-      <img class="crumb-icon" [src]="stackIcon" alt="" />
       <span class="crumb">angular-router</span>
     </h1>
 
@@ -127,8 +126,6 @@ export class AppComponent {
   readonly appBase = `${this.base}angular-router/`;
   // The shared glyphnav logo mark, shown before the wordmark in the breadcrumb.
   readonly logo = logoSrc;
-  // The Angular brand mark, shown before the breadcrumb name (the stack's logo).
-  readonly stackIcon = stackIconSrc;
 
   // Restore this page's toolbar (charset is the option key; resolved to a glyph
   // pool only when handing options to the controller). Not shared with other demos.
@@ -155,9 +152,10 @@ export class AppComponent {
 
   constructor() {
     this.apply();
-    // Wire the theme switcher + styled control tooltips once (idempotent).
+    // Wire the theme switcher + styled control tooltips + code-block helpers once.
     initTheme();
     initTooltips();
+    initCodeBlocks();
     if (this.backForward()) {
       this.stopPopState = this.nav.controller.enableHistoryAnimation();
     }

@@ -11,6 +11,7 @@ import {
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  initCodeBlocks,
   initTheme,
   initTooltips,
   loadToolbar,
@@ -18,7 +19,6 @@ import {
   sliderToDuration,
 } from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
-import nextIcon from '@glyphnav-demo/shared/icons/nextjs.svg';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'next';
@@ -104,10 +104,11 @@ function Inner({ children }: { children: ReactNode }) {
     if (backForward) return controller.enableHistoryAnimation();
   }, [controller, backForward]);
 
-  // Wire the theme switcher + styled control tooltips once (idempotent).
+  // Wire the theme switcher + styled control tooltips + code-block helpers once.
   useEffect(() => {
     initTheme();
     initTooltips();
+    initCodeBlocks();
   }, []);
 
   // Restore the saved toolbar on the client (after hydration), so the
@@ -135,13 +136,11 @@ function Inner({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <h1>
+      <h1 data-fw="next">
         {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
         <img className="glyph-mark" src={logo.src} alt="" />
         <a href={ROOT_HREF}>glyphnav</a>
         <span className="sep">/</span>
-        {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
-        <img className="crumb-icon" src={nextIcon.src} alt="" />
         <span className="crumb">next</span>
       </h1>
 

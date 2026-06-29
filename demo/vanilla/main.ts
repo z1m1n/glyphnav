@@ -12,6 +12,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 
@@ -165,6 +166,8 @@ commitSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.commit;
 scopeSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.scope;
 backforward.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.backForward;
 initTooltips();
+// Copy buttons on the docs code blocks + package-manager tabs on the install cmd.
+initCodeBlocks();
 
 // Reflect the restored state in the controls.
 charsetSel.value = state.charset;

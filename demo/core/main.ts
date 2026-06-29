@@ -20,6 +20,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import { createGlyphText } from './glyph-text';
@@ -75,6 +76,8 @@ charsetSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.charset;
 speed.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.speed;
 effectSel.closest('label')!.dataset.tip = CONTROL_TOOLTIPS.effect;
 initTooltips();
+// Copy button on the snippet code block (no install command on this page).
+initCodeBlocks();
 
 // Reflect the restored state in the controls.
 charsetSel.value = state.charset;

@@ -22,6 +22,7 @@ export {
 } from './content';
 export type { ToolbarState } from './content';
 export { highlight } from './highlight';
+export { initCodeBlocks } from './code-blocks';
 export { initTheme, THEME_INIT_SCRIPT } from './theme';
 export type { ThemePref } from './theme';
 export { initTooltips } from './tooltip';

@@ -3,6 +3,7 @@ import { marked } from 'marked';
 // (Vite's `?raw` suffix) and render it to HTML at runtime, so this page never
 // drifts from the real release notes.
 import changelog from '../../CHANGELOG.md?raw';
+import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
 
 // Mount the shared light/dark/system theme switcher, like every other demo page.
@@ -19,3 +20,6 @@ for (const a of el.querySelectorAll('a[href^="http"]')) {
   a.setAttribute('target', '_blank');
   a.setAttribute('rel', 'noopener');
 }
+
+// Copy buttons on the changelog's fenced code blocks (rendered above).
+initCodeBlocks();

@@ -24,6 +24,7 @@
   --blue-soft: #e8eeff; /* resolving-state path highlight (soft blue tint) */
   --blue-hover: #456ee3; /* link hover — the logo blue, darkened to clear AA 4.6:1 */
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
+  --ok: #1a7f37; /* success green — the copy button's "copied" checkmark */
 
   /* Panel for the controls toolbar — the brand's soft blue tint (shared with the
      resolving path highlight) so the knobs read as the interactive block, set
@@ -89,6 +90,7 @@
   --blue: #7aa2ff; /* links — bright enough on the dark surface */
   --blue-soft: #1d2740; /* resolving-state path highlight + toolbar tint */
   --blue-hover: #a9c2ff; /* link hover */
+  --ok: #3fb950; /* success green — brighter for the dark surface */
   --toolbar-border: #677287; /* greyish-blue border — 3:1 on the toolbar tint */
   --accent-bg: #2b2920; /* dark greyish-yellow tooltip fill */
   --accent-border: #4d4730; /* greyish-yellow hairline */
@@ -178,11 +180,19 @@ h1 {
     color: inherit;
   }
 
-  /* Breadcrumb separator ("/") and the trailing page name, both muted. */
-  .sep,
-  .crumb {
+  /* Breadcrumb separator ("/") — muted, lighter than the bold wordmark. */
+  .sep {
     color: var(--gray);
     font-weight: 400;
+  }
+
+  /* Breadcrumb page name, tinted with the demo's framework accent — the same
+     per-[data-fw] colour the landing cards use, set on the masthead h1 — so each
+     demo carries a subtle identity without a second logo. Falls back to muted
+     gray where there's no framework (e.g. the changelog page). */
+  .crumb {
+    color: var(--card-accent, var(--gray));
+    font-weight: 700;
   }
 
   /* Library version after the wordmark on the landing page — muted, like the
@@ -201,15 +211,6 @@ h1 {
   height: 1.15em;
   /* h1 is a baseline flex; center the mark against the wordmark line instead
      of relying on inline vertical-align. Spacing is handled by the h1 gap. */
-  align-self: center;
-}
-/* The framework (stack) mark, shown inline before the breadcrumb name on each
-   demo page — the same brand icons the landing-page cards use. A touch smaller
-   than the glyphnav mark so it reads as a tag for the crumb, not a second logo.
-   Centered against the wordmark line; the h1 gap owns the spacing. */
-.crumb-icon {
-  width: 1.1em;
-  height: 1.1em;
   align-self: center;
 }
 /* The default mark is a dark badge with light glyphs — it disappears on the dark
@@ -426,16 +427,23 @@ nav {
   /* Per-demo docs pages. */
   &.docs {
     pre {
+      /* Anchor the absolutely-positioned copy button (and host the install
+         tabs). overflow-x lives on the inner code so the button stays pinned
+         while a long line scrolls (see .code-copy below). */
+      position: relative;
       margin: 0 0 0.75rem;
       padding: 0.7rem 0.9rem;
       background: var(--fill-soft);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      overflow-x: auto;
       font-size: 0.8rem;
       line-height: 1.55;
 
       code {
+        /* The scroll container is the code, not the pre, so the copy button
+           (a child of the pre) never scrolls out of view with a wide line. */
+        display: block;
+        overflow-x: auto;
         background: none;
         padding: 0;
       }
@@ -501,6 +509,106 @@ nav {
     padding-left: 0.75rem;
     border-left: 2px solid var(--border);
     color: var(--gray-strong);
+  }
+}
+
+/* Floating copy button on every docs code block (injected by demo/shared/
+   code-blocks.ts). Pinned to the pre's top-right corner; the pre is the
+   positioning context and the inner <code> owns the horizontal scroll, so the
+   button stays put while a long line scrolls under it. Resting muted, it
+   brightens on hover/focus and flips to a green check after a copy. */
+.code-copy {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--fill-soft);
+  color: var(--gray);
+  cursor: pointer;
+  opacity: 0.55;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  .view.docs pre:hover &,
+  .view.docs pre:focus-within & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--blue);
+    border-color: var(--blue);
+  }
+
+  &:focus-visible {
+    opacity: 1;
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  /* Copied: lock visible, paint the checkmark green. */
+  &.copied {
+    opacity: 1;
+    color: var(--ok);
+    border-color: var(--ok);
+  }
+
+  svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    display: block;
+  }
+}
+
+/* Package-manager tabs on the install command (npm / pnpm / yarn / bun / deno),
+   injected as the first child of that one <pre>. The row overrides the pre's
+   monospace pre-wrap so the buttons lay out normally, and reserves room on the
+   right so it never slides under the copy button. */
+.pm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+  padding-right: 2rem;
+  white-space: normal;
+}
+.pm-tab {
+  padding: 0.12rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--gray);
+  font: 0.72rem var(--mono);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    color: var(--blue);
+    border-color: var(--blue);
+  }
+
+  /* Selected manager — inked and filled, set apart from the muted siblings. */
+  &.active {
+    color: var(--ink);
+    border-color: var(--border);
+    background: var(--fill);
+    font-weight: 700;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
   }
 }
 
