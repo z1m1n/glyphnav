@@ -169,6 +169,17 @@ a {
   }
 }
 
+/* One focus ring for the whole page. Every keyboard-focused element — nav tabs,
+   the deep-link row, body links, the footer — gets the demo's framework accent
+   (the same --card-accent the controls and breadcrumb already use), so focus
+   reads as one identity instead of the browser's default blue. Per-component
+   rules below restate this with their own outline-offset; they pick up the same
+   colour. Falls back to --blue where no framework accent is set (the changelog). */
+:focus-visible {
+  outline: 2px solid var(--card-accent, var(--blue));
+  outline-offset: 2px;
+}
+
 h1 {
   font-size: 1.3rem;
   margin: 0 0 1.25rem;
@@ -617,7 +628,7 @@ nav {
 
   &:focus-visible {
     opacity: 1;
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--card-accent, var(--blue));
     outline-offset: 2px;
   }
 
@@ -674,7 +685,7 @@ nav {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--card-accent, var(--blue));
     outline-offset: 1px;
   }
 }
@@ -1025,7 +1036,7 @@ code {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--card-accent, var(--blue));
     outline-offset: 2px;
   }
 

@@ -50,7 +50,7 @@ const docs = {
     h('div', { class: 'view docs' }, [
       h('article', [
         h('header', { class: 'lead' }, [
-          h('h2', 'docs'),
+          h('h2', 'Docs'),
           'Install the package — Vue Router stays a peer dependency:',
         ]),
         figure(DOCS_INSTALL),
@@ -66,21 +66,21 @@ const router = createRouter({
     {
       path: '/',
       component: page(
-        'home',
+        'Home',
         'Vue Router edition. The glyphnav plugin wraps <code>router.push</code> and <code>router.replace</code>, so every <code>&lt;router-link&gt;</code> click animates the address bar. With <code>commit: "navigate first"</code> the route swaps instantly and the bar decodes on top.',
       ),
     },
     {
       path: '/about',
       component: page(
-        'about',
+        'About',
         'No guards, no boilerplate: <code>app.use(glyphnav, { router })</code> is the whole integration. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.',
       ),
     },
     {
       path: '/features',
       component: page(
-        'features',
+        'Features',
         'Switch the charset, speed, effect and commit order in the controls — changes apply to the very next navigation via <code>controller.update()</code>.',
       ),
     },
