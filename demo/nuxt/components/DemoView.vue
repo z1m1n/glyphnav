@@ -7,7 +7,7 @@ defineProps<{ title: string; body: string }>();
     <article>
       <header class="lead">
         <h2>{{ title }}</h2>
-        {{ body }}
+        <span v-html="body" />
       </header>
     </article>
   </div>

@@ -144,6 +144,15 @@ history stays clean. Safety rails:
 - If the URL changes externally mid‑animation (back/forward button, another script),
   the run cancels itself and leaves the new URL alone.
 
+**Caveat — URL history / autocomplete:** `replaceState` never adds a back/forward
+entry, but the browser still treats each frame as a same‑document navigation, so
+Chromium's address‑bar autocomplete (and any extension listening for
+`webNavigation.onHistoryStateUpdated`) can log **every frame** as a visit — a long
+scramble can leave dozens of throwaway, half‑resolved URLs in your history/autocomplete
+suggestions. There is no web‑platform API to opt a `replaceState` call out of that; the
+only lever is fewer frames — a short `duration`, a low `maxFrames`, or `scope: 'tail'`
+(shorter animated text means fewer frames).
+
 Frame generation is pure and deterministic given an `rng`, which is exactly what the
 test‑suite pins down.
 

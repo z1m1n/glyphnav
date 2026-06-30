@@ -65,11 +65,11 @@ const DOCS_OPTIONS = `install({
 const pages: Record<string, Page> = {
   '/': {
     title: 'Home',
-    lead: 'No framework here. install() hijacks the links above; with commit: "navigate first" the page swaps instantly and the address bar decodes on top (mirrored in the line above).',
+    lead: 'No framework here. <code>install()</code> hijacks the links above; with <code>commit: "navigate first"</code> the page swaps instantly and the address bar decodes on top (mirrored in the line above).',
   },
   '/about': {
     title: 'About',
-    lead: 'glyphnav rewrites history.replaceState frame by frame. The decode effect grows the path and resolves it left to right; the scramble effect bursts to full length and locks characters in random order.',
+    lead: 'glyphnav rewrites <code>history.replaceState</code> frame by frame. The decode effect grows the path and resolves it left to right; the scramble effect bursts to full length and locks characters in random order.',
   },
   '/docs': {
     title: 'Docs',
@@ -82,7 +82,7 @@ const pages: Record<string, Page> = {
   },
   '/contact': {
     title: 'Contact',
-    lead: 'Try the controls — your choices are remembered per page. "matrix" and "symbols" get percent-encoded by the browser in the real bar (expected for non-URL-safe glyphs). Deep links with ?query and #hash animate too: they are just part of the path.',
+    lead: 'Try the controls — your choices are remembered per page. <code>matrix</code> and <code>symbols</code> get percent-encoded by the browser in the real bar (expected for non-URL-safe glyphs). Deep links with <code>?query</code> and <code>#hash</code> animate too: they are just part of the path.',
   },
 };
 

@@ -7,7 +7,7 @@
   <article>
     <header class="lead">
       <h2>{title}</h2>
-      {body}
+      {@html body}
     </header>
   </article>
 </div>

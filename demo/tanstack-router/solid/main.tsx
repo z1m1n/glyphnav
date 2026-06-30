@@ -63,7 +63,7 @@ function View(props: { title: string; body: string }): JSX.Element {
       <article>
         <header class="lead">
           <h2>{props.title}</h2>
-          {props.body}
+          <span innerHTML={props.body} />
         </header>
       </article>
     </div>
@@ -294,7 +294,7 @@ const routeTree = rootRoute.addChildren([
     component: () => (
       <View
         title="Home"
-        body="TanStack Router on Solid. A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
+        body="TanStack Router on Solid. A <code>GlyphnavProvider</code> shares one controller; each <code>GlyphnavLink</code> decodes the URL. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top."
       />
     ),
   }),
@@ -304,7 +304,7 @@ const routeTree = rootRoute.addChildren([
     component: () => (
       <View
         title="About"
-        body="useGlyphnavNavigate() mirrors useNavigate(); GlyphnavLink renders a plain anchor. Deep links with ?search and #hash animate too — they are just part of the path."
+        body="<code>useGlyphnavNavigate()</code> mirrors <code>useNavigate()</code>; <code>GlyphnavLink</code> renders a plain anchor. Deep links with <code>?search</code> and <code>#hash</code> animate too — they are just part of the path."
       />
     ),
   }),
@@ -314,7 +314,7 @@ const routeTree = rootRoute.addChildren([
     component: () => (
       <View
         title="Posts"
-        body="The animation rides on history.replaceState; TanStack Router performs the real navigation. Try scope: tail — only the part of the path that differs gets scrambled."
+        body="The animation rides on <code>history.replaceState</code>; TanStack Router performs the real navigation. Try <code>scope: tail</code> — only the part of the path that differs gets scrambled."
       />
     ),
   }),

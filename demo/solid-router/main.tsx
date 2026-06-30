@@ -52,7 +52,7 @@ function View(props: { title: string; body: string }): JSX.Element {
       <article>
         <header class="lead">
           <h2>{props.title}</h2>
-          {props.body}
+          <span innerHTML={props.body} />
         </header>
       </article>
     </div>
@@ -278,7 +278,7 @@ render(
           component={() => (
             <View
               title="Home"
-              body="Solid Router (@solidjs/router). A GlyphnavProvider shares one controller; each GlyphnavLink decodes the URL. With commit: 'navigate first' the route swaps instantly and the bar animates on top."
+              body="Solid Router (<code>@solidjs/router</code>). A <code>GlyphnavProvider</code> shares one controller; each <code>GlyphnavLink</code> decodes the URL. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top."
             />
           )}
         />
@@ -287,7 +287,7 @@ render(
           component={() => (
             <View
               title="About"
-              body="useGlyphnavNavigate() mirrors useNavigate(); GlyphnavLink is a drop-in for <A>. Deep links with ?search and #hash animate too — they are just part of the path."
+              body={`<code>useGlyphnavNavigate()</code> mirrors <code>useNavigate()</code>; <code>GlyphnavLink</code> is a drop-in for <code>&lt;A&gt;</code>. Deep links with <code>?search</code> and <code>#hash</code> animate too — they are just part of the path.`}
             />
           )}
         />
@@ -296,7 +296,7 @@ render(
           component={() => (
             <View
               title="Posts"
-              body="The animation rides on history.replaceState; Solid Router performs the real navigation. Try scope: tail — only the part of the path that differs gets scrambled."
+              body="The animation rides on <code>history.replaceState</code>; Solid Router performs the real navigation. Try <code>scope: tail</code> — only the part of the path that differs gets scrambled."
             />
           )}
         />

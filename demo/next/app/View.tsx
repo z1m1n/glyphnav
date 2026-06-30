@@ -5,7 +5,7 @@ export function View({ title, body }: { title: string; body: string }) {
       <article>
         <header className="lead">
           <h2>{title}</h2>
-          {body}
+          <span dangerouslySetInnerHTML={{ __html: body }} />
         </header>
       </article>
     </div>

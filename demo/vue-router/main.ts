@@ -9,7 +9,9 @@ import App from './App.vue';
 const page = (title: string, body: string) => ({
   render: () =>
     h('div', { class: 'view' }, [
-      h('article', [h('header', { class: 'lead' }, [h('h2', title), body])]),
+      h('article', [
+        h('header', { class: 'lead' }, [h('h2', title), h('span', { innerHTML: body })]),
+      ]),
     ]),
 });
 
@@ -65,21 +67,21 @@ const router = createRouter({
       path: '/',
       component: page(
         'home',
-        'Vue Router edition. The glyphnav plugin wraps router.push and router.replace, so every <router-link> click animates the address bar. With commit: "navigate first" the route swaps instantly and the bar decodes on top.',
+        'Vue Router edition. The glyphnav plugin wraps <code>router.push</code> and <code>router.replace</code>, so every <code>&lt;router-link&gt;</code> click animates the address bar. With <code>commit: "navigate first"</code> the route swaps instantly and the bar decodes on top.',
       ),
     },
     {
       path: '/about',
       component: page(
         'about',
-        'No guards, no boilerplate: app.use(glyphnav, { router }) is the whole integration. Deep links with ?query and #hash animate too — they are just part of the path.',
+        'No guards, no boilerplate: <code>app.use(glyphnav, { router })</code> is the whole integration. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.',
       ),
     },
     {
       path: '/features',
       component: page(
         'features',
-        'Switch the charset, speed, effect and commit order in the controls — changes apply to the very next navigation via controller.update().',
+        'Switch the charset, speed, effect and commit order in the controls — changes apply to the very next navigation via <code>controller.update()</code>.',
       ),
     },
     { path: '/docs', component: docs },

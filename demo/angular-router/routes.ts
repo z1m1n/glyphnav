@@ -10,7 +10,7 @@ import { DOCS_INSTALL } from '../shared/content';
     <article>
       <header class="lead">
         <h2>{{ data.title }}</h2>
-        {{ data.body }}
+        <span [innerHTML]="data.body"></span>
       </header>
     </article>
   </div>`,
@@ -90,7 +90,7 @@ export const routes: Routes = [
     component: PageComponent,
     data: {
       title: 'Home',
-      body: 'Angular Router edition. provideGlyphnav() registers a navigator you inject as GLYPHNAV; the [glyphnavLink] directive uses it. With commit: "before" the route swaps instantly and the bar animates on top.',
+      body: 'Angular Router edition. <code>provideGlyphnav()</code> registers a navigator you inject as <code>GLYPHNAV</code>; the <code>[glyphnavLink]</code> directive uses it. With <code>commit: "before"</code> the route swaps instantly and the bar animates on top.',
     },
   },
   {
@@ -98,7 +98,7 @@ export const routes: Routes = [
     component: PageComponent,
     data: {
       title: 'About',
-      body: 'This demo runs inside the shared Vite playground using Angular JIT: @angular/compiler is loaded in the browser, so no separate ngtsc build is needed. The package itself stays compiler-free.',
+      body: 'This demo runs inside the shared Vite playground using Angular JIT: <code>@angular/compiler</code> is loaded in the browser, so no separate <code>ngtsc</code> build is needed. The package itself stays compiler-free.',
     },
   },
   { path: 'docs', component: DocsComponent },
@@ -107,7 +107,7 @@ export const routes: Routes = [
     component: PageComponent,
     data: {
       title: 'Blog',
-      body: 'The real navigation is still the Angular Router’s — glyphnav only animates the address bar on the way there. Deep links with ?query and #hash animate too: they are just part of the path.',
+      body: 'The real navigation is still the Angular Router’s — glyphnav only animates the address bar on the way there. Deep links with <code>?query</code> and <code>#hash</code> animate too: they are just part of the path.',
     },
   },
 ];
