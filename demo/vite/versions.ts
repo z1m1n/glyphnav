@@ -1,14 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { fromDemoRoot } from './paths';
+import { glyphnavVersion } from '../shared/internal/version';
 
 const nodeRequire = createRequire(import.meta.url);
 
-/** The glyphnav library's own version, read from the repo's root manifest. */
-export const glyphnavVersion = (
-  JSON.parse(readFileSync(fromDemoRoot('../package.json'), 'utf8')) as { version: string }
-).version;
+/** The glyphnav library's own version, read once and shared by every build pipeline. */
+export { glyphnavVersion };
 
 /**
  * Read an installed dependency's version from its `package.json`.
@@ -67,4 +65,28 @@ export const stackForFile = (filename: string): string => {
   const path = filename.replace(/\\/g, '/').replace(/\/?index\.html$/, '');
   const app = Object.keys(STACK_BY_APP).find((name) => path.endsWith(name));
   return app ? STACK_BY_APP[app]() : '';
+};
+
+/**
+ * vanilla, core and changelog have no separate framework/router packages —
+ * their `STACK_BY_APP` entry is just the glyphnav version itself, which the
+ * footer already shows directly. A tooltip restating "paired with glyphnav
+ * vX" on top of that would be redundant, so these get none.
+ */
+const NO_TIP_APPS = new Set(['vanilla', 'core', 'changelog']);
+
+/**
+ * Tooltip text for the footer's `.stack` span, spelling out the exact package
+ * versions this page runs (the footer text itself, restated) alongside the
+ * glyphnav version. `''` for pages where that would just repeat the footer
+ * (see {@link NO_TIP_APPS}) — the demo omits the tooltip entirely in that case.
+ *
+ * @param filename - The HTML file being transformed.
+ * @returns The tooltip text, or `''` for a page with no tooltip.
+ */
+export const stackTipForFile = (filename: string): string => {
+  const path = filename.replace(/\\/g, '/').replace(/\/?index\.html$/, '');
+  const app = Object.keys(STACK_BY_APP).find((name) => path.endsWith(name));
+  if (!app || NO_TIP_APPS.has(app)) return '';
+  return `This page runs ${STACK_BY_APP[app]()}, paired with glyphnav v${glyphnavVersion}.`;
 };

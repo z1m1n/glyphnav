@@ -136,7 +136,7 @@ function Inner({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <h1 data-fw="next">
+      <h1>
         {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
         <img className="glyph-mark" src={logo.src} alt="" />
         <a href={ROOT_HREF}>glyphnav</a>
@@ -242,7 +242,9 @@ function Inner({ children }: { children: ReactNode }) {
         {/* The changelog page is part of the combined demo site, one level up
             from this app's base path — a plain anchor (full navigation). */}
         <a href={`${ROOT_HREF}changelog/`}>Changelog</a>
-        <span className="stack">{process.env.NEXT_PUBLIC_STACK}</span>
+        <span className="stack" data-tip={process.env.NEXT_PUBLIC_STACK_TIP}>
+          {process.env.NEXT_PUBLIC_STACK}
+        </span>
       </footer>
     </>
   );

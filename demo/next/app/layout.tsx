@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     // suppressHydrationWarning: the pre-paint script sets data-theme on <html>
     // before React hydrates, which would otherwise trip an attribute mismatch.
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body data-fw="next">
         {/* Apply the saved/OS theme before first paint, so no flash. First in
             <body> so it runs before the app markup is parsed. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
+import { glyphnavVersion } from '@glyphnav-demo/shared/internal/version';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { ports } from '../ports';
@@ -31,10 +32,18 @@ const ver = (name: string): string => {
 // The framework + view library this demo runs, shown muted in the footer.
 const stack = `sveltekit ${ver('@sveltejs/kit')} · svelte ${ver('svelte')}`;
 
+// Tooltip for the footer's `.stack` span — spells out the exact versions above
+// alongside the glyphnav version, since the footer text alone doesn't repeat it.
+const stackTip = `This page runs ${stack}, paired with glyphnav v${glyphnavVersion}.`;
+
 export default defineConfig({
   plugins: [sveltekit()],
-  // Surfaced to the client so the footer can show which stack this demo runs.
-  define: { GLYPHNAV_STACK: JSON.stringify(stack) },
+  // Surfaced to the client so the footer can show which stack this demo runs
+  // and explain it in a tooltip.
+  define: {
+    GLYPHNAV_STACK: JSON.stringify(stack),
+    GLYPHNAV_STACK_TIP: JSON.stringify(stackTip),
+  },
   // Port read from demo/.env via demo/ports.ts, so it and the picker proxy
   // (`/sveltekit`) always point at the same place.
   server: { port: ports.sveltekit, strictPort: true, open: false },

@@ -4,3 +4,5 @@ declare namespace App {}
 
 /** Injected by Vite `define` in vite.config.ts: the framework + view stack. */
 declare const GLYPHNAV_STACK: string;
+/** Injected by Vite `define` in vite.config.ts: the footer's hover-tooltip text. */
+declare const GLYPHNAV_STACK_TIP: string;

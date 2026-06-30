@@ -26,11 +26,13 @@
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
   --ok: #1a7f37; /* success green — the copy button's "copied" checkmark */
 
-  /* Panel for the controls toolbar — the brand's soft blue tint (shared with the
-     resolving path highlight) so the knobs read as the interactive block, set
-     apart from the white page and the gray-bordered view/code panels. */
-  --toolbar-bg: var(--blue-soft); /* soft blue tint */
-  --toolbar-border: #838893; /* greyish-blue border — 3:1 on the toolbar tint */
+  /* Panel for the controls toolbar — tinted with the demo's own framework accent
+     (--card-accent, set per [data-fw] on <body>/.app-shell — the same token the
+     breadcrumb crumb uses), falling back to the brand blue on untagged pages
+     (e.g. the changelog). Resolved via color-mix so it tracks whichever accent
+     is inherited, instead of a single fixed hue for every demo. */
+  --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 10%, var(--white));
+  --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
 
   /* Accent for the control tooltips — a muted, greyish light-yellow, a warm
      contrast to the cool toolbar the tip springs from. */
@@ -74,8 +76,8 @@
 /* Dark theme. The shared switcher (demo/shared/theme.ts) sets data-theme on
    <html> — resolving the saved preference, or the OS `prefers-color-scheme` by
    default — before first paint, so there's no flash. Only the tokens that change
-   are overridden; everything else (layout, the --toolbar-bg = --blue-soft link,
-   the tooltip arrow) inherits and re-resolves automatically. */
+   are overridden; everything else (layout, the toolbar's --card-accent tint, the
+   tooltip arrow) inherits and re-resolves automatically. */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
@@ -91,7 +93,10 @@
   --blue-soft: #1d2740; /* resolving-state path highlight + toolbar tint */
   --blue-hover: #a9c2ff; /* link hover */
   --ok: #3fb950; /* success green — brighter for the dark surface */
-  --toolbar-border: #677287; /* greyish-blue border — 3:1 on the toolbar tint */
+  /* Same --card-accent-tinted formula as light mode, just a stronger mix so the
+     panel still reads against the dark surface. */
+  --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 20%, var(--white));
+  --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
   --accent-bg: #2b2920; /* dark greyish-yellow tooltip fill */
   --accent-border: #4d4730; /* greyish-yellow hairline */
 
@@ -176,8 +181,23 @@ h1 {
   align-items: baseline;
   gap: 0.4em;
 
-  a {
+  /* The wordmark link reads as plain ink, underlined to mark it as a link
+     without borrowing the body-link blue. `:link`/`:visited` are listed
+     explicitly (not just inherited via the bare `a` rule below) so their
+     higher specificity beats the global `a:hover` — without this, hovering or
+     refocusing the link mid route-transition would win the cascade and flash
+     it blue. */
+  a:link,
+  a:visited {
     color: inherit;
+    text-decoration: underline;
+  }
+
+  /* On hover/focus, brighten to the same logo blue every other link uses —
+     keeps the wordmark reading as "a link", not tied to the demo's accent. */
+  a:hover,
+  a:focus-visible {
+    color: var(--blue-hover);
   }
 
   /* Breadcrumb separator ("/") — muted, lighter than the bold wordmark. */
@@ -316,8 +336,55 @@ nav {
     display: inline-block;
   }
 
+  /* Custom select chevron, drawn from two gradients (no SVG/data-URI, so it
+     re-tints with the theme vars automatically) since `appearance: none`
+     drops the UA arrow entirely. */
+  select {
+    appearance: none;
+    background-color: var(--white);
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--gray-strong) 50%),
+      linear-gradient(135deg, var(--gray-strong) 50%, transparent 50%);
+    background-position:
+      calc(100% - 0.95rem) center,
+      calc(100% - 0.65rem) center;
+    background-size: 0.3rem 0.3rem;
+    background-repeat: no-repeat;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.2rem 1.7rem 0.2rem 0.45rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: var(--card-accent, var(--blue));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--card-accent, var(--blue));
+      outline-offset: 1px;
+    }
+  }
+
+  /* Checkbox + range both tint with the demo's framework accent (same token as
+     the toolbar panel and the breadcrumb crumb), falling back to brand blue. */
+  input[type='checkbox'] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--card-accent, var(--blue));
+    cursor: pointer;
+  }
+
   input[type='range'] {
     width: 7.5rem;
+    accent-color: var(--card-accent, var(--blue));
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--card-accent, var(--blue));
+      outline-offset: 2px;
+    }
   }
 }
 
@@ -822,10 +889,10 @@ nav {
   --card-accent: #3a6096;
 }
 [data-fw='tanstack-react'] {
-  --card-accent: #c55e00;
+  --card-accent: #0891b0;
 }
 [data-fw='tanstack-solid'] {
-  --card-accent: #c55e00;
+  --card-accent: #3a6096;
 }
 [data-fw='angular-router'] {
   --card-accent: #aa0026;
@@ -854,10 +921,10 @@ nav {
     --card-accent: #7aaee0;
   }
   [data-fw='tanstack-react'] {
-    --card-accent: #ff8c30;
+    --card-accent: #22c4e6;
   }
   [data-fw='tanstack-solid'] {
-    --card-accent: #ff8c30;
+    --card-accent: #7aaee0;
   }
   [data-fw='angular-router'] {
     --card-accent: #ff5070;
@@ -900,6 +967,13 @@ nav {
      the footer's muted gray. Wraps under the links on narrow viewports. */
   .stack {
     margin-left: auto;
+
+    /* `help` cursor only where there's a `data-tip` to show (see ./tooltip) —
+       vanilla/core/changelog have no separate framework versions to spell out
+       beyond the glyphnav version already shown here, so they get no tooltip. */
+    &[data-tip] {
+      cursor: help;
+    }
   }
 }
 

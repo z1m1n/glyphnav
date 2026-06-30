@@ -6,6 +6,7 @@
   "type": "module",
   "exports": {
     ".": "./index.ts",
+    "./internal/version": "./internal/version.ts",
     "./styles.css": "./styles.css",
     "./logo.svg": "./logo.svg",
     "./icons/*": "./icons/*"

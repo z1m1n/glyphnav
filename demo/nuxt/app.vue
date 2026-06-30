@@ -49,6 +49,7 @@ const config = useRuntimeConfig();
 const baseURL = config.app.baseURL;
 const rootHref = baseURL.replace(/nuxt\/$/, '') || '/';
 const stack = config.public.stack;
+const stackTip = config.public.stackTip;
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'nuxt';
@@ -143,8 +144,8 @@ watch(backForward, () => {
 </script>
 
 <template>
-  <div class="app-shell">
-    <h1 data-fw="nuxt">
+  <div class="app-shell" data-fw="nuxt">
+    <h1>
       <img class="glyph-mark" :src="logo" alt="" />
       <a :href="rootHref">glyphnav</a>
       <span class="sep">/</span>
@@ -234,7 +235,7 @@ watch(backForward, () => {
       <!-- The changelog lives in the combined demo site, one level up from this
            app's base — a plain anchor so it does a full navigation. -->
       <a :href="`${rootHref}changelog/`">Changelog</a>
-      <span class="stack">{{ stack }}</span>
+      <span class="stack" :data-tip="stackTip">{{ stack }}</span>
     </footer>
   </div>
 </template>

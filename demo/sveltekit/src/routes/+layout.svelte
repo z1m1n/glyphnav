@@ -26,6 +26,7 @@
   const STORE_KEY = 'sveltekit';
   const tips = CONTROL_TOOLTIPS;
   const stack = GLYPHNAV_STACK;
+  const stackTip = GLYPHNAV_STACK_TIP;
 
   // `resolve` prefixes the configured `paths.base` (the non-deprecated successor
   // to the `base` string). The picker lives one level up from this app's base
@@ -168,8 +169,8 @@
   <meta name="twitter:image" content="https://z1m1n.github.io/glyphnav/og.png" />
 </svelte:head>
 
-<div class="app-shell">
-  <h1 data-fw="sveltekit">
+<div class="app-shell" data-fw="sveltekit">
+  <h1>
     <img class="glyph-mark" src={logo} alt="" />
     <a href={rootHref} data-glyphnav="off">glyphnav</a>
     <span class="sep">/</span>
@@ -260,6 +261,6 @@
          app's base); `data-glyphnav="off"` opts it out of the link animation so
          it does a real full-page navigation out of the SPA, like the home link. -->
     <a href="{rootHref}changelog/" data-glyphnav="off">Changelog</a>
-    <span class="stack">{stack}</span>
+    <span class="stack" data-tip={stackTip}>{stack}</span>
   </footer>
 </div>
