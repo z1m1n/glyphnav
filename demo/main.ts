@@ -40,6 +40,7 @@ const targets = [
   '/tanstack-router/react',
   '/tanstack-router/solid',
   '/angular-router',
+  '/preact-iso',
   '/next',
   '/nuxt',
   '/sveltekit',

@@ -50,6 +50,7 @@ const STACK_BY_APP: Record<string, () => string> = {
     `solid-js ${pkgVersion('solid-js')} · @tanstack/solid-router ${pkgVersion('@tanstack/solid-router')}`,
   'angular-router': () =>
     `angular ${pkgVersion('@angular/core')} · @angular/router ${pkgVersion('@angular/router')}`,
+  'preact-iso': () => `preact ${pkgVersion('preact')} · preact-iso ${pkgVersion('preact-iso')}`,
 };
 
 /**

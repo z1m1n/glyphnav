@@ -33,6 +33,7 @@
     "dist",
     "demo",
     "test/tanstack-solid-router.test.ts",
+    "test/preact-iso.test.tsx",
     "**/*.config.ts"
   ]
 }

@@ -46,6 +46,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://z1m1n.github.io/glyphnav/preact-iso/</loc>
+    <lastmod>2026-07-01</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://z1m1n.github.io/glyphnav/next/</loc>
     <lastmod>2026-06-16</lastmod>
     <priority>0.8</priority>
