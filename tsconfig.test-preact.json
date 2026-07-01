@@ -1,0 +1,13 @@
+{
+  // The Preact adapter test uses Preact's own JSX runtime (`jsx: react-jsx` +
+  // `jsxImportSource: preact`). Loading Preact's and React's JSX types in one
+  // program clashes, so — like the Solid test (tsconfig.test-solid.json) — it
+  // gets its own isolated program, excluded from the root tsconfig.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsxImportSource": "preact",
+    "types": ["node"]
+  },
+  "include": ["src/preact-iso", "test/preact-iso.test.tsx"],
+  "exclude": []
+}

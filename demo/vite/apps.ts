@@ -12,6 +12,7 @@ export const DEMO_ROUTES: Record<string, string[]> = {
   'tanstack-router/react': ['about', 'posts', 'docs'],
   'tanstack-router/solid': ['about', 'posts', 'docs'],
   'angular-router': ['about', 'docs', 'blog'],
+  'preact-iso': ['about', 'posts', 'docs'],
 };
 
 /** The Vite demos that own deep links, in picker order. */

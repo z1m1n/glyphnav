@@ -30,6 +30,7 @@ Jump straight to an integration:
 [TanStack (React)](https://z1m1n.github.io/glyphnav/tanstack-router/react/) ·
 [TanStack (Solid)](https://z1m1n.github.io/glyphnav/tanstack-router/solid/) ·
 [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/) ·
+[Preact (preact-iso)](https://z1m1n.github.io/glyphnav/preact-iso/) ·
 [Next.js](https://z1m1n.github.io/glyphnav/next/) ·
 [Nuxt](https://z1m1n.github.io/glyphnav/nuxt/) ·
 [SvelteKit](https://z1m1n.github.io/glyphnav/sveltekit/)
@@ -42,8 +43,8 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
   `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`,
-  `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`
-  (App **and** Pages Router), `glyphnav/nuxt` and `glyphnav/sveltekit`.
+  `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/preact-iso`,
+  `glyphnav/next` (App **and** Pages Router), `glyphnav/nuxt` and `glyphnav/sveltekit`.
 - ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
   instantly and the animation plays on top; switch to `commit: 'after'` for the
   classic animate‑then‑commit order.
@@ -220,7 +221,9 @@ import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } fro
 Each subpath is named after the router it wraps. The Vue and Nuxt plugins, the
 SvelteKit adapter, and vanilla `install()` intercept globally — and all can be told
 not to. The React, Solid, TanStack, Angular and Next adapters are opt‑in by design:
-only navigations made through their links/hooks animate. Browser back/forward animation is opt‑in for every
+only navigations made through their links/hooks animate. The Preact adapter is opt‑in
+too, but adds `interceptLinks` to animate the plain `<a>` clicks preact-iso already
+handles. Browser back/forward animation is opt‑in for every
 adapter via `animatePopState` — except the vanilla `install()`, where it is on by
 default; see [Back/forward animation](#backforward-animation).
 
@@ -390,6 +393,45 @@ For an animated link directive (`[glyphnavLink]`), copy the small directive from
 [`demo/angular-router/glyphnav-link.directive.ts`](demo/angular-router/glyphnav-link.directive.ts)
 into your app, where your own Angular build compiles it. Or wrap a `Router` directly with
 `createGlyphnavNavigator(router, options)`.
+
+### Preact (preact-iso) — `glyphnav/preact-iso`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/preact-iso/)**
+
+For Preact's official router, [`preact-iso`](https://github.com/preactjs/preact-iso)
+(`preact` + `preact-iso` as peers). `preact-iso` already intercepts every same‑origin
+`<a>` itself, so the adapter gives you both a global mode and opt‑in entry points:
+
+```tsx
+import { LocationProvider, Router } from 'preact-iso';
+import { GlyphnavProvider, GlyphnavLink, useGlyphnavRoute } from 'glyphnav/preact-iso';
+
+<LocationProvider>
+  <GlyphnavProvider duration={250} commit="before" interceptLinks>
+    <a href="/about">About</a> {/* plain links animate via interceptLinks */}
+    <GlyphnavLink href="/posts?page=2#top">Posts</GlyphnavLink>
+    <Router>{/* <Route> children */}</Router>
+  </GlyphnavProvider>
+</LocationProvider>;
+
+// imperative, drop-in for useLocation().route:
+const route = useGlyphnavRoute();
+await route('/dashboard');
+```
+
+`interceptLinks` (on `<GlyphnavProvider>`, or the standalone `useGlyphnavLinks()` hook)
+animates the plain `<a>` clicks `preact-iso` already handles — no component swap.
+`GlyphnavLink` and `useGlyphnavRoute()` are the opt‑in equivalents; both stop the click
+from reaching `preact-iso`'s global handler, so each navigation happens exactly once.
+Modified clicks (⌘/Ctrl/middle) fall through to the browser. The provider is optional —
+without it, the hooks create their own controller.
+
+Note that `preact-iso` intercepts **every** same‑origin `<a>` itself — including links
+that leave your router (a link back to a separate app, another server‑rendered page).
+`data-glyphnav="off"` only tells glyphnav's interceptor to skip; to make such a link a
+real full‑page navigation, bound `preact-iso` with
+[`<LocationProvider scope>`](https://github.com/preactjs/preact-iso#locationprovider)
+(a path prefix or `RegExp`) so out‑of‑scope links fall through to the browser.
 
 ### Next.js — `glyphnav/next`
 

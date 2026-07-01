@@ -5,6 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-07-01
+
+### Added
+
+- **Preact adapter** (`glyphnav/preact-iso`): animate navigation on Preact's
+  official router, [`preact-iso`](https://github.com/preactjs/preact-iso)
+  (`preact` + `preact-iso` as optional peers). Because `preact-iso`'s
+  `LocationProvider` already intercepts every same-origin `<a>` on `window`, the
+  adapter ships both a global mode and opt-in entry points:
+  - `interceptLinks` (a `<GlyphnavProvider>` prop, or the standalone
+    `useGlyphnavLinks()` hook) animates the plain `<a>` clicks `preact-iso`
+    already handles — no component swap.
+  - `<GlyphnavLink>` (a drop-in `<a>`) and `useGlyphnavRoute()` (a drop-in for
+    `useLocation().route`) are the opt-in equivalents.
+  - `<GlyphnavProvider>` shares one controller (with `animatePopState` for
+    browser back/forward); `useGlyphnavController()` reads it.
+
+  Every entry point stops the click from reaching `preact-iso`'s global handler
+  (`stopPropagation`, since `preact-iso` ignores `defaultPrevented`), so each
+  navigation happens exactly once. `preact-iso` commits synchronously, so the
+  default `commit: 'before'` lands the route first and animates on top with no
+  settle wait.
+
 ## [2.3.0] - 2026-06-30
 
 ### Changed
@@ -216,6 +239,7 @@ Initial public release.
 - Router adapters: Vue Router, React Router, TanStack React Router, TanStack Solid Router, and Angular Router.
 
 [Unreleased]: https://github.com/z1m1n/glyphnav/compare/2.3.0...HEAD
+[2.4.0]: https://github.com/z1m1n/glyphnav/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/z1m1n/glyphnav/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/z1m1n/glyphnav/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/z1m1n/glyphnav/compare/2.0.0...2.1.0

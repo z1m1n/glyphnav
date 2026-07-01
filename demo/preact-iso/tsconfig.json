@@ -1,0 +1,30 @@
+{
+  // The Preact demo uses Preact's JSX runtime (`jsx: react-jsx` +
+  // `jsxImportSource: preact`), so — like the Solid demo — it gets its own
+  // config rather than the react-jsx one in demo/tsconfig.json. Paths resolve
+  // `glyphnav/*` to the live src (matching demo/vite.config.ts).
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": [],
+    "paths": {
+      "glyphnav": ["../../src/index.ts"],
+      "glyphnav/core": ["../../src/core/index.ts"],
+      "glyphnav/preact-iso": ["../../src/preact-iso/index.tsx"]
+    }
+  },
+  "include": ["*.tsx", "*.ts", "../shared/highlight.ts", "../shared/content.ts", "../vite-env.d.ts"]
+}

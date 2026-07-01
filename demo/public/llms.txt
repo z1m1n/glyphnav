@@ -22,6 +22,7 @@ below. Install with `pnpm add glyphnav` (npm/yarn work too).
 - [TanStack Router (React)](https://z1m1n.github.io/glyphnav/tanstack-router/react/): `GlyphnavLink` + `useGlyphnavNavigate`
 - [TanStack Router (Solid)](https://z1m1n.github.io/glyphnav/tanstack-router/solid/): the same engine with Solid bindings
 - [Angular Router](https://z1m1n.github.io/glyphnav/angular-router/): `provideGlyphnav` + the `[glyphnavLink]` directive
+- [Preact (preact-iso)](https://z1m1n.github.io/glyphnav/preact-iso/): `interceptLinks` animates plain `<a>` clicks; `GlyphnavLink` + `useGlyphnavRoute` are opt-in
 - [Next.js (App Router)](https://z1m1n.github.io/glyphnav/next/): `GlyphnavLink` + `useGlyphnavNavigate`
 - [Nuxt](https://z1m1n.github.io/glyphnav/nuxt/): a client plugin wraps `router.push` / `navigateTo`
 - [SvelteKit](https://z1m1n.github.io/glyphnav/sveltekit/): `attachGlyphnav(goto)` intercepts `<a>` clicks and drives `goto`
@@ -37,4 +38,4 @@ below. Install with `pnpm add glyphnav` (npm/yarn work too).
 - `install(options)` — vanilla: hijack in-page link clicks and animate via the History API
 - `generateFrames(from, to, { charset, effect })` — produce the per-frame URL strings the animation steps through
 - Options: `duration` (ms), `effect` (`decode` | `scramble`), `charset` (`url` | `hex` | `matrix` | `symbols`), `commit` (`before` | `after` — navigate first vs. animate first), `scope` (`full` | `tail`)
-- Adapter entry points: `glyphnav/core`, `glyphnav/vue-router`, `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`, `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/next`, `glyphnav/nuxt`, `glyphnav/sveltekit`
+- Adapter entry points: `glyphnav/core`, `glyphnav/vue-router`, `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`, `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/preact-iso`, `glyphnav/next`, `glyphnav/nuxt`, `glyphnav/sveltekit`
