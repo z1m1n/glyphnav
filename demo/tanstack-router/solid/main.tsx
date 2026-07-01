@@ -183,7 +183,7 @@ function Layout(): JSX.Element {
 
   return (
     <>
-      <h1 data-fw="tanstack-solid">
+      <h1>
         <img class="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span class="sep">/</span>

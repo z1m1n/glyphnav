@@ -19,7 +19,7 @@ import logo from '@glyphnav-demo/shared/logo.svg';
 // SEO / social + AI link previews. Absolute URLs so the tags stay correct in the
 // statically generated output served from the GitHub Pages project subpath.
 useHead({
-  htmlAttrs: { lang: 'en' },
+  htmlAttrs: { lang: 'en', 'data-fw': 'nuxt' },
   link: [
     { rel: 'canonical', href: 'https://z1m1n.github.io/glyphnav/nuxt/' },
     { rel: 'icon', type: 'image/svg+xml', href: 'https://z1m1n.github.io/glyphnav/favicon.svg' },
@@ -145,7 +145,7 @@ watch(backForward, () => {
 </script>
 
 <template>
-  <div class="app-shell" data-fw="nuxt">
+  <div class="app-shell">
     <main>
       <h1>
         <img class="glyph-mark" :src="logo" alt="" />

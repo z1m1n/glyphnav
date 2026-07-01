@@ -183,7 +183,7 @@ function Layout() {
 
   return (
     <>
-      <h1 data-fw="tanstack-react">
+      <h1>
         <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>

@@ -100,7 +100,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1 data-fw="vue-router">
+  <h1>
     <img class="glyph-mark" :src="logo" alt="" />
     <a :href="base">glyphnav</a>
     <span class="sep">/</span>

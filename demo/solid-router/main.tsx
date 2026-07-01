@@ -114,7 +114,7 @@ function NavItem(props: { href: string; children: JSX.Element }): JSX.Element {
   const active = (): boolean => {
     const resolvedPath = normalizePath(resolved() ?? '');
     const currentPath = normalizePath(location.pathname);
-    
+
     return resolvedPath === currentPath && !location.search && !location.hash;
   };
 
@@ -184,7 +184,7 @@ function Layout(props: RouteSectionProps): JSX.Element {
 
   return (
     <>
-      <h1 data-fw="solid-router">
+      <h1>
         <img class="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span class="sep">/</span>

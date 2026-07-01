@@ -25,7 +25,7 @@ const STORE_KEY = 'angular-router';
   selector: 'app-root',
   imports: [RouterOutlet, GlyphnavLinkDirective],
   template: `
-    <h1 data-fw="angular-router">
+    <h1>
       <img class="glyph-mark" [src]="logo" alt="" />
       <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>

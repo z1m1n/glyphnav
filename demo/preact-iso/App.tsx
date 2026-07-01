@@ -210,7 +210,7 @@ export function App() {
 
   return (
     <>
-      <h1 data-fw="preact-iso">
+      <h1>
         <img class="glyph-mark" src={logo} alt="" />
         {/* Cross-app link — exclude from interceptLinks so it full-loads. */}
         <a href={import.meta.env.BASE_URL} data-glyphnav="off">

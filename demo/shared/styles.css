@@ -26,14 +26,6 @@
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
   --ok: #1a7f37; /* success green — the copy button's "copied" checkmark */
 
-  /* Panel for the controls toolbar — tinted with the demo's own framework accent
-     (--card-accent, set per [data-fw] on <body>/.app-shell — the same token the
-     breadcrumb crumb uses), falling back to the brand blue on untagged pages
-     (e.g. the changelog). Resolved via color-mix so it tracks whichever accent
-     is inherited, instead of a single fixed hue for every demo. */
-  --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 10%, var(--white));
-  --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
-
   /* Accent for the control tooltips — a muted, greyish light-yellow, a warm
      contrast to the cool toolbar the tip springs from. */
   --accent-bg: #faf8ea; /* soft greyish-yellow fill */
@@ -93,10 +85,7 @@
   --blue-soft: #1d2740; /* resolving-state path highlight + toolbar tint */
   --blue-hover: #a9c2ff; /* link hover */
   --ok: #3fb950; /* success green — brighter for the dark surface */
-  /* Same --card-accent-tinted formula as light mode, just a stronger mix so the
-     panel still reads against the dark surface. */
-  --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 20%, var(--white));
-  --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+
   --accent-bg: #2b2920; /* dark greyish-yellow tooltip fill */
   --accent-border: #4d4730; /* greyish-yellow hairline */
 
@@ -319,6 +308,14 @@ nav {
 }
 
 .controls {
+  --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 10%, var(--white));
+  --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+
+  :root[data-theme='dark'] & {
+    --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 20%, var(--white));
+    --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+  }
+
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.75rem;
@@ -896,6 +893,9 @@ nav {
 [data-fw='react-router'] {
   --card-accent: #0891b0;
 }
+[data-fw='preact-iso'] {
+    --card-accent: #673ab8;
+}
 [data-fw='solid-router'] {
   --card-accent: #3a6096;
 }
@@ -927,6 +927,9 @@ nav {
   }
   [data-fw='react-router'] {
     --card-accent: #22c4e6;
+  }
+  [data-fw='preact-iso'] {
+    --card-accent: #673ab8;
   }
   [data-fw='solid-router'] {
     --card-accent: #7aaee0;

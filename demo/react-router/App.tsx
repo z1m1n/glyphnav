@@ -167,7 +167,7 @@ export default function App() {
 
   return (
     <>
-      <h1 data-fw="react-router">
+      <h1>
         <img className="glyph-mark" src={logo} alt="" />
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>

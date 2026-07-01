@@ -169,7 +169,7 @@
   <meta name="twitter:image" content="https://z1m1n.github.io/glyphnav/og.png" />
 </svelte:head>
 
-<div class="app-shell" data-fw="sveltekit">
+<div class="app-shell">
   <main>
     <h1>
       <img class="glyph-mark" src={logo} alt="" />
