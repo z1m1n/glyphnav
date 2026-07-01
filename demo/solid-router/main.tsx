@@ -99,14 +99,25 @@ function Docs(): JSX.Element {
   );
 }
 
+function normalizePath(path: string): string {
+  if (!path || path === '/') return '/';
+  return path.replace(/\/+$/, '');
+}
+
 function NavItem(props: { href: string; children: JSX.Element }): JSX.Element {
   // Active only on an exact match: the route-resolved path (base-less) equals
   // the current path AND there's no query/hash, so a deep link like
   // /about?ref=deep never lights up the plain "About" tab.
   const resolved = useResolvedPath(() => props.href);
   const location = useLocation();
-  const active = (): boolean =>
-    resolved() === location.pathname && !location.search && !location.hash;
+
+  const active = (): boolean => {
+    const resolvedPath = normalizePath(resolved() ?? '');
+    const currentPath = normalizePath(location.pathname);
+    
+    return resolvedPath === currentPath && !location.search && !location.hash;
+  };
+
   return (
     <GlyphnavLink href={props.href} class={active() ? 'active' : undefined}>
       {props.children}

@@ -68,186 +68,190 @@
     </script>
   </head>
   <body>
-    <h1>
-      <img class="glyph-mark" src="./shared/logo.svg" alt="" />glyphnav
-      <span class="version">__GLYPHNAV_VERSION__</span>
-    </h1>
-    <p>
-      Animated navigation: the URL decodes itself, glyph by glyph, right in the address bar — keep
-      an eye on the address bar as you open any demo below. A live preview runs here:
-    </p>
+    <main>
+      <h1>
+        <img class="glyph-mark" src="./shared/logo.svg" alt="" />glyphnav
+        <span class="version">__GLYPHNAV_VERSION__</span>
+      </h1>
+      <p>
+        Animated navigation: the URL decodes itself, glyph by glyph, right in the address bar — keep
+        an eye on the address bar as you open any demo below. A live preview runs here:
+      </p>
 
-    <!-- Decorative idle teaser (cycles the demo names); the real links are the
-         list below, so hide this animated mirror from assistive tech. -->
-    <p class="bar" id="bar" aria-hidden="true"><span class="path" id="path">/</span></p>
+      <!-- Decorative idle teaser (cycles the demo names); the real links are the
+           list below, so hide this animated mirror from assistive tech. -->
+      <p class="bar" id="bar" aria-hidden="true"><span class="path" id="path">/</span></p>
 
-    <ul class="pick">
-      <li>
-        <a class="card" href="/vanilla/" data-fw="vanilla">
-          <div class="card-header">
-            <!-- JavaScript -->
-            <span class="card-icon" data-icon="javascript"></span>
-            <span class="card-router">install() · no framework</span>
-          </div>
-          <strong class="card-name">vanilla</strong>
-          <p class="card-desc">
-            Hijacks plain &lt;a&gt; clicks via the History API — zero dependencies, no build step
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/core/" data-fw="core">
-          <div class="card-header">
-            <!-- glyphnav's own mark — the engine behind every adapter -->
-            <img class="card-icon" src="./shared/logo.svg" alt="" />
-            <span class="card-router">core · framework-agnostic</span>
-          </div>
-          <strong class="card-name">core</strong>
-          <p class="card-desc">
-            Decode any DOM text — animate content directly, not just address bar URLs
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/vue-router/" data-fw="vue-router">
-          <div class="card-header">
-            <!-- Vue.js -->
-            <span class="card-icon" data-icon="vue"></span>
-            <span class="card-router">Vue Router · plugin</span>
-          </div>
-          <strong class="card-name">vue-router</strong>
-          <p class="card-desc">
-            Plugin wraps router.push and router.replace — useGlyphnav() composable
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/react-router/" data-fw="react-router">
-          <div class="card-header">
-            <!-- React -->
-            <span class="card-icon" data-icon="react"></span>
-            <span class="card-router">React Router · hooks</span>
-          </div>
-          <strong class="card-name">react-router</strong>
-          <p class="card-desc">
-            &lt;GlyphnavLink&gt; + useGlyphnavNavigate() — drop-ins for &lt;Link&gt; and useNavigate
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/solid-router/" data-fw="solid-router">
-          <div class="card-header">
-            <!-- SolidJS -->
-            <span class="card-icon" data-icon="solid"></span>
-            <span class="card-router">Solid Router · component</span>
-          </div>
-          <strong class="card-name">solid-router</strong>
-          <p class="card-desc">
-            Drop-in &lt;A&gt; replacement via &lt;GlyphnavLink&gt; — reactive signals, no VDOM
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/tanstack-router/react/" data-fw="tanstack-react">
-          <div class="card-header">
-            <!-- React -->
-            <span class="card-icon" data-icon="react"></span>
-            <span class="card-router">TanStack Router</span>
-          </div>
-          <strong class="card-name">tanstack-router/react</strong>
-          <p class="card-desc">
-            &lt;GlyphnavLink&gt; + useGlyphnavNavigate() for TanStack's fully type-safe router
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/tanstack-router/solid/" data-fw="tanstack-solid">
-          <div class="card-header">
-            <!-- SolidJS -->
-            <span class="card-icon" data-icon="solid"></span>
-            <span class="card-router">TanStack Router</span>
-          </div>
-          <strong class="card-name">tanstack-router/solid</strong>
-          <p class="card-desc">
-            Same engine, Solid signals — TanStack's type-safe routing with reactive primitives
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/angular-router/" data-fw="angular-router">
-          <div class="card-header">
-            <!-- Angular -->
-            <span class="card-icon" data-icon="angular"></span>
-            <span class="card-router">Angular Router · directive</span>
-          </div>
-          <strong class="card-name">angular-router</strong>
-          <p class="card-desc">
-            provideGlyphnav() + [glyphnavLink] attribute directive — JIT mode, standalone
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/preact-iso/" data-fw="preact-iso">
-          <div class="card-header">
-            <!-- Preact -->
-            <span class="card-icon" data-icon="preact"></span>
-            <span class="card-router">preact-iso · router</span>
-          </div>
-          <strong class="card-name">preact-iso</strong>
-          <p class="card-desc">
-            interceptLinks animates plain &lt;a&gt; clicks — &lt;GlyphnavLink&gt; and
-            useGlyphnavRoute() opt-ins
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/next/" data-fw="next">
-          <div class="card-header">
-            <!-- Next.js -->
-            <span class="card-icon" data-icon="nextjs"></span>
-            <span class="card-router">Next.js · App Router</span>
-          </div>
-          <strong class="card-name">next</strong>
-          <p class="card-desc">
-            &lt;GlyphnavProvider&gt; in root layout + &lt;GlyphnavLink&gt; and useGlyphnavNavigate()
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/nuxt/" data-fw="nuxt">
-          <div class="card-header">
-            <!-- Nuxt -->
-            <span class="card-icon" data-icon="nuxt"></span>
-            <span class="card-router">Nuxt · client plugin</span>
-          </div>
-          <strong class="card-name">nuxt</strong>
-          <p class="card-desc">
-            Client plugin wraps router.push and navigateTo — $glyphnav injected into NuxtApp
-          </p>
-        </a>
-      </li>
-      <li>
-        <a class="card" href="/sveltekit/" data-fw="sveltekit">
-          <div class="card-header">
-            <!-- Svelte -->
-            <span class="card-icon" data-icon="svelte"></span>
-            <span class="card-router">SvelteKit · goto wrapper</span>
-          </div>
-          <strong class="card-name">sveltekit</strong>
-          <p class="card-desc">
-            attachGlyphnav(goto) intercepts &lt;a&gt; clicks — use:link action, compiler-free, no
-            build-time transform
-          </p>
-        </a>
-      </li>
-    </ul>
+      <ul class="pick">
+        <li>
+          <a class="card" href="/vanilla/" data-fw="vanilla">
+            <div class="card-header">
+              <!-- JavaScript -->
+              <span class="card-icon" data-icon="javascript"></span>
+              <span class="card-router">install() · no framework</span>
+            </div>
+            <strong class="card-name">vanilla</strong>
+            <p class="card-desc">
+              Hijacks plain &lt;a&gt; clicks via the History API — zero dependencies, no build step
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/core/" data-fw="core">
+            <div class="card-header">
+              <!-- glyphnav's own mark — the engine behind every adapter -->
+              <img class="card-icon" src="./shared/logo.svg" alt="" />
+              <span class="card-router">core · framework-agnostic</span>
+            </div>
+            <strong class="card-name">core</strong>
+            <p class="card-desc">
+              Decode any DOM text — animate content directly, not just address bar URLs
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/vue-router/" data-fw="vue-router">
+            <div class="card-header">
+              <!-- Vue.js -->
+              <span class="card-icon" data-icon="vue"></span>
+              <span class="card-router">Vue Router · plugin</span>
+            </div>
+            <strong class="card-name">vue-router</strong>
+            <p class="card-desc">
+              Plugin wraps router.push and router.replace — useGlyphnav() composable
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/react-router/" data-fw="react-router">
+            <div class="card-header">
+              <!-- React -->
+              <span class="card-icon" data-icon="react"></span>
+              <span class="card-router">React Router · hooks</span>
+            </div>
+            <strong class="card-name">react-router</strong>
+            <p class="card-desc">
+              &lt;GlyphnavLink&gt; + useGlyphnavNavigate() — drop-ins for &lt;Link&gt; and
+              useNavigate
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/solid-router/" data-fw="solid-router">
+            <div class="card-header">
+              <!-- SolidJS -->
+              <span class="card-icon" data-icon="solid"></span>
+              <span class="card-router">Solid Router · component</span>
+            </div>
+            <strong class="card-name">solid-router</strong>
+            <p class="card-desc">
+              Drop-in &lt;A&gt; replacement via &lt;GlyphnavLink&gt; — reactive signals, no VDOM
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/tanstack-router/react/" data-fw="tanstack-react">
+            <div class="card-header">
+              <!-- React -->
+              <span class="card-icon" data-icon="react"></span>
+              <span class="card-router">TanStack Router</span>
+            </div>
+            <strong class="card-name">tanstack-router/react</strong>
+            <p class="card-desc">
+              &lt;GlyphnavLink&gt; + useGlyphnavNavigate() for TanStack's fully type-safe router
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/tanstack-router/solid/" data-fw="tanstack-solid">
+            <div class="card-header">
+              <!-- SolidJS -->
+              <span class="card-icon" data-icon="solid"></span>
+              <span class="card-router">TanStack Router</span>
+            </div>
+            <strong class="card-name">tanstack-router/solid</strong>
+            <p class="card-desc">
+              Same engine, Solid signals — TanStack's type-safe routing with reactive primitives
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/angular-router/" data-fw="angular-router">
+            <div class="card-header">
+              <!-- Angular -->
+              <span class="card-icon" data-icon="angular"></span>
+              <span class="card-router">Angular Router · directive</span>
+            </div>
+            <strong class="card-name">angular-router</strong>
+            <p class="card-desc">
+              provideGlyphnav() + [glyphnavLink] attribute directive — JIT mode, standalone
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/preact-iso/" data-fw="preact-iso">
+            <div class="card-header">
+              <!-- Preact -->
+              <span class="card-icon" data-icon="preact"></span>
+              <span class="card-router">preact-iso · router</span>
+            </div>
+            <strong class="card-name">preact-iso</strong>
+            <p class="card-desc">
+              interceptLinks animates plain &lt;a&gt; clicks — &lt;GlyphnavLink&gt; and
+              useGlyphnavRoute() opt-ins
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/next/" data-fw="next">
+            <div class="card-header">
+              <!-- Next.js -->
+              <span class="card-icon" data-icon="nextjs"></span>
+              <span class="card-router">Next.js · App Router</span>
+            </div>
+            <strong class="card-name">next</strong>
+            <p class="card-desc">
+              &lt;GlyphnavProvider&gt; in root layout + &lt;GlyphnavLink&gt; and
+              useGlyphnavNavigate()
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/nuxt/" data-fw="nuxt">
+            <div class="card-header">
+              <!-- Nuxt -->
+              <span class="card-icon" data-icon="nuxt"></span>
+              <span class="card-router">Nuxt · client plugin</span>
+            </div>
+            <strong class="card-name">nuxt</strong>
+            <p class="card-desc">
+              Client plugin wraps router.push and navigateTo — $glyphnav injected into NuxtApp
+            </p>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="/sveltekit/" data-fw="sveltekit">
+            <div class="card-header">
+              <!-- Svelte -->
+              <span class="card-icon" data-icon="svelte"></span>
+              <span class="card-router">SvelteKit · goto wrapper</span>
+            </div>
+            <strong class="card-name">sveltekit</strong>
+            <p class="card-desc">
+              attachGlyphnav(goto) intercepts &lt;a&gt; clicks — use:link action, compiler-free, no
+              build-time transform
+            </p>
+          </a>
+        </li>
+      </ul>
 
-    <p class="foot">
-      Picking a demo animates the real address bar first (vanilla <code>install()</code> in reload
-      mode), then loads the page. While idle, the line above cycles through the demos, rotating its
-      glyph charset, effect (<code>decode</code> / <code>scramble</code>) and speed on every pass.
-      Demos are aliased to <code>src/</code> — edit the library and refresh.
-    </p>
+      <p class="foot">
+        Picking a demo animates the real address bar first (vanilla <code>install()</code> in reload
+        mode), then loads the page. While idle, the line above cycles through the demos, rotating
+        its glyph charset, effect (<code>decode</code> / <code>scramble</code>) and speed on every
+        pass. Demos are aliased to <code>src/</code> — edit the library and refresh.
+      </p>
+    </main>
 
     <footer class="site-footer">
       <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>

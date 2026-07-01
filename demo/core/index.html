@@ -25,92 +25,94 @@
     <link rel="stylesheet" href="../shared/styles.css" />
   </head>
   <body data-fw="core">
-    <h1 data-fw="core">
-      <img class="glyph-mark" src="../shared/logo.svg" alt="" />
-      <a href="/" data-glyphnav="off">glyphnav</a>
-      <span class="sep">/</span>
-      <span class="crumb">core</span>
-    </h1>
+    <main>
+      <h1 data-fw="core">
+        <img class="glyph-mark" src="../shared/logo.svg" alt="" />
+        <a href="/" data-glyphnav="off">glyphnav</a>
+        <span class="sep">/</span>
+        <span class="crumb">core</span>
+      </h1>
 
-    <p>
-      The framework-agnostic engine behind every adapter: <code>generateFrames()</code> builds the
-      in-between strings and a <code>Player</code> ticks through them. Point that Player at a DOM
-      node instead of <code>history</code> and any text decodes the same way — no URL, no router
-      involved.
-    </p>
+      <p>
+        The framework-agnostic engine behind every adapter: <code>generateFrames()</code> builds the
+        in-between strings and a <code>Player</code> ticks through them. Point that Player at a DOM
+        node instead of <code>history</code> and any text decodes the same way — no URL, no router
+        involved.
+      </p>
 
-    <div class="controls">
-      <label id="ctl-charset"
-        >charset
-        <select id="charset">
-          <option value="url">url-safe</option>
-          <option value="hex">hex</option>
-          <option value="matrix">matrix</option>
-          <option value="symbols">symbols</option>
-        </select>
-      </label>
-      <label id="ctl-speed"
-        >speed
-        <input
-          id="speed"
-          type="range"
-          min="20"
-          max="1000"
-          step="10"
-          value="770"
-          aria-valuetext="250ms"
-        />
-        <span class="ms" id="speedval">250ms</span>
-      </label>
-      <label id="ctl-effect"
-        >effect
-        <select id="effect">
-          <option value="decode">decode</option>
-          <option value="scramble">scramble</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="view">
-      <section class="core-demo">
-        <!-- aria-live="off": the stage scrambles continuously, so don't announce
-             every intermediate frame; the resting text is still read on demand. -->
-        <output class="glyph-stage" id="stage" for="coreinput" aria-live="off"></output>
-        <form class="core-form" id="coretext">
+      <div class="controls">
+        <label id="ctl-charset"
+          >charset
+          <select id="charset">
+            <option value="url">url-safe</option>
+            <option value="hex">hex</option>
+            <option value="matrix">matrix</option>
+            <option value="symbols">symbols</option>
+          </select>
+        </label>
+        <label id="ctl-speed"
+          >speed
           <input
-            id="coreinput"
-            type="text"
-            value="decode any text — not just the URL"
-            aria-label="text to scramble"
+            id="speed"
+            type="range"
+            min="20"
+            max="1000"
+            step="10"
+            value="770"
+            aria-valuetext="250ms"
           />
-          <button type="submit">decode →</button>
-        </form>
-      </section>
-    </div>
+          <span class="ms" id="speedval">250ms</span>
+        </label>
+        <label id="ctl-effect"
+          >effect
+          <select id="effect">
+            <option value="decode">decode</option>
+            <option value="scramble">scramble</option>
+          </select>
+        </label>
+      </div>
 
-    <div class="view docs">
-      <article>
-        <figure>
-          <figcaption>
-            The same two calls, pointed at an element instead of the address bar:
-          </figcaption>
-          <pre><code id="snippet"></code></pre>
-        </figure>
-        <aside class="note">
-          Charset, effect and speed (the controls above) drive this — change one and the line
-          re-scrambles; your choices are remembered per page. Type your own text and run it. This
-          page never touches the URL: it is the same core engine, pointed at a
-          <code>&lt;span&gt;</code>.
-        </aside>
-      </article>
-    </div>
+      <div class="view">
+        <section class="core-demo">
+          <!-- aria-live="off": the stage scrambles continuously, so don't announce
+               every intermediate frame; the resting text is still read on demand. -->
+          <output class="glyph-stage" id="stage" for="coreinput" aria-live="off"></output>
+          <form class="core-form" id="coretext">
+            <input
+              id="coreinput"
+              type="text"
+              value="decode any text — not just the URL"
+              aria-label="text to scramble"
+            />
+            <button type="submit">decode →</button>
+          </form>
+        </section>
+      </div>
 
-    <p class="foot">
-      Reachable from the <a href="/" data-glyphnav="off">picker</a>. The same two calls (<code
-        >generateFrames</code
-      >
-      + <code>createPlayer</code>) power the address-bar animation in every other demo.
-    </p>
+      <div class="view docs">
+        <article>
+          <figure>
+            <figcaption>
+              The same two calls, pointed at an element instead of the address bar:
+            </figcaption>
+            <pre><code id="snippet"></code></pre>
+          </figure>
+          <aside class="note">
+            Charset, effect and speed (the controls above) drive this — change one and the line
+            re-scrambles; your choices are remembered per page. Type your own text and run it. This
+            page never touches the URL: it is the same core engine, pointed at a
+            <code>&lt;span&gt;</code>.
+          </aside>
+        </article>
+      </div>
+
+      <p class="foot">
+        Reachable from the <a href="/" data-glyphnav="off">picker</a>. The same two calls (<code
+          >generateFrames</code
+        >
+        + <code>createPlayer</code>) power the address-bar animation in every other demo.
+      </p>
+    </main>
 
     <footer class="site-footer">
       <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>

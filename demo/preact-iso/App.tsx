@@ -55,13 +55,13 @@ const DOCS_OPTIONS = `<GlyphnavProvider
   animatePopState       // also animate browser back/forward (opt-in)
 >`;
 
-function View({ title, body }: { title: string; body: string }) {
+function View({ title, body }: { title: string; body: ComponentChildren }) {
   return (
     <div class="view">
       <article>
         <header class="lead">
           <h2>{title}</h2>
-          <span dangerouslySetInnerHTML={{ __html: body }} />
+          <span>{body}</span>
         </header>
       </article>
     </div>
@@ -120,21 +120,21 @@ function Docs() {
 const Home = () => (
   <View
     title="Home"
-    body="Preact + preact-iso. A <code>GlyphnavProvider</code> shares one controller; with <code>interceptLinks</code> the plain <code>&lt;a&gt;</code> links preact-iso already handles decode the URL — no component swap. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top."
+    body={<>Preact + preact-iso. A <code>GlyphnavProvider</code> shares one controller; with <code>interceptLinks</code> the plain <code>&lt;a&gt;</code> links preact-iso already handles decode the URL — no component swap. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top.</>}
   />
 );
 
 const AboutPage = () => (
   <View
     title="About"
-    body={`preact-iso auto-intercepts every same-origin <code>&lt;a&gt;</code>; <code>interceptLinks</code> makes those clicks animate, while <code>GlyphnavLink</code> and <code>useGlyphnavRoute()</code> are the opt-in equivalents. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.`}
+    body={<>preact-iso auto-intercepts every same-origin <code>&lt;a&gt;</code>; <code>interceptLinks</code> makes those clicks animate, while <code>GlyphnavLink</code> and <code>useGlyphnavRoute()</code> are the opt-in equivalents. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.</>}
   />
 );
 
 const PostsPage = () => (
   <View
     title="Posts"
-    body="The animation rides on <code>history.replaceState</code>; preact-iso performs the real navigation via <code>useLocation().route</code>. Try <code>scope: tail</code> — only the part of the path that differs gets scrambled."
+    body={<>The animation rides on <code>history.replaceState</code>; preact-iso performs the real navigation via <code>useLocation().route</code>. Try <code>scope: tail</code> — only the part of the path that differs gets scrambled.</>}
   />
 );
 

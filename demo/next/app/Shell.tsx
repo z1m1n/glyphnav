@@ -136,101 +136,103 @@ function Inner({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <h1>
-        {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
-        <img className="glyph-mark" src={logo.src} alt="" />
-        <a href={ROOT_HREF}>glyphnav</a>
-        <span className="sep">/</span>
-        <span className="crumb">next</span>
-      </h1>
+      <main>
+        <h1>
+          {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
+          <img className="glyph-mark" src={logo.src} alt="" />
+          <a href={ROOT_HREF}>glyphnav</a>
+          <span className="sep">/</span>
+          <span className="crumb">next</span>
+        </h1>
 
-      <p className={resolving ? 'bar resolving' : 'bar'}>
-        Watch the address bar. Current path: <span className="path">{path}</span>
-      </p>
+        <p className={resolving ? 'bar resolving' : 'bar'}>
+          Watch the address bar. Current path: <span className="path">{path}</span>
+        </p>
 
-      <nav aria-label="demo pages">
-        <GlyphnavLink href="/" className={isActive('/') ? 'active' : undefined}>
-          Home
-        </GlyphnavLink>
-        <GlyphnavLink href="/about" className={isActive('/about') ? 'active' : undefined}>
-          About
-        </GlyphnavLink>
-        <GlyphnavLink href="/docs" className={isActive('/docs') ? 'active' : undefined}>
-          Docs
-        </GlyphnavLink>
-        <GlyphnavLink href="/blog" className={isActive('/blog') ? 'active' : undefined}>
-          Blog
-        </GlyphnavLink>
-      </nav>
+        <nav aria-label="demo pages">
+          <GlyphnavLink href="/" className={isActive('/') ? 'active' : undefined}>
+            Home
+          </GlyphnavLink>
+          <GlyphnavLink href="/about" className={isActive('/about') ? 'active' : undefined}>
+            About
+          </GlyphnavLink>
+          <GlyphnavLink href="/docs" className={isActive('/docs') ? 'active' : undefined}>
+            Docs
+          </GlyphnavLink>
+          <GlyphnavLink href="/blog" className={isActive('/blog') ? 'active' : undefined}>
+            Blog
+          </GlyphnavLink>
+        </nav>
 
-      <nav className="deep" aria-label="deep links">
-        deep links:
-        <GlyphnavLink href="/about?ref=deep&page=2">?query</GlyphnavLink>
-        <GlyphnavLink href="/docs#options">#hash</GlyphnavLink>
-        <GlyphnavLink href="/about?q=glyph#results">?query+#hash</GlyphnavLink>
-      </nav>
+        <nav className="deep" aria-label="deep links">
+          deep links:
+          <GlyphnavLink href="/about?ref=deep&page=2">?query</GlyphnavLink>
+          <GlyphnavLink href="/docs#options">#hash</GlyphnavLink>
+          <GlyphnavLink href="/about?q=glyph#results">?query+#hash</GlyphnavLink>
+        </nav>
 
-      <div className="controls">
-        <label data-tip={CONTROL_TOOLTIPS.charset}>
-          charset
-          <select value={charset} onChange={(e) => setCharset(e.target.value)}>
-            <option value="url">url-safe</option>
-            <option value="hex">hex</option>
-            <option value="matrix">matrix</option>
-            <option value="symbols">symbols</option>
-          </select>
-        </label>
-        <label data-tip={CONTROL_TOOLTIPS.speed}>
-          speed
-          <input
-            type="range"
-            min={20}
-            max={1000}
-            step={10}
-            value={durationToSlider(duration)}
-            aria-valuetext={`${duration}ms`}
-            onChange={(e) => setDuration(sliderToDuration(Number(e.target.value)))}
-          />
-          <span className="ms">{duration}ms</span>
-        </label>
-        <label data-tip={CONTROL_TOOLTIPS.effect}>
-          effect
-          <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
-            <option value="decode">decode</option>
-            <option value="scramble">scramble</option>
-          </select>
-        </label>
-        <label data-tip={CONTROL_TOOLTIPS.commit}>
-          commit
-          <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
-            <option value="before">navigate first</option>
-            <option value="after">animate first</option>
-          </select>
-        </label>
-        <label data-tip={CONTROL_TOOLTIPS.scope}>
-          scope
-          <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
-            <option value="full">full</option>
-            <option value="tail">tail</option>
-          </select>
-        </label>
-        <label className="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
-          <input
-            type="checkbox"
-            checked={backForward}
-            onChange={(e) => setBackForward(e.target.checked)}
-          />
-          back/forward
-        </label>
-      </div>
+        <div className="controls">
+          <label data-tip={CONTROL_TOOLTIPS.charset}>
+            charset
+            <select value={charset} onChange={(e) => setCharset(e.target.value)}>
+              <option value="url">url-safe</option>
+              <option value="hex">hex</option>
+              <option value="matrix">matrix</option>
+              <option value="symbols">symbols</option>
+            </select>
+          </label>
+          <label data-tip={CONTROL_TOOLTIPS.speed}>
+            speed
+            <input
+              type="range"
+              min={20}
+              max={1000}
+              step={10}
+              value={durationToSlider(duration)}
+              aria-valuetext={`${duration}ms`}
+              onChange={(e) => setDuration(sliderToDuration(Number(e.target.value)))}
+            />
+            <span className="ms">{duration}ms</span>
+          </label>
+          <label data-tip={CONTROL_TOOLTIPS.effect}>
+            effect
+            <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
+              <option value="decode">decode</option>
+              <option value="scramble">scramble</option>
+            </select>
+          </label>
+          <label data-tip={CONTROL_TOOLTIPS.commit}>
+            commit
+            <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
+              <option value="before">navigate first</option>
+              <option value="after">animate first</option>
+            </select>
+          </label>
+          <label data-tip={CONTROL_TOOLTIPS.scope}>
+            scope
+            <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
+              <option value="full">full</option>
+              <option value="tail">tail</option>
+            </select>
+          </label>
+          <label className="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
+            <input
+              type="checkbox"
+              checked={backForward}
+              onChange={(e) => setBackForward(e.target.checked)}
+            />
+            back/forward
+          </label>
+        </div>
 
-      {children}
+        {children}
 
-      <p className="foot">
-        Served under the <code>/next</code> base path via Next&apos;s <code>basePath</code>; the App
-        Router performs the real navigation while glyphnav animates the bar. The title link is a
-        plain anchor (full page load back to the picker).
-      </p>
+        <p className="foot">
+          Served under the <code>/next</code> base path via Next&apos;s <code>basePath</code>; the
+          App Router performs the real navigation while glyphnav animates the bar. The title link is
+          a plain anchor (full page load back to the picker).
+        </p>
+      </main>
 
       <footer className="site-footer">
         <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">

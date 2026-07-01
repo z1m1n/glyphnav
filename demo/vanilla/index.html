@@ -25,88 +25,90 @@
     <link rel="stylesheet" href="../shared/styles.css" />
   </head>
   <body data-fw="vanilla">
-    <h1 data-fw="vanilla">
-      <img class="glyph-mark" src="../shared/logo.svg" alt="" />
-      <a href="/" data-glyphnav="off">glyphnav</a>
-      <span class="sep">/</span>
-      <span class="crumb">vanilla</span>
-    </h1>
+    <main>
+      <h1 data-fw="vanilla">
+        <img class="glyph-mark" src="../shared/logo.svg" alt="" />
+        <a href="/" data-glyphnav="off">glyphnav</a>
+        <span class="sep">/</span>
+        <span class="crumb">vanilla</span>
+      </h1>
 
-    <p class="bar" id="bar">
-      Watch the address bar. Current path: <span class="path" id="path">/</span>
-    </p>
+      <p class="bar" id="bar">
+        Watch the address bar. Current path: <span class="path" id="path">/</span>
+      </p>
 
-    <nav id="nav" aria-label="demo pages">
-      <a href="/vanilla/">Home</a>
-      <a href="/vanilla/about">About</a>
-      <a href="/vanilla/docs">Docs</a>
-      <a href="/vanilla/contact">Contact</a>
-    </nav>
+      <nav id="nav" aria-label="demo pages">
+        <a href="/vanilla/">Home</a>
+        <a href="/vanilla/about">About</a>
+        <a href="/vanilla/docs">Docs</a>
+        <a href="/vanilla/contact">Contact</a>
+      </nav>
 
-    <nav class="deep" aria-label="deep links">
-      deep links:
-      <a href="/vanilla/about?ref=deep&page=2">?query</a>
-      <a href="/vanilla/docs#options">#hash</a>
-      <a href="/vanilla/about?q=glyph#results">?query+#hash</a>
-    </nav>
+      <nav class="deep" aria-label="deep links">
+        deep links:
+        <a href="/vanilla/about?ref=deep&page=2">?query</a>
+        <a href="/vanilla/docs#options">#hash</a>
+        <a href="/vanilla/about?q=glyph#results">?query+#hash</a>
+      </nav>
 
-    <div class="controls">
-      <label
-        >charset
-        <select id="charset">
-          <option value="url">url-safe</option>
-          <option value="hex">hex</option>
-          <option value="matrix">matrix</option>
-          <option value="symbols">symbols</option>
-        </select>
-      </label>
-      <label
-        >speed
-        <input
-          id="speed"
-          type="range"
-          min="20"
-          max="1000"
-          step="10"
-          value="770"
-          aria-valuetext="250ms"
-        />
-        <span class="ms" id="speedval">250ms</span>
-      </label>
-      <label
-        >effect
-        <select id="effect">
-          <option value="decode">decode</option>
-          <option value="scramble">scramble</option>
-        </select>
-      </label>
-      <label id="ctl-commit"
-        >commit
-        <select id="commit">
-          <option value="before">navigate first</option>
-          <option value="after">animate first</option>
-        </select>
-      </label>
-      <label id="ctl-scope"
-        >scope
-        <select id="scope">
-          <option value="full">full</option>
-          <option value="tail">tail</option>
-        </select>
-      </label>
-      <label class="toggle">
-        <input type="checkbox" id="backforward" checked />
-        back/forward
-      </label>
-    </div>
+      <div class="controls">
+        <label
+          >charset
+          <select id="charset">
+            <option value="url">url-safe</option>
+            <option value="hex">hex</option>
+            <option value="matrix">matrix</option>
+            <option value="symbols">symbols</option>
+          </select>
+        </label>
+        <label
+          >speed
+          <input
+            id="speed"
+            type="range"
+            min="20"
+            max="1000"
+            step="10"
+            value="770"
+            aria-valuetext="250ms"
+          />
+          <span class="ms" id="speedval">250ms</span>
+        </label>
+        <label
+          >effect
+          <select id="effect">
+            <option value="decode">decode</option>
+            <option value="scramble">scramble</option>
+          </select>
+        </label>
+        <label id="ctl-commit"
+          >commit
+          <select id="commit">
+            <option value="before">navigate first</option>
+            <option value="after">animate first</option>
+          </select>
+        </label>
+        <label id="ctl-scope"
+          >scope
+          <select id="scope">
+            <option value="full">full</option>
+            <option value="tail">tail</option>
+          </select>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="backforward" checked />
+          back/forward
+        </label>
+      </div>
 
-    <div class="view" id="view"></div>
+      <div class="view" id="view"></div>
 
-    <p class="foot">
-      Plain anchors hijacked by <code>install({ reload: false })</code> — navigation commits via
-      <code>pushState</code>. The title link carries <code>data-glyphnav="off"</code>, so it does a
-      normal full page load back to the demo picker.
-    </p>
+      <p class="foot">
+        Plain anchors hijacked by <code>install({ reload: false })</code> — navigation commits via
+        <code>pushState</code>. The title link carries <code>data-glyphnav="off"</code>, so it does
+        a normal full page load back to the demo picker.
+      </p>
+    </main>
 
     <footer class="site-footer">
       <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>

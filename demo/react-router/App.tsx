@@ -42,13 +42,13 @@ const DOCS_OPTIONS = `<GlyphnavProvider
   animatePopState       // also animate browser back/forward (opt-in)
 >`;
 
-function View({ title, body }: { title: string; body: string }) {
+function View({ title, body }: { title: string; body: ReactNode }) {
   return (
     <div className="view">
       <article>
         <header className="lead">
           <h2>{title}</h2>
-          <span dangerouslySetInnerHTML={{ __html: body }} />
+          <span>{body}</span>
         </header>
       </article>
     </div>
@@ -252,7 +252,7 @@ export default function App() {
           element={
             <View
               title="Home"
-              body="React Router edition. A <code>GlyphnavProvider</code> shares one controller; each <code>GlyphnavLink</code> decodes the URL. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top."
+              body={<>React Router edition. A <code>GlyphnavProvider</code> shares one controller; each <code>GlyphnavLink</code> decodes the URL. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top.</>}
             />
           }
         />
@@ -261,7 +261,7 @@ export default function App() {
           element={
             <View
               title="About"
-              body={`<code>GlyphnavLink</code> is a drop-in for <code>&lt;Link&gt;</code>; <code>useGlyphnavNavigate()</code> is the imperative equivalent of <code>useNavigate()</code>. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.`}
+              body={<><code>GlyphnavLink</code> is a drop-in for <code>&lt;Link&gt;</code>; <code>useGlyphnavNavigate()</code> is the imperative equivalent of <code>useNavigate()</code>. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.</>}
             />
           }
         />
@@ -271,7 +271,7 @@ export default function App() {
           element={
             <View
               title="Blog"
-              body="The animation rides on <code>history.replaceState</code>; React Router performs the real navigation. Modified clicks (⌘/Ctrl/middle) fall through to the browser, exactly like a normal link."
+              body={<>The animation rides on <code>history.replaceState</code>; React Router performs the real navigation. Modified clicks (⌘/Ctrl/middle) fall through to the browser, exactly like a normal link.</>}
             />
           }
         />

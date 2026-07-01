@@ -17,7 +17,7 @@
   --fill-soft: #f7f7f7; /* docs code blocks */
   --rule: #939393; /* hairline dividers — 3:1 non-text contrast on white */
   --border: #8a8a8a; /* control & view borders — 3:1 on white, fill & fill-soft */
-  --gray: #757575; /* muted text: crumb, hints, footnotes — AA 4.6:1 on white */
+  --gray: #6e6e6e; /* muted text: crumb, hints, footnotes — AA 5.1:1 on white, 4.6:1 on --fill */
   --gray-strong: #444444; /* denser copy: control labels, view text */
   --ink: #111111; /* primary text */
   --blue: #0000ee; /* links — strong, high-contrast blue */
@@ -991,9 +991,13 @@ nav {
 /* Nuxt mounts the app one level deeper than the other demos (#__nuxt → the
    app-shell root), so its footer isn't a direct child of the flex-column body.
    Let that chain grow to full height so the nested footer can still sink to the
-   bottom. Harmless for the other demos (no #__nuxt / .app-shell there). */
+   bottom. Harmless for the other demos (no #__nuxt / .app-shell there).
+   <main> (the landmark wrapping each page's content, footer excluded) joins the
+   list for the same reason: it must relay the flex column so its children keep
+   the exact spacing they had as direct flex items of the body / app shell. */
 #__nuxt,
-.app-shell {
+.app-shell,
+main {
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;

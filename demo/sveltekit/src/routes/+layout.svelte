@@ -170,89 +170,91 @@
 </svelte:head>
 
 <div class="app-shell" data-fw="sveltekit">
-  <h1>
-    <img class="glyph-mark" src={logo} alt="" />
-    <a href={rootHref} data-glyphnav="off">glyphnav</a>
-    <span class="sep">/</span>
-    <span class="crumb">sveltekit</span>
-  </h1>
+  <main>
+    <h1>
+      <img class="glyph-mark" src={logo} alt="" />
+      <a href={rootHref} data-glyphnav="off">glyphnav</a>
+      <span class="sep">/</span>
+      <span class="crumb">sveltekit</span>
+    </h1>
 
-  <p class={resolving ? 'bar resolving' : 'bar'}>
-    Watch the address bar. Current path: <span class="path">{path}</span>
-  </p>
+    <p class={resolving ? 'bar resolving' : 'bar'}>
+      Watch the address bar. Current path: <span class="path">{path}</span>
+    </p>
 
-  <nav aria-label="demo pages">
-    <a href={homeHref} class:active={isActive(homeHref)}>Home</a>
-    <a href={aboutHref} class:active={isActive(aboutHref)}>About</a>
-    <a href={docsHref} class:active={isActive(docsHref)}>Docs</a>
-    <a href={featuresHref} class:active={isActive(featuresHref)}>Features</a>
-  </nav>
+    <nav aria-label="demo pages">
+      <a href={homeHref} class:active={isActive(homeHref)}>Home</a>
+      <a href={aboutHref} class:active={isActive(aboutHref)}>About</a>
+      <a href={docsHref} class:active={isActive(docsHref)}>Docs</a>
+      <a href={featuresHref} class:active={isActive(featuresHref)}>Features</a>
+    </nav>
 
-  <nav class="deep" aria-label="deep links">
-    deep links:
-    <a href={resolve('/about/?ref=deep&page=2')}>?query</a>
-    <a href={resolve('/docs/#options')}>#hash</a>
-    <a href={resolve('/about/?q=glyph#results')}>?query+#hash</a>
-  </nav>
+    <nav class="deep" aria-label="deep links">
+      deep links:
+      <a href={resolve('/about/?ref=deep&page=2')}>?query</a>
+      <a href={resolve('/docs/#options')}>#hash</a>
+      <a href={resolve('/about/?q=glyph#results')}>?query+#hash</a>
+    </nav>
 
-  <div class="controls">
-    <label data-tip={tips.charset}>
-      charset
-      <select bind:value={charset}>
-        <option value="url">url-safe</option>
-        <option value="hex">hex</option>
-        <option value="matrix">matrix</option>
-        <option value="symbols">symbols</option>
-      </select>
-    </label>
-    <label data-tip={tips.speed}>
-      speed
-      <input
-        type="range"
-        min="20"
-        max="1000"
-        step="10"
-        value={durationToSlider(duration)}
-        aria-valuetext={`${duration}ms`}
-        on:input={(e) => (duration = sliderToDuration(Number(e.currentTarget.value)))}
-      />
-      <span class="ms">{duration}ms</span>
-    </label>
-    <label data-tip={tips.effect}>
-      effect
-      <select bind:value={effect}>
-        <option value="decode">decode</option>
-        <option value="scramble">scramble</option>
-      </select>
-    </label>
-    <label data-tip={tips.commit}>
-      commit
-      <select bind:value={commit}>
-        <option value="before">navigate first</option>
-        <option value="after">animate first</option>
-      </select>
-    </label>
-    <label data-tip={tips.scope}>
-      scope
-      <select bind:value={scope}>
-        <option value="full">full</option>
-        <option value="tail">tail</option>
-      </select>
-    </label>
-    <label class="toggle" data-tip={tips.backForward}>
-      <input type="checkbox" bind:checked={backForward} />
-      back/forward
-    </label>
-  </div>
+    <div class="controls">
+      <label data-tip={tips.charset}>
+        charset
+        <select bind:value={charset}>
+          <option value="url">url-safe</option>
+          <option value="hex">hex</option>
+          <option value="matrix">matrix</option>
+          <option value="symbols">symbols</option>
+        </select>
+      </label>
+      <label data-tip={tips.speed}>
+        speed
+        <input
+          type="range"
+          min="20"
+          max="1000"
+          step="10"
+          value={durationToSlider(duration)}
+          aria-valuetext={`${duration}ms`}
+          on:input={(e) => (duration = sliderToDuration(Number(e.currentTarget.value)))}
+        />
+        <span class="ms">{duration}ms</span>
+      </label>
+      <label data-tip={tips.effect}>
+        effect
+        <select bind:value={effect}>
+          <option value="decode">decode</option>
+          <option value="scramble">scramble</option>
+        </select>
+      </label>
+      <label data-tip={tips.commit}>
+        commit
+        <select bind:value={commit}>
+          <option value="before">navigate first</option>
+          <option value="after">animate first</option>
+        </select>
+      </label>
+      <label data-tip={tips.scope}>
+        scope
+        <select bind:value={scope}>
+          <option value="full">full</option>
+          <option value="tail">tail</option>
+        </select>
+      </label>
+      <label class="toggle" data-tip={tips.backForward}>
+        <input type="checkbox" bind:checked={backForward} />
+        back/forward
+      </label>
+    </div>
 
-  <slot />
+    <slot />
 
-  <p class="foot">
-    Served under the <code>/sveltekit</code> base via SvelteKit's <code>paths.base</code>;
-    <code>attachGlyphnav(goto)</code> installs a capture-phase listener so every
-    <code>&lt;a&gt;</code> click animates, then hands the navigation to <code>goto</code>. The title
-    link is a plain anchor (full page load back to the picker).
-  </p>
+    <p class="foot">
+      Served under the <code>/sveltekit</code> base via SvelteKit's <code>paths.base</code>;
+      <code>attachGlyphnav(goto)</code> installs a capture-phase listener so every
+      <code>&lt;a&gt;</code> click animates, then hands the navigation to <code>goto</code>. The title
+      link is a plain anchor (full page load back to the picker).
+    </p>
+  </main>
 
   <footer class="site-footer">
     <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
