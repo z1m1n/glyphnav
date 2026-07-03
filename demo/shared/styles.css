@@ -132,6 +132,9 @@ body {
        --accent-bg          tinted panel fill + control hover fill
        --accent-bg-active   pressed-control fill, one step stronger
        --accent-border      tinted hairline for panels & views (≥3:1 non-text)
+       --accent-fill        inline-code chip fill — --fill with a whisper of accent
+       --accent-fill-ink    inline-code chip text — ink barely nudged toward the
+                            accent; stays near-ink so chips clear AA everywhere
      Falls back to --blue where no framework accent is set (the changelog). */
   --accent-bg: color-mix(in srgb, var(--accent, var(--blue)) 10%, var(--white));
   --accent-bg-active: color-mix(in srgb, var(--accent, var(--blue)) 18%, var(--white));
@@ -139,6 +142,8 @@ body {
   --accent-ink: color-mix(in srgb, var(--accent, var(--blue)) 70%, var(--ink));
   --accent-ink-hover: color-mix(in srgb, var(--accent, var(--blue)) 52%, var(--ink));
   --accent-ink-active: color-mix(in srgb, var(--accent, var(--blue)) 38%, var(--ink));
+  --accent-fill: color-mix(in srgb, var(--accent, var(--blue)) 8%, var(--fill));
+  --accent-fill-ink: color-mix(in srgb, var(--accent-ink) 25%, var(--ink));
 
   :root[data-theme='dark'] & {
     --accent-bg: color-mix(in srgb, var(--accent, var(--blue)) 20%, var(--white));
@@ -147,6 +152,9 @@ body {
     --accent-ink: color-mix(in srgb, var(--accent, var(--blue)) 60%, var(--ink));
     --accent-ink-hover: color-mix(in srgb, var(--accent, var(--blue)) 48%, var(--ink));
     --accent-ink-active: color-mix(in srgb, var(--accent, var(--blue)) 34%, var(--ink));
+    --accent-fill: color-mix(in srgb, var(--accent, var(--blue)) 12%, var(--fill));
+    /* --accent-fill-ink needs no dark override: its formula re-resolves against
+       the dark --accent-ink / --ink above. */
   }
 }
 
@@ -543,10 +551,13 @@ nav {
 
       code {
         /* The scroll container is the code, not the pre, so the copy button
-           (a child of the pre) never scrolls out of view with a wide line. */
+           (a child of the pre) never scrolls out of view with a wide line.
+           Blocks also opt out of the inline-chip accent fill/ink — base text
+           stays plain ink under the syntax-token spans. */
         display: block;
         overflow-x: auto;
         background: none;
+        color: var(--ink);
         padding: 0;
       }
     }
@@ -1069,8 +1080,14 @@ main {
   min-width: 0;
 }
 
+/* Inline code chips carry a whisper of the framework accent — fill and ink both
+   nudge toward it (see --accent-fill* on body) while staying near --fill/--ink,
+   so contrast stays well past AA in both themes. Code *blocks* opt back out:
+   .view.docs pre code resets the background and inherits ink (the syntax-token
+   spans own their colours). */
 code {
-  background: var(--fill);
+  background: var(--accent-fill);
+  color: var(--accent-fill-ink);
   padding: 1px 4px;
   border-radius: 3px; /* a touch tighter than --radius for the tiny inline chip */
 }
