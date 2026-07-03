@@ -4,14 +4,17 @@ import { GLYPHNAV } from 'glyphnav/angular-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { GlyphnavLinkDirective } from './glyphnav-link.directive';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
+  createHistoryToggle,
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
@@ -62,19 +65,18 @@ const STORE_KEY = 'angular-router';
       <label [attr.data-tip]="tips.charset"
         >charset
         <select [value]="charset()" (change)="onCharset($event)">
-          <option value="url">url-safe</option>
-          <option value="hex">hex</option>
-          <option value="matrix">matrix</option>
-          <option value="symbols">symbols</option>
+          @for (o of selects.charset; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
         </select>
       </label>
       <label [attr.data-tip]="tips.speed"
         >speed
         <input
           type="range"
-          min="20"
-          max="1000"
-          step="10"
+          [min]="slider.min"
+          [max]="slider.max"
+          [step]="slider.step"
           [value]="durationToSlider(duration())"
           [attr.aria-valuetext]="duration() + 'ms'"
           (input)="onSpeed($event)"
@@ -84,22 +86,25 @@ const STORE_KEY = 'angular-router';
       <label [attr.data-tip]="tips.effect"
         >effect
         <select [value]="effect()" (change)="onEffect($event)">
-          <option value="decode">decode</option>
-          <option value="scramble">scramble</option>
+          @for (o of selects.effect; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
         </select>
       </label>
       <label [attr.data-tip]="tips.commit"
         >commit
         <select [value]="commit()" (change)="onCommit($event)">
-          <option value="before">navigate first</option>
-          <option value="after">animate first</option>
+          @for (o of selects.commit; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
         </select>
       </label>
       <label [attr.data-tip]="tips.scope"
         >scope
         <select [value]="scope()" (change)="onScope($event)">
-          <option value="full">full</option>
-          <option value="tail">tail</option>
+          @for (o of selects.scope; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
         </select>
       </label>
       <label class="toggle" [attr.data-tip]="tips.backForward">
@@ -135,6 +140,8 @@ export class AppComponent {
   readonly resolving = signal(false);
   readonly active = signal('/');
   readonly tips = CONTROL_TOOLTIPS;
+  readonly selects = TOOLBAR_SELECTS;
+  readonly slider = SPEED_SLIDER;
 
   readonly charset = signal(this.saved.charset);
   readonly duration = signal(this.saved.duration);
@@ -145,7 +152,9 @@ export class AppComponent {
 
   // Back/forward animation is opt-in; the checkbox attaches/detaches the
   // popstate listener (the cleanup returned by enableHistoryAnimation).
-  private stopPopState: (() => void) | null = null;
+  private readonly toggleHistory = createHistoryToggle(() =>
+    this.nav.controller.enableHistoryAnimation(),
+  );
 
   // Exposed for the template's inverted speed slider.
   readonly durationToSlider = durationToSlider;
@@ -156,9 +165,7 @@ export class AppComponent {
     initTheme();
     initTooltips();
     initCodeBlocks();
-    if (this.backForward()) {
-      this.stopPopState = this.nav.controller.enableHistoryAnimation();
-    }
+    this.toggleHistory(this.backForward());
     inject(Router).events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         // Keep the full URL (incl. query/hash) so a deep link like
@@ -169,23 +176,21 @@ export class AppComponent {
   }
 
   private apply(): void {
-    this.nav.controller.update({
-      charset: charsets[this.charset()],
-      duration: this.duration(),
-      effect: this.effect(),
-      commit: this.commit(),
-      scope: this.scope(),
-      hooks: {
-        onFrame: (f) => {
-          this.path.set(f.path);
-          this.resolving.set(f.phase === 'resolve');
+    this.nav.controller.update(
+      glyphnavOptions(
+        {
+          charset: this.charset(),
+          duration: this.duration(),
+          effect: this.effect(),
+          commit: this.commit(),
+          scope: this.scope(),
         },
-        onComplete: () => {
-          this.resolving.set(false);
-          this.path.set(currentUrl());
+        (p, r) => {
+          this.path.set(p);
+          this.resolving.set(r);
         },
-      },
-    });
+      ),
+    );
     this.persist();
   }
 
@@ -229,12 +234,7 @@ export class AppComponent {
   onBackForward(event: Event): void {
     const on = (event.target as HTMLInputElement).checked;
     this.backForward.set(on);
-    if (on && !this.stopPopState) {
-      this.stopPopState = this.nav.controller.enableHistoryAnimation();
-    } else if (!on && this.stopPopState) {
-      this.stopPopState();
-      this.stopPopState = null;
-    }
+    this.toggleHistory(on);
     this.persist();
   }
 }

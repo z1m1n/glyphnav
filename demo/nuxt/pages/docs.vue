@@ -57,12 +57,12 @@ const DOCS_OPTIONS = `installGlyphnav(app, {
         <pre><code v-html="highlight(DOCS_OPTIONS)" /></pre>
       </figure>
       <aside class="note">
-        <strong>Caveat:</strong> every frame writes via <code>history.replaceState</code>,
-        so back/forward stays untouched — but the browser's own URL history/autocomplete
-        (and any extension listening for <code>webNavigation.onHistoryStateUpdated</code>)
-        can still log each frame as a visit. There's no API to opt a
-        <code>replaceState</code> call out of that; keep <code>duration</code> short,
-        <code>maxFrames</code> low, or use <code>scope: 'tail'</code> to cut the frame count.
+        <strong>Caveat:</strong> every frame writes via <code>history.replaceState</code>, so
+        back/forward stays untouched — but the browser's own URL history/autocomplete (and any
+        extension listening for <code>webNavigation.onHistoryStateUpdated</code>) can still log each
+        frame as a visit. There's no API to opt a <code>replaceState</code> call out of that; keep
+        <code>duration</code> short, <code>maxFrames</code> low, or use
+        <code>scope: 'tail'</code> to cut the frame count.
       </aside>
     </article>
   </div>

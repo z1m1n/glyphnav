@@ -7,15 +7,17 @@ import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
 import logo from '../shared/logo.svg';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
   currentUrl,
   DEFAULT_TOOLBAR,
   DOCS_INSTALL,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
@@ -120,21 +122,41 @@ function Docs() {
 const Home = () => (
   <View
     title="Home"
-    body={<>Preact + preact-iso. A <code>GlyphnavProvider</code> shares one controller; with <code>interceptLinks</code> the plain <code>&lt;a&gt;</code> links preact-iso already handles decode the URL — no component swap. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top.</>}
+    body={
+      <>
+        Preact + preact-iso. A <code>GlyphnavProvider</code> shares one controller; with{' '}
+        <code>interceptLinks</code> the plain <code>&lt;a&gt;</code> links preact-iso already
+        handles decode the URL — no component swap. With <code>commit: 'navigate first'</code> the
+        route swaps instantly and the bar animates on top.
+      </>
+    }
   />
 );
 
 const AboutPage = () => (
   <View
     title="About"
-    body={<>preact-iso auto-intercepts every same-origin <code>&lt;a&gt;</code>; <code>interceptLinks</code> makes those clicks animate, while <code>GlyphnavLink</code> and <code>useGlyphnavRoute()</code> are the opt-in equivalents. Deep links with <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.</>}
+    body={
+      <>
+        preact-iso auto-intercepts every same-origin <code>&lt;a&gt;</code>;{' '}
+        <code>interceptLinks</code> makes those clicks animate, while <code>GlyphnavLink</code> and{' '}
+        <code>useGlyphnavRoute()</code> are the opt-in equivalents. Deep links with{' '}
+        <code>?query</code> and <code>#hash</code> animate too — they are just part of the path.
+      </>
+    }
   />
 );
 
 const PostsPage = () => (
   <View
     title="Posts"
-    body={<>The animation rides on <code>history.replaceState</code>; preact-iso performs the real navigation via <code>useLocation().route</code>. Try <code>scope: tail</code> — only the part of the path that differs gets scrambled.</>}
+    body={
+      <>
+        The animation rides on <code>history.replaceState</code>; preact-iso performs the real
+        navigation via <code>useLocation().route</code>. Try <code>scope: tail</code> — only the
+        part of the path that differs gets scrambled.
+      </>
+    }
   />
 );
 
@@ -171,23 +193,12 @@ export function App() {
   const [backForward, setBackForward] = useState(saved.backForward);
 
   useEffect(() => {
-    controller.update({
-      charset: charsets[charset],
-      duration,
-      effect,
-      commit,
-      scope,
-      hooks: {
-        onFrame: (f) => {
-          setPath(f.path);
-          setResolving(f.phase === 'resolve');
-        },
-        onComplete: () => {
-          setResolving(false);
-          setPath(currentUrl());
-        },
-      },
-    });
+    controller.update(
+      glyphnavOptions({ charset, duration, effect, commit, scope }, (p, r) => {
+        setPath(p);
+        setResolving(r);
+      }),
+    );
   }, [controller, charset, duration, effect, commit, scope]);
 
   // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
@@ -242,19 +253,18 @@ export function App() {
         <label data-tip={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset} onChange={(e) => setCharset(e.currentTarget.value)}>
-            <option value="url">url-safe</option>
-            <option value="hex">hex</option>
-            <option value="matrix">matrix</option>
-            <option value="symbols">symbols</option>
+            {TOOLBAR_SELECTS.charset.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
-            min={20}
-            max={1000}
-            step={10}
+            {...SPEED_SLIDER}
             value={durationToSlider(duration)}
             aria-valuetext={`${duration}ms`}
             onInput={(e) => setDuration(sliderToDuration(Number(e.currentTarget.value)))}
@@ -264,22 +274,31 @@ export function App() {
         <label data-tip={CONTROL_TOOLTIPS.effect}>
           effect
           <select value={effect} onChange={(e) => setEffect(e.currentTarget.value as GlyphEffect)}>
-            <option value="decode">decode</option>
-            <option value="scramble">scramble</option>
+            {TOOLBAR_SELECTS.effect.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.commit}>
           commit
           <select value={commit} onChange={(e) => setCommit(e.currentTarget.value as CommitTiming)}>
-            <option value="before">navigate first</option>
-            <option value="after">animate first</option>
+            {TOOLBAR_SELECTS.commit.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope} onChange={(e) => setScope(e.currentTarget.value as AnimateScope)}>
-            <option value="full">full</option>
-            <option value="tail">tail</option>
+            {TOOLBAR_SELECTS.scope.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label class="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>

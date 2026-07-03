@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { render } from 'solid-js/web';
 import { Route, Router, useLocation, useResolvedPath } from '@solidjs/router';
@@ -8,15 +8,18 @@ import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
 import logo from '../shared/logo.svg';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
   currentUrl,
   DEFAULT_TOOLBAR,
   DOCS_INSTALL,
+  DOCS_PROVIDER_OPTIONS,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
@@ -36,15 +39,6 @@ const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate
 
 const navigate = useGlyphnavNavigate();
 await navigate('/posts');`;
-
-const DOCS_OPTIONS = `<GlyphnavProvider
-  duration={250}        // total animation time (ms), spread over all frames
-  effect="scramble"     // 'decode' grows + resolves; 'scramble' bursts, then locks randomly
-  commit="before"       // navigate instantly, animate on top ('after' = classic order)
-  charset={MATRIX}      // glyph pool — URL_SAFE stays readable in the bar
-  scope="tail"          // animate only the part that differs from the current path
-  animatePopState       // also animate browser back/forward (opt-in)
->`;
 
 function View(props: { title: string; body: string }): JSX.Element {
   return (
@@ -92,7 +86,7 @@ function Docs(): JSX.Element {
         <Figure
           captionId="options"
           caption="Every entry point accepts the same options object:"
-          code={DOCS_OPTIONS}
+          code={DOCS_PROVIDER_OPTIONS}
         />
       </article>
     </div>
@@ -138,23 +132,21 @@ function Layout(props: RouteSectionProps): JSX.Element {
   const [backForward, setBackForward] = createSignal(saved.backForward);
 
   createEffect(() => {
-    controller.update({
-      charset: charsets[charset()],
-      duration: duration(),
-      effect: effect(),
-      commit: commit(),
-      scope: scope(),
-      hooks: {
-        onFrame: (f) => {
-          setPath(f.path);
-          setResolving(f.phase === 'resolve');
+    controller.update(
+      glyphnavOptions(
+        {
+          charset: charset(),
+          duration: duration(),
+          effect: effect(),
+          commit: commit(),
+          scope: scope(),
         },
-        onComplete: () => {
-          setResolving(false);
-          setPath(currentUrl());
+        (p, r) => {
+          setPath(p);
+          setResolving(r);
         },
-      },
-    });
+      ),
+    );
   });
 
   // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
@@ -213,19 +205,16 @@ function Layout(props: RouteSectionProps): JSX.Element {
         <label data-tip={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset()} onChange={(e) => setCharset(e.currentTarget.value)}>
-            <option value="url">url-safe</option>
-            <option value="hex">hex</option>
-            <option value="matrix">matrix</option>
-            <option value="symbols">symbols</option>
+            <For each={TOOLBAR_SELECTS.charset}>
+              {(o) => <option value={o.value}>{o.label}</option>}
+            </For>
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
-            min={20}
-            max={1000}
-            step={10}
+            {...SPEED_SLIDER}
             value={durationToSlider(duration())}
             aria-valuetext={`${duration()}ms`}
             onInput={(e) => setDuration(sliderToDuration(Number(e.currentTarget.value)))}
@@ -238,8 +227,9 @@ function Layout(props: RouteSectionProps): JSX.Element {
             value={effect()}
             onChange={(e) => setEffect(e.currentTarget.value as GlyphEffect)}
           >
-            <option value="decode">decode</option>
-            <option value="scramble">scramble</option>
+            <For each={TOOLBAR_SELECTS.effect}>
+              {(o) => <option value={o.value}>{o.label}</option>}
+            </For>
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.commit}>
@@ -248,15 +238,17 @@ function Layout(props: RouteSectionProps): JSX.Element {
             value={commit()}
             onChange={(e) => setCommit(e.currentTarget.value as CommitTiming)}
           >
-            <option value="before">navigate first</option>
-            <option value="after">animate first</option>
+            <For each={TOOLBAR_SELECTS.commit}>
+              {(o) => <option value={o.value}>{o.label}</option>}
+            </For>
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope()} onChange={(e) => setScope(e.currentTarget.value as AnimateScope)}>
-            <option value="full">full</option>
-            <option value="tail">tail</option>
+            <For each={TOOLBAR_SELECTS.scope}>
+              {(o) => <option value={o.value}>{o.label}</option>}
+            </For>
           </select>
         </label>
         <label class="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>

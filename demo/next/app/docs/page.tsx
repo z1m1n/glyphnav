@@ -76,13 +76,12 @@ export default function Docs() {
           code={DOCS_OPTIONS}
         />
         <aside className="note">
-          <strong>Caveat:</strong> every frame writes via <code>history.replaceState</code>,
-          so back/forward stays untouched — but the browser&apos;s own URL history/autocomplete
-          (and any extension listening for <code>webNavigation.onHistoryStateUpdated</code>) can
-          still log each frame as a visit. There&apos;s no API to opt a{' '}
-          <code>replaceState</code> call out of that; keep <code>duration</code> short,{' '}
-          <code>maxFrames</code> low, or use <code>scope: &quot;tail&quot;</code> to cut the frame
-          count.
+          <strong>Caveat:</strong> every frame writes via <code>history.replaceState</code>, so
+          back/forward stays untouched — but the browser&apos;s own URL history/autocomplete (and
+          any extension listening for <code>webNavigation.onHistoryStateUpdated</code>) can still
+          log each frame as a visit. There&apos;s no API to opt a <code>replaceState</code> call out
+          of that; keep <code>duration</code> short, <code>maxFrames</code> low, or use{' '}
+          <code>scope: &quot;tail&quot;</code> to cut the frame count.
         </aside>
       </article>
     </div>

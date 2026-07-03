@@ -19,7 +19,7 @@ export function demoFallback(): Plugin {
         if (app && !url.includes('.')) {
           req.url = `/${app}/index.html`;
         }
-        
+
         next();
       });
     },

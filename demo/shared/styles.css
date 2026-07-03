@@ -26,11 +26,6 @@
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
   --ok: #1a7f37; /* success green — the copy button's "copied" checkmark */
 
-  /* Accent for the control tooltips — a muted, greyish light-yellow, a warm
-     contrast to the cool toolbar the tip springs from. */
-  --accent-bg: #faf8ea; /* soft greyish-yellow fill */
-  --accent-border: #e3dcad; /* greyish-yellow hairline */
-
   /* Drop shadow for the floating tooltip + theme toggle. */
   --shadow: 0 4px 14px -4px rgb(17 17 17 / 0.18);
 
@@ -86,9 +81,6 @@
   --blue-hover: #a9c2ff; /* link hover */
   --ok: #3fb950; /* success green — brighter for the dark surface */
 
-  --accent-bg: #2b2920; /* dark greyish-yellow tooltip fill */
-  --accent-border: #4d4730; /* greyish-yellow hairline */
-
   --shadow: 0 6px 18px -6px rgb(0 0 0 / 0.6);
 
   --tok-keyword: #c792ea;
@@ -128,6 +120,14 @@ body {
   min-height: calc(100dvh - 5rem);
   display: flex;
   flex-direction: column;
+
+  --accent-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 10%, var(--white));
+  --accent-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+
+  :root[data-theme='dark'] & {
+    --accent-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 20%, var(--white));
+    --accent-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+  }
 }
 
 /* Roomier reading column on large screens (≥ --bp-xl): the demo-picker card grid
@@ -308,21 +308,13 @@ nav {
 }
 
 .controls {
-  --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 10%, var(--white));
-  --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
-
-  :root[data-theme='dark'] & {
-    --toolbar-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 20%, var(--white));
-    --toolbar-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
-  }
-
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.75rem;
   margin: 0 0 1.25rem;
   padding: 0.8rem 1rem;
-  background: var(--toolbar-bg);
-  border: 1px solid var(--toolbar-border);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius);
 
   label {
@@ -490,7 +482,7 @@ nav {
 }
 
 .view {
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
   min-height: 7.5rem;
@@ -894,7 +886,7 @@ nav {
   --card-accent: #0891b0;
 }
 [data-fw='preact-iso'] {
-    --card-accent: #673ab8;
+  --card-accent: #673ab8;
 }
 [data-fw='solid-router'] {
   --card-accent: #3a6096;

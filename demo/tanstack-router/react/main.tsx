@@ -19,15 +19,18 @@ import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../../shared/highlight';
 import logo from '../../shared/logo.svg';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
   currentUrl,
   DEFAULT_TOOLBAR,
   DOCS_INSTALL,
+  DOCS_PROVIDER_OPTIONS,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from '../../shared/content';
 import { initCodeBlocks } from '../../shared/code-blocks';
 import { initTheme } from '../../shared/theme';
@@ -47,15 +50,6 @@ const DOCS_SETUP = `import { GlyphnavProvider, GlyphnavLink, useGlyphnavNavigate
 
 const navigate = useGlyphnavNavigate();
 await navigate({ to: '/posts' });`;
-
-const DOCS_OPTIONS = `<GlyphnavProvider
-  duration={250}        // total animation time (ms), spread over all frames
-  effect="scramble"     // 'decode' grows + resolves; 'scramble' bursts, then locks randomly
-  commit="before"       // navigate instantly, animate on top ('after' = classic order)
-  charset={MATRIX}      // glyph pool — URL_SAFE stays readable in the bar
-  scope="tail"          // animate only the part that differs from the current path
-  animatePopState       // also animate browser back/forward (opt-in)
->`;
 
 function View({ title, body }: { title: string; body: ReactNode }) {
   return (
@@ -111,7 +105,7 @@ function Docs() {
         <Figure
           captionId="options"
           caption="Every entry point accepts the same options object:"
-          code={DOCS_OPTIONS}
+          code={DOCS_PROVIDER_OPTIONS}
         />
       </article>
     </div>
@@ -144,23 +138,12 @@ function Layout() {
   const [backForward, setBackForward] = useState(saved.backForward);
 
   useEffect(() => {
-    controller.update({
-      charset: charsets[charset],
-      duration,
-      effect,
-      commit,
-      scope,
-      hooks: {
-        onFrame: (f) => {
-          setPath(f.path);
-          setResolving(f.phase === 'resolve');
-        },
-        onComplete: () => {
-          setResolving(false);
-          setPath(currentUrl());
-        },
-      },
-    });
+    controller.update(
+      glyphnavOptions({ charset, duration, effect, commit, scope }, (p, r) => {
+        setPath(p);
+        setResolving(r);
+      }),
+    );
   }, [controller, charset, duration, effect, commit, scope]);
 
   // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
@@ -218,19 +201,18 @@ function Layout() {
         <label data-tip={CONTROL_TOOLTIPS.charset}>
           charset
           <select value={charset} onChange={(e) => setCharset(e.target.value)}>
-            <option value="url">url-safe</option>
-            <option value="hex">hex</option>
-            <option value="matrix">matrix</option>
-            <option value="symbols">symbols</option>
+            {TOOLBAR_SELECTS.charset.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.speed}>
           speed
           <input
             type="range"
-            min={20}
-            max={1000}
-            step={10}
+            {...SPEED_SLIDER}
             value={durationToSlider(duration)}
             aria-valuetext={`${duration}ms`}
             onChange={(e) => setDuration(sliderToDuration(Number(e.target.value)))}
@@ -240,22 +222,31 @@ function Layout() {
         <label data-tip={CONTROL_TOOLTIPS.effect}>
           effect
           <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
-            <option value="decode">decode</option>
-            <option value="scramble">scramble</option>
+            {TOOLBAR_SELECTS.effect.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.commit}>
           commit
           <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
-            <option value="before">navigate first</option>
-            <option value="after">animate first</option>
+            {TOOLBAR_SELECTS.commit.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label data-tip={CONTROL_TOOLTIPS.scope}>
           scope
           <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
-            <option value="full">full</option>
-            <option value="tail">tail</option>
+            {TOOLBAR_SELECTS.scope.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </label>
         <label className="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
@@ -288,7 +279,13 @@ const routeTree = rootRoute.addChildren([
     component: () => (
       <View
         title="Home"
-        body={<>TanStack Router edition. A <code>GlyphnavProvider</code> shares one controller; each <code>GlyphnavLink</code> decodes the URL. With <code>commit: 'navigate first'</code> the route swaps instantly and the bar animates on top.</>}
+        body={
+          <>
+            TanStack Router edition. A <code>GlyphnavProvider</code> shares one controller; each{' '}
+            <code>GlyphnavLink</code> decodes the URL. With <code>commit: 'navigate first'</code>{' '}
+            the route swaps instantly and the bar animates on top.
+          </>
+        }
       />
     ),
   }),
@@ -298,7 +295,13 @@ const routeTree = rootRoute.addChildren([
     component: () => (
       <View
         title="About"
-        body={<><code>useGlyphnavNavigate()</code> mirrors <code>useNavigate()</code>; <code>GlyphnavLink</code> renders a plain anchor. Deep links with <code>?search</code> and <code>#hash</code> animate too — they are just part of the path.</>}
+        body={
+          <>
+            <code>useGlyphnavNavigate()</code> mirrors <code>useNavigate()</code>;{' '}
+            <code>GlyphnavLink</code> renders a plain anchor. Deep links with <code>?search</code>{' '}
+            and <code>#hash</code> animate too — they are just part of the path.
+          </>
+        }
       />
     ),
   }),
@@ -308,7 +311,13 @@ const routeTree = rootRoute.addChildren([
     component: () => (
       <View
         title="Posts"
-        body={<>The animation rides on <code>history.replaceState</code>; TanStack Router performs the real navigation. Try <code>scope: tail</code> — only the part of the path that differs gets scrambled.</>}
+        body={
+          <>
+            The animation rides on <code>history.replaceState</code>; TanStack Router performs the
+            real navigation. Try <code>scope: tail</code> — only the part of the path that differs
+            gets scrambled.
+          </>
+        }
       />
     ),
   }),

@@ -32,7 +32,11 @@ const config = {
   transpilePackages: ['@glyphnav-demo/shared'],
   // Exposed to the client so the glyphnav adapter can prefix the base path for
   // `commit: 'after'` (the default `commit: 'before'` reads it back from the URL).
-  env: { NEXT_PUBLIC_BASE_PATH: basePath, NEXT_PUBLIC_STACK: stack, NEXT_PUBLIC_STACK_TIP: stackTip },
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+    NEXT_PUBLIC_STACK: stack,
+    NEXT_PUBLIC_STACK_TIP: stackTip,
+  },
 };
 
 export default config;

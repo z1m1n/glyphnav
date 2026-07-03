@@ -1,13 +1,14 @@
 import { install } from 'glyphnav';
-import type { AnimateScope, CommitTiming, FrameInfo, GlyphEffect } from 'glyphnav';
+import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav';
 import { highlight } from '../shared/highlight';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
+  createHistoryToggle,
   currentUrl,
   DEFAULT_TOOLBAR,
   DOCS_INSTALL,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
@@ -114,38 +115,26 @@ function render(): void {
   });
 }
 
-// The view itself re-renders on the synthetic popstate that commit() fires —
-// instantly in navigate-first mode. The hooks only drive the bar mirror.
-const hooks = {
-  onFrame: (f: FrameInfo) => {
-    pathEl.textContent = f.path;
-    bar.classList.toggle('resolving', f.phase === 'resolve');
-  },
-  onComplete: () => {
-    bar.classList.remove('resolving');
-    pathEl.textContent = currentUrl();
-  },
-};
-
 // Restore this page's toolbar (charset is stored as its option key). Resolve the
 // key to a glyph pool only when handing options to the controller. Back/forward
 // defaults on here — install({ intercept: 'links' }) enables it by default —
 // unlike the opt-in router adapters.
 const state = loadToolbar(STORE_KEY, { ...DEFAULT_TOOLBAR, backForward: true });
-const glyphOptions = () => ({
-  charset: charsets[state.charset],
-  duration: state.duration,
-  effect: state.effect,
-  commit: state.commit,
-  scope: state.scope,
-});
+
+// The view itself re-renders on the synthetic popstate that commit() fires —
+// instantly in navigate-first mode. The hooks (inside glyphnavOptions) only
+// drive the bar mirror.
+const glyphOptions = () =>
+  glyphnavOptions(state, (p, r) => {
+    pathEl.textContent = p;
+    bar.classList.toggle('resolving', r);
+  });
 
 // Manage the back/forward animation ourselves so the checkbox can toggle it
 // live: install with it off, then attach/detach the popstate listener on demand.
-const handle = install({ reload: false, animatePopState: false, hooks, ...glyphOptions() });
-let stopPopState: (() => void) | null = state.backForward
-  ? handle.controller.enableHistoryAnimation()
-  : null;
+const handle = install({ reload: false, animatePopState: false, ...glyphOptions() });
+const toggleHistory = createHistoryToggle(() => handle.controller.enableHistoryAnimation());
+toggleHistory(state.backForward);
 
 window.addEventListener('popstate', render);
 render();
@@ -182,7 +171,7 @@ speed.setAttribute('aria-valuetext', `${state.duration}ms`);
 backforward.checked = state.backForward;
 
 function apply(): void {
-  handle.controller.update({ ...glyphOptions(), hooks });
+  handle.controller.update(glyphOptions());
   saveToolbar(STORE_KEY, state);
 }
 
@@ -212,11 +201,6 @@ scopeSel.addEventListener('change', () => {
 
 backforward.addEventListener('change', () => {
   state.backForward = backforward.checked;
-  if (backforward.checked && !stopPopState) {
-    stopPopState = handle.controller.enableHistoryAnimation();
-  } else if (!backforward.checked && stopPopState) {
-    stopPopState();
-    stopPopState = null;
-  }
+  toggleHistory(backforward.checked);
   saveToolbar(STORE_KEY, state);
 });

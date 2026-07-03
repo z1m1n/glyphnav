@@ -12,15 +12,20 @@
 export {
   charsets,
   CONTROL_TOOLTIPS,
+  createHistoryToggle,
   currentUrl,
   DEFAULT_TOOLBAR,
   DOCS_INSTALL,
+  DOCS_PROVIDER_OPTIONS,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from './content';
-export type { ToolbarState } from './content';
+export type { SelectOption, ToolbarState } from './content';
 export { highlight } from './highlight';
 export { initCodeBlocks } from './code-blocks';
 export { initTheme, THEME_INIT_SCRIPT } from './theme';

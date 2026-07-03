@@ -8,17 +8,20 @@
   import type { SvelteKitGlyphnavInstance } from 'glyphnav/sveltekit';
   import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
   import {
-    charsets,
     CONTROL_TOOLTIPS,
+    createHistoryToggle,
     currentUrl,
     DEFAULT_TOOLBAR,
     durationToSlider,
+    glyphnavOptions,
     initCodeBlocks,
     initTheme,
     initTooltips,
     loadToolbar,
     saveToolbar,
     sliderToDuration,
+    SPEED_SLIDER,
+    TOOLBAR_SELECTS,
   } from '@glyphnav-demo/shared';
   import logo from '@glyphnav-demo/shared/logo.svg';
 
@@ -63,18 +66,13 @@
   let mounted = false;
 
   let glyph: SvelteKitGlyphnavInstance | null = null;
-  let stopPopState: (() => void) | null = null;
 
   // Back/forward animation is opt-in; the checkbox attaches/detaches the popstate
   // listener. The instance only exists client-side, so this runs after mount.
+  const toggleHistory = createHistoryToggle(() => glyph!.controller.enableHistoryAnimation());
   function applyBackForward(): void {
     if (!glyph) return;
-    if (backForward && !stopPopState) {
-      stopPopState = glyph.controller.enableHistoryAnimation();
-    } else if (!backForward && stopPopState) {
-      stopPopState();
-      stopPopState = null;
-    }
+    toggleHistory(backForward);
   }
 
   function persist(): void {
@@ -83,23 +81,12 @@
 
   function apply(): void {
     if (!glyph) return; // absent during SSR/prerender
-    glyph.controller.update({
-      charset: charsets[charset],
-      duration,
-      effect,
-      commit,
-      scope,
-      hooks: {
-        onFrame: (f) => {
-          path = f.path;
-          resolving = f.phase === 'resolve';
-        },
-        onComplete: () => {
-          resolving = false;
-          path = currentUrl();
-        },
-      },
-    });
+    glyph.controller.update(
+      glyphnavOptions({ charset, duration, effect, commit, scope }, (p, r) => {
+        path = p;
+        resolving = r;
+      }),
+    );
     persist();
   }
 
@@ -122,7 +109,7 @@
     // (and never clobber the saved state with the defaults on the first render).
     mounted = true;
     return () => {
-      stopPopState?.();
+      toggleHistory(false);
       glyph?.detach();
     };
   });
@@ -200,19 +187,18 @@
       <label data-tip={tips.charset}>
         charset
         <select bind:value={charset}>
-          <option value="url">url-safe</option>
-          <option value="hex">hex</option>
-          <option value="matrix">matrix</option>
-          <option value="symbols">symbols</option>
+          {#each TOOLBAR_SELECTS.charset as o (o.value)}
+            <option value={o.value}>{o.label}</option>
+          {/each}
         </select>
       </label>
       <label data-tip={tips.speed}>
         speed
         <input
           type="range"
-          min="20"
-          max="1000"
-          step="10"
+          min={SPEED_SLIDER.min}
+          max={SPEED_SLIDER.max}
+          step={SPEED_SLIDER.step}
           value={durationToSlider(duration)}
           aria-valuetext={`${duration}ms`}
           on:input={(e) => (duration = sliderToDuration(Number(e.currentTarget.value)))}
@@ -222,22 +208,25 @@
       <label data-tip={tips.effect}>
         effect
         <select bind:value={effect}>
-          <option value="decode">decode</option>
-          <option value="scramble">scramble</option>
+          {#each TOOLBAR_SELECTS.effect as o (o.value)}
+            <option value={o.value}>{o.label}</option>
+          {/each}
         </select>
       </label>
       <label data-tip={tips.commit}>
         commit
         <select bind:value={commit}>
-          <option value="before">navigate first</option>
-          <option value="after">animate first</option>
+          {#each TOOLBAR_SELECTS.commit as o (o.value)}
+            <option value={o.value}>{o.label}</option>
+          {/each}
         </select>
       </label>
       <label data-tip={tips.scope}>
         scope
         <select bind:value={scope}>
-          <option value="full">full</option>
-          <option value="tail">tail</option>
+          {#each TOOLBAR_SELECTS.scope as o (o.value)}
+            <option value={o.value}>{o.label}</option>
+          {/each}
         </select>
       </label>
       <label class="toggle" data-tip={tips.backForward}>

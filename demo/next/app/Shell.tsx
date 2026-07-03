@@ -6,17 +6,19 @@ import { usePathname } from 'next/navigation';
 import { GlyphnavLink, GlyphnavProvider, useGlyphnavController } from 'glyphnav/next';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  glyphnavOptions,
   initCodeBlocks,
   initTheme,
   initTooltips,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from '@glyphnav-demo/shared';
 import logo from '@glyphnav-demo/shared/logo.svg';
 
@@ -76,26 +78,18 @@ function Inner({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    controller.update({
-      charset: charsets[charset],
-      duration,
-      effect,
-      commit,
-      scope,
-      hooks: {
-        onFrame: (f) => {
-          setPath(f.path);
-          setResolving(f.phase === 'resolve');
+    controller.update(
+      glyphnavOptions(
+        { charset, duration, effect, commit, scope },
+        (p, r) => {
+          setPath(p);
+          setResolving(r);
         },
-        onComplete: () => {
-          setResolving(false);
-          setPath(currentUrl());
-          // Same-path query navigations (router.push, no pathname change) settle
-          // here — refresh `extra` so the active check stays exact.
-          setExtra(window.location.search + window.location.hash);
-        },
-      },
-    });
+        // Same-path query navigations (router.push, no pathname change) settle
+        // in onComplete — refresh `extra` so the active check stays exact.
+        () => setExtra(window.location.search + window.location.hash),
+      ),
+    );
   }, [controller, charset, duration, effect, commit, scope]);
 
   // Back/forward animation is opt-in; toggling the checkbox attaches/detaches
@@ -175,19 +169,18 @@ function Inner({ children }: { children: ReactNode }) {
           <label data-tip={CONTROL_TOOLTIPS.charset}>
             charset
             <select value={charset} onChange={(e) => setCharset(e.target.value)}>
-              <option value="url">url-safe</option>
-              <option value="hex">hex</option>
-              <option value="matrix">matrix</option>
-              <option value="symbols">symbols</option>
+              {TOOLBAR_SELECTS.charset.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </label>
           <label data-tip={CONTROL_TOOLTIPS.speed}>
             speed
             <input
               type="range"
-              min={20}
-              max={1000}
-              step={10}
+              {...SPEED_SLIDER}
               value={durationToSlider(duration)}
               aria-valuetext={`${duration}ms`}
               onChange={(e) => setDuration(sliderToDuration(Number(e.target.value)))}
@@ -197,22 +190,31 @@ function Inner({ children }: { children: ReactNode }) {
           <label data-tip={CONTROL_TOOLTIPS.effect}>
             effect
             <select value={effect} onChange={(e) => setEffect(e.target.value as GlyphEffect)}>
-              <option value="decode">decode</option>
-              <option value="scramble">scramble</option>
+              {TOOLBAR_SELECTS.effect.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </label>
           <label data-tip={CONTROL_TOOLTIPS.commit}>
             commit
             <select value={commit} onChange={(e) => setCommit(e.target.value as CommitTiming)}>
-              <option value="before">navigate first</option>
-              <option value="after">animate first</option>
+              {TOOLBAR_SELECTS.commit.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </label>
           <label data-tip={CONTROL_TOOLTIPS.scope}>
             scope
             <select value={scope} onChange={(e) => setScope(e.target.value as AnimateScope)}>
-              <option value="full">full</option>
-              <option value="tail">tail</option>
+              {TOOLBAR_SELECTS.scope.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </label>
           <label className="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>

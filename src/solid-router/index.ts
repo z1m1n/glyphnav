@@ -75,9 +75,7 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
       return Promise.resolve<RunResult>('skipped');
     }
 
-    return controller.run(to, () =>
-      settleAfter(() => navigate(to, navOptions), SETTLE_TIMEOUT_MS),
-    );
+    return controller.run(to, () => settleAfter(() => navigate(to, navOptions), SETTLE_TIMEOUT_MS));
   };
 }
 

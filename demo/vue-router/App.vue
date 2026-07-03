@@ -2,16 +2,18 @@
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGlyphnav } from 'glyphnav/vue-router';
-import type { FrameInfo } from 'glyphnav/core';
 import {
-  charsets,
   CONTROL_TOOLTIPS,
+  createHistoryToggle,
   currentUrl,
   DEFAULT_TOOLBAR,
   durationToSlider,
+  glyphnavOptions,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
+  SPEED_SLIDER,
+  TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
@@ -32,6 +34,8 @@ const base = import.meta.env.BASE_URL;
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'vue-router';
 const tips = CONTROL_TOOLTIPS;
+const selects = TOOLBAR_SELECTS;
+const slider = SPEED_SLIDER;
 
 const s = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
 const displayPath = ref(currentUrl());
@@ -55,23 +59,21 @@ function persist(): void {
 }
 
 function apply(): void {
-  controller.update({
-    charset: charsets[charset.value],
-    duration: duration.value,
-    effect: effect.value,
-    commit: commit.value,
-    scope: scope.value,
-    hooks: {
-      onFrame: (f: FrameInfo) => {
-        displayPath.value = f.path;
-        resolving.value = f.phase === 'resolve';
+  controller.update(
+    glyphnavOptions(
+      {
+        charset: charset.value,
+        duration: duration.value,
+        effect: effect.value,
+        commit: commit.value,
+        scope: scope.value,
       },
-      onComplete: () => {
-        resolving.value = false;
-        displayPath.value = currentUrl();
+      (p, r) => {
+        displayPath.value = p;
+        resolving.value = r;
       },
-    },
-  });
+    ),
+  );
   persist();
 }
 apply();
@@ -79,15 +81,10 @@ watch([charset, duration, effect, commit, scope], apply);
 
 // Back/forward animation: attach/detach the popstate listener as the checkbox
 // (restored from storage) toggles.
-let stopPopState: (() => void) | null = backForward.value
-  ? controller.enableHistoryAnimation()
-  : null;
+const toggleHistory = createHistoryToggle(() => controller.enableHistoryAnimation());
+toggleHistory(backForward.value);
 watch(backForward, (on) => {
-  if (on && !stopPopState) stopPopState = controller.enableHistoryAnimation();
-  else if (!on && stopPopState) {
-    stopPopState();
-    stopPopState = null;
-  }
+  toggleHistory(on);
   persist();
 });
 
@@ -129,19 +126,16 @@ onMounted(() => {
     <label :data-tip="tips.charset"
       >charset
       <select v-model="charset">
-        <option value="url">url-safe</option>
-        <option value="hex">hex</option>
-        <option value="matrix">matrix</option>
-        <option value="symbols">symbols</option>
+        <option v-for="o in selects.charset" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </label>
     <label :data-tip="tips.speed"
       >speed
       <input
         type="range"
-        min="20"
-        max="1000"
-        step="10"
+        :min="slider.min"
+        :max="slider.max"
+        :step="slider.step"
         :value="durationToSlider(duration)"
         :aria-valuetext="`${duration}ms`"
         @input="duration = sliderToDuration(Number(($event.target as HTMLInputElement).value))"
@@ -151,22 +145,19 @@ onMounted(() => {
     <label :data-tip="tips.effect"
       >effect
       <select v-model="effect">
-        <option value="decode">decode</option>
-        <option value="scramble">scramble</option>
+        <option v-for="o in selects.effect" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </label>
     <label :data-tip="tips.commit"
       >commit
       <select v-model="commit">
-        <option value="before">navigate first</option>
-        <option value="after">animate first</option>
+        <option v-for="o in selects.commit" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </label>
     <label :data-tip="tips.scope"
       >scope
       <select v-model="scope">
-        <option value="full">full</option>
-        <option value="tail">tail</option>
+        <option v-for="o in selects.scope" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </label>
     <label class="toggle" :data-tip="tips.backForward">

@@ -21,7 +21,7 @@ export function staticRoutes(): Plugin {
     closeBundle() {
       for (const [app, routes] of Object.entries(DEMO_ROUTES)) {
         const html = readFileSync(fromDemoRoot(`dist/${app}/index.html`), 'utf8');
-        
+
         for (const route of routes) {
           const dir = fromDemoRoot(`dist/${app}/${route}`);
 

@@ -36,7 +36,7 @@ export function inlineIcons(): Plugin {
           (_m, pre: string, name: string, post: string) => {
             const cls = /class="([^"]*)"/.exec(`${pre} ${post}`)?.[1] ?? '';
             const ns = `i${seq++}`;
-            
+
             return load(name)
               .replace(
                 /(\bid="|url\(#|href="#)([\w-]+)/g,
