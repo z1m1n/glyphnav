@@ -20,9 +20,8 @@
   --gray: #6e6e6e; /* muted text: crumb, hints, footnotes — AA 5.1:1 on white, 4.6:1 on --fill */
   --gray-strong: #444444; /* denser copy: control labels, view text */
   --ink: #111111; /* primary text */
-  --blue: #0000ee; /* links — strong, high-contrast blue */
+  --blue: #0000ee; /* brand blue — the accent fallback where no framework accent is set */
   --blue-soft: #e8eeff; /* resolving-state path highlight (soft blue tint) */
-  --blue-hover: #456ee3; /* link hover — the logo blue, darkened to clear AA 4.6:1 */
   /* The logo mark keeps its own softer blue (#4d7cff), set in the SVG sources. */
   --ok: #1a7f37; /* success green — the copy button's "copied" checkmark */
 
@@ -63,7 +62,7 @@
 /* Dark theme. The shared switcher (demo/shared/theme.ts) sets data-theme on
    <html> — resolving the saved preference, or the OS `prefers-color-scheme` by
    default — before first paint, so there's no flash. Only the tokens that change
-   are overridden; everything else (layout, the toolbar's --card-accent tint, the
+   are overridden; everything else (layout, the toolbar's --accent tint, the
    tooltip arrow) inherits and re-resolves automatically. */
 :root[data-theme='dark'] {
   color-scheme: dark;
@@ -76,9 +75,8 @@
   --gray: #8d939c; /* muted text */
   --gray-strong: #b9bec6; /* denser copy */
   --ink: #e7e9ec; /* primary text */
-  --blue: #7aa2ff; /* links — bright enough on the dark surface */
+  --blue: #7aa2ff; /* brand blue / accent fallback — bright enough on the dark surface */
   --blue-soft: #1d2740; /* resolving-state path highlight + toolbar tint */
-  --blue-hover: #a9c2ff; /* link hover */
   --ok: #3fb950; /* success green — brighter for the dark surface */
 
   --shadow: 0 6px 18px -6px rgb(0 0 0 / 0.6);
@@ -121,12 +119,34 @@ body {
   display: flex;
   flex-direction: column;
 
-  --accent-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 10%, var(--white));
-  --accent-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+  /* Accent-derived palette. --accent is the raw framework hue set per [data-fw]
+     below — around 3:1 on the page surface, so it's used as-is only for non-text
+     UI (borders, focus rings, widget tints) and large bold text (the crumb).
+     Everything text-sized derives from it here by mixing toward --ink, which in
+     BOTH themes moves the colour toward higher contrast (darker on light, lighter
+     on dark) — every --accent-ink* step clears AA 4.5:1 on the page surface and
+     on the tinted fills for every framework hue:
+       --accent-ink         resting links + hovered-control text/border
+       --accent-ink-hover   link hover/focus — one step further toward ink
+       --accent-ink-active  pressed link — the deepest step
+       --accent-bg          tinted panel fill + control hover fill
+       --accent-bg-active   pressed-control fill, one step stronger
+       --accent-border      tinted hairline for panels & views (≥3:1 non-text)
+     Falls back to --blue where no framework accent is set (the changelog). */
+  --accent-bg: color-mix(in srgb, var(--accent, var(--blue)) 10%, var(--white));
+  --accent-bg-active: color-mix(in srgb, var(--accent, var(--blue)) 18%, var(--white));
+  --accent-border: color-mix(in srgb, var(--accent, var(--blue)) 55%, var(--border));
+  --accent-ink: color-mix(in srgb, var(--accent, var(--blue)) 70%, var(--ink));
+  --accent-ink-hover: color-mix(in srgb, var(--accent, var(--blue)) 52%, var(--ink));
+  --accent-ink-active: color-mix(in srgb, var(--accent, var(--blue)) 38%, var(--ink));
 
   :root[data-theme='dark'] & {
-    --accent-bg: color-mix(in srgb, var(--card-accent, var(--blue)) 20%, var(--white));
-    --accent-border: color-mix(in srgb, var(--card-accent, var(--blue)) 55%, var(--border));
+    --accent-bg: color-mix(in srgb, var(--accent, var(--blue)) 20%, var(--white));
+    --accent-bg-active: color-mix(in srgb, var(--accent, var(--blue)) 30%, var(--white));
+    --accent-border: color-mix(in srgb, var(--accent, var(--blue)) 55%, var(--border));
+    --accent-ink: color-mix(in srgb, var(--accent, var(--blue)) 60%, var(--ink));
+    --accent-ink-hover: color-mix(in srgb, var(--accent, var(--blue)) 48%, var(--ink));
+    --accent-ink-active: color-mix(in srgb, var(--accent, var(--blue)) 34%, var(--ink));
   }
 }
 
@@ -139,33 +159,47 @@ body {
   }
 }
 
-/* Links use --blue, visited and unvisited alike (no violet fade). Declared
-   before the per-element rules below so those (h1, nav) still win at equal
-   specificity. */
+/* Links carry the demo's framework accent — --accent-ink (see the body tokens)
+   is the accent hue mixed toward ink for AA body-text contrast. Visited matches
+   unvisited (no violet fade). The underline rests half-transparent and inks in
+   fully on hover/focus, so the state change reads even where the colour shift
+   alone is subtle. Declared before the per-element rules below so those (h1,
+   nav) still win at equal specificity. */
 a {
-  color: var(--blue);
-  transition: color 0.15s ease;
+  color: var(--accent-ink);
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-underline-offset: 0.15em;
+  transition:
+    color 0.15s ease,
+    text-decoration-color 0.15s ease;
 
   &:visited {
-    color: var(--blue);
+    color: var(--accent-ink);
   }
 
-  /* Brighten to the logo blue on hover. Comes after :visited (LVHA order) so
-     it applies to visited links too, and its specificity (0,1,1) lifts it over
-     the inherit-colored wordmark (h1 a), so that brightens on hover as well. */
-  &:hover {
-    color: var(--blue-hover);
+  /* Hover/focus step further toward ink — darker in light mode, brighter in
+     dark; contrast only ever increases. After :visited (LVHA order) so it
+     applies to visited links too. */
+  &:hover,
+  &:focus-visible {
+    color: var(--accent-ink-hover);
+    text-decoration-color: currentColor;
+  }
+
+  /* Pressed: the deepest step, an unmistakable "click registered" tick. */
+  &:active {
+    color: var(--accent-ink-active);
   }
 }
 
 /* One focus ring for the whole page. Every keyboard-focused element — nav tabs,
    the deep-link row, body links, the footer — gets the demo's framework accent
-   (the same --card-accent the controls and breadcrumb already use), so focus
+   (the same --accent the controls and breadcrumb already use), so focus
    reads as one identity instead of the browser's default blue. Per-component
    rules below restate this with their own outline-offset; they pick up the same
    colour. Falls back to --blue where no framework accent is set (the changelog). */
 :focus-visible {
-  outline: 2px solid var(--card-accent, var(--blue));
+  outline: 2px solid var(--accent, var(--blue));
   outline-offset: 2px;
 }
 
@@ -186,18 +220,19 @@ h1 {
      explicitly (not just inherited via the bare `a` rule below) so their
      higher specificity beats the global `a:hover` — without this, hovering or
      refocusing the link mid route-transition would win the cascade and flash
-     it blue. */
+     it in the accent link colour. */
   a:link,
   a:visited {
     color: inherit;
     text-decoration: underline;
   }
 
-  /* On hover/focus, brighten to the same logo blue every other link uses —
-     keeps the wordmark reading as "a link", not tied to the demo's accent. */
+  /* On hover/focus/press, take the same accent link colour every other link
+     uses — the wordmark reads as "a link" without owning the accent at rest. */
   a:hover,
-  a:focus-visible {
-    color: var(--blue-hover);
+  a:focus-visible,
+  a:active {
+    color: var(--accent-ink);
   }
 
   /* Breadcrumb separator ("/") — muted, lighter than the bold wordmark. */
@@ -211,7 +246,7 @@ h1 {
      demo carries a subtle identity without a second logo. Falls back to muted
      gray where there's no framework (e.g. the changelog page). */
   .crumb {
-    color: var(--card-accent, var(--gray));
+    color: var(--accent, var(--gray));
     font-weight: 700;
   }
 
@@ -358,11 +393,11 @@ nav {
     transition: border-color 0.15s ease;
 
     &:hover {
-      border-color: var(--card-accent, var(--blue));
+      border-color: var(--accent-ink);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--card-accent, var(--blue));
+      outline: 2px solid var(--accent, var(--blue));
       outline-offset: 1px;
     }
   }
@@ -372,17 +407,17 @@ nav {
   input[type='checkbox'] {
     width: 1rem;
     height: 1rem;
-    accent-color: var(--card-accent, var(--blue));
+    accent-color: var(--accent, var(--blue));
     cursor: pointer;
   }
 
   input[type='range'] {
     width: 7.5rem;
-    accent-color: var(--card-accent, var(--blue));
+    accent-color: var(--accent, var(--blue));
     cursor: pointer;
 
     &:focus-visible {
-      outline: 2px solid var(--card-accent, var(--blue));
+      outline: 2px solid var(--accent, var(--blue));
       outline-offset: 2px;
     }
   }
@@ -603,21 +638,30 @@ nav {
   transition:
     opacity 0.15s ease,
     color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    background 0.15s ease;
 
   .view.docs pre:hover &,
   .view.docs pre:focus-within & {
     opacity: 1;
   }
 
+  /* Hover/press: the accent link colour on an accent-tinted fill — the same
+     two-step (hover tint, deeper pressed tint) every button on the page uses. */
   &:hover {
-    color: var(--blue);
-    border-color: var(--blue);
+    color: var(--accent-ink);
+    border-color: var(--accent-ink);
+    background: var(--accent-bg);
+  }
+
+  &:active {
+    color: var(--accent-ink-hover);
+    background: var(--accent-bg-active);
   }
 
   &:focus-visible {
     opacity: 1;
-    outline: 2px solid var(--card-accent, var(--blue));
+    outline: 2px solid var(--accent, var(--blue));
     outline-offset: 2px;
   }
 
@@ -660,21 +704,29 @@ nav {
     border-color 0.15s ease,
     background 0.15s ease;
 
+  /* Hover/press: same accent two-step as every other button. */
   &:hover {
-    color: var(--blue);
-    border-color: var(--blue);
+    color: var(--accent-ink);
+    border-color: var(--accent-ink);
+    background: var(--accent-bg);
   }
 
-  /* Selected manager — inked and filled, set apart from the muted siblings. */
+  &:active {
+    color: var(--accent-ink-hover);
+    background: var(--accent-bg-active);
+  }
+
+  /* Selected manager — accent-inked on the accent fill, set apart from the
+     muted siblings. Declared after :hover/:active so it holds its look. */
   &.active {
-    color: var(--ink);
-    border-color: var(--border);
-    background: var(--fill);
+    color: var(--accent-ink);
+    border-color: var(--accent-border);
+    background: var(--accent-bg);
     font-weight: 700;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--card-accent, var(--blue));
+    outline: 2px solid var(--accent, var(--blue));
     outline-offset: 1px;
   }
 }
@@ -715,6 +767,11 @@ nav {
     border-radius: var(--radius);
     background: var(--white);
     color: var(--ink);
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: var(--accent-border);
+    }
   }
 
   button {
@@ -724,10 +781,21 @@ nav {
     background: var(--fill);
     color: var(--ink);
     cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background 0.15s ease;
 
+    /* Hover/press: same accent two-step as every other button. */
     &:hover {
-      border-color: var(--blue);
-      color: var(--blue);
+      color: var(--accent-ink);
+      border-color: var(--accent-ink);
+      background: var(--accent-bg);
+    }
+
+    &:active {
+      color: var(--accent-ink-hover);
+      background: var(--accent-bg-active);
     }
   }
 }
@@ -785,9 +853,9 @@ nav {
   }
 
   &:hover {
-    border-color: var(--card-accent, var(--blue));
+    border-color: var(--accent, var(--blue));
     box-shadow:
-      0 12px 36px -10px color-mix(in srgb, var(--card-accent, var(--blue)) 28%, transparent),
+      0 12px 36px -10px color-mix(in srgb, var(--accent, var(--blue)) 28%, transparent),
       0 3px 10px -4px rgba(0, 0, 0, 0.08);
 
     &::after {
@@ -796,7 +864,7 @@ nav {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--card-accent, var(--blue));
+    outline: 2px solid var(--accent, var(--blue));
     outline-offset: 3px;
   }
 }
@@ -870,76 +938,78 @@ nav {
   margin: 0;
 }
 
-/* Per-framework accent colours.
-   Light-mode values are darkened enough for AA contrast on white (#ffffff).
-   Dark-mode overrides are brighter so they clear AA on the dark surface (#16181c). */
+/* Per-framework accent hues — the single --accent source every accent-derived
+   token on `body` mixes from. Light-mode values are darkened to clear the 3:1
+   non-text minimum on white (#ffffff); dark-mode overrides are brightened to
+   clear it on the dark surface (#16181c). Text-sized uses never take these raw:
+   they go through --accent-ink (see body), which mixes toward --ink for AA. */
 [data-fw='vanilla'] {
-  --card-accent: #b08e00;
+  --accent: #b08e00;
 }
 [data-fw='core'] {
-  --card-accent: #4d7cff;
+  --accent: #4d7cff;
 }
 [data-fw='vue-router'] {
-  --card-accent: #2e9b68;
+  --accent: #2e9b68;
 }
 [data-fw='react-router'] {
-  --card-accent: #0891b0;
+  --accent: #0891b0;
 }
 [data-fw='preact-iso'] {
-  --card-accent: #673ab8;
+  --accent: #673ab8;
 }
 [data-fw='solid-router'] {
-  --card-accent: #3a6096;
+  --accent: #3a6096;
 }
 [data-fw='tanstack-react'] {
-  --card-accent: #0891b0;
+  --accent: #0891b0;
 }
 [data-fw='tanstack-solid'] {
-  --card-accent: #3a6096;
+  --accent: #3a6096;
 }
 [data-fw='angular-router'] {
-  --card-accent: #aa0026;
+  --accent: #aa0026;
 }
 [data-fw='next'] {
-  --card-accent: var(--ink);
+  --accent: var(--ink);
 }
 [data-fw='nuxt'] {
-  --card-accent: #008f60;
+  --accent: #008f60;
 }
 [data-fw='sveltekit'] {
-  --card-accent: #c23000;
+  --accent: #c23000;
 }
 
 :root[data-theme='dark'] {
   [data-fw='vanilla'] {
-    --card-accent: #e8c000;
+    --accent: #e8c000;
   }
   [data-fw='vue-router'] {
-    --card-accent: #4ec990;
+    --accent: #4ec990;
   }
   [data-fw='react-router'] {
-    --card-accent: #22c4e6;
+    --accent: #22c4e6;
   }
   [data-fw='preact-iso'] {
-    --card-accent: #673ab8;
+    --accent: #673ab8;
   }
   [data-fw='solid-router'] {
-    --card-accent: #7aaee0;
+    --accent: #7aaee0;
   }
   [data-fw='tanstack-react'] {
-    --card-accent: #22c4e6;
+    --accent: #22c4e6;
   }
   [data-fw='tanstack-solid'] {
-    --card-accent: #7aaee0;
+    --accent: #7aaee0;
   }
   [data-fw='angular-router'] {
-    --card-accent: #ff5070;
+    --accent: #ff5070;
   }
   [data-fw='nuxt'] {
-    --card-accent: #00dc82;
+    --accent: #00dc82;
   }
   [data-fw='sveltekit'] {
-    --card-accent: #ff5e2e;
+    --accent: #ff5e2e;
   }
 }
 
@@ -1027,15 +1097,23 @@ code {
   cursor: pointer;
   transition:
     color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    background 0.15s ease;
 
+  /* Hover/press: same accent two-step as every other button. */
   &:hover {
-    color: var(--blue);
-    border-color: var(--blue);
+    color: var(--accent-ink);
+    border-color: var(--accent-ink);
+    background: var(--accent-bg);
+  }
+
+  &:active {
+    color: var(--accent-ink-hover);
+    background: var(--accent-bg-active);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--card-accent, var(--blue));
+    outline: 2px solid var(--accent, var(--blue));
     outline-offset: 2px;
   }
 
