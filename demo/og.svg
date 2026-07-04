@@ -18,22 +18,29 @@
     </text>
     <rect x="735" y="90" width="11" height="30" rx="1.5" fill="#0000ee"/>
 
-    <!-- brand mark: the logo, centered above the wordmark -->
-    <rect x="556" y="154" width="88" height="88" rx="20" fill="#111111"/>
-    <path d="M582.1 182.9 L571.1 213.1" fill="none" stroke="#ffffff" stroke-width="7.15" stroke-linecap="round"/>
-    <rect x="589" y="184.25" width="11" height="27.5" rx="3.3" fill="#ffffff"/>
-    <rect x="604.1" y="184.25" width="11" height="27.5" rx="3.3" fill="#ffffff" opacity="0.45"/>
-    <rect x="619.25" y="184.25" width="11" height="27.5" rx="3.3" fill="#4d7cff"/>
-
-    <!-- wordmark -->
-    <text x="600" y="352" text-anchor="middle" font-size="132" font-weight="bold" fill="#111111" letter-spacing="-2">glyphnav</text>
+    <!-- brand lockup: logo inline, left of the wordmark, centered as one unit -->
+    <g transform="translate(0, 0)">
+      <!-- the logo -->
+      <g transform="translate(-325, 70)">
+        <rect x="556" y="154" width="88" height="88" rx="20" fill="#111111"/>
+        <path d="M582.1 182.9 L571.1 213.1" fill="none" stroke="#ffffff" stroke-width="7.15" stroke-linecap="round"/>
+        <rect x="589" y="184.25" width="11" height="27.5" rx="3.3" fill="#ffffff"/>
+        <rect x="604.1" y="184.25" width="11" height="27.5" rx="3.3" fill="#ffffff" opacity="0.45"/>
+        <rect x="619.25" y="184.25" width="11" height="27.5" rx="3.3" fill="#4d7cff"/>
+      </g>
+      <!-- wordmark -->
+      <text x="349" y="316" font-size="132" font-weight="bold" fill="#111111" letter-spacing="-2">glyphnav</text>
+    </g>
 
     <!-- tagline -->
-    <text x="600" y="432" text-anchor="middle" font-size="31" fill="#555555">animate the URL in the address bar &#8212; glyph by glyph</text>
+    <text x="600" y="406" text-anchor="middle" font-size="31" fill="#555555">animate the URL in the address bar &#8212; glyph by glyph</text>
+
+    <!-- supported frameworks -->
+    <text x="600" y="478" text-anchor="middle" font-size="22" fill="#999999">vue &#183; react &#183; solid &#183; tanstack &#183; angular &#183; preact &#183; next &#183; nuxt &#183; svelte</text>
 
     <!-- footer -->
-    <line x1="80" y1="520" x2="1120" y2="520" stroke="#eeeeee" stroke-width="1.5"/>
-    <text x="80" y="566" font-size="26" fill="#888888">$ npm i glyphnav</text>
-    <text x="1120" y="566" text-anchor="end" font-size="22" fill="#999999">vue &#183; react &#183; tanstack &#183; angular &#183; next &#183; nuxt</text>
+    <line x1="80" y1="514" x2="1120" y2="514" stroke="#eeeeee" stroke-width="1.5"/>
+    <text x="80" y="562" font-size="26" fill="#888888">$ npm i glyphnav</text>
+    <text x="1120" y="562" text-anchor="end" font-size="22" fill="#999999">github.com/z1m1n/glyphnav</text>
   </g>
 </svg>
