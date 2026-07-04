@@ -12,6 +12,7 @@ import {
   durationToSlider,
   glyphnavOptions,
   initCodeBlocks,
+  initFwMenu,
   initTheme,
   initTooltips,
   loadToolbar,
@@ -98,11 +99,15 @@ function Inner({ children }: { children: ReactNode }) {
     if (backForward) return controller.enableHistoryAnimation();
   }, [controller, backForward]);
 
-  // Wire the theme switcher + styled control tooltips + code-block helpers once.
+  // Wire the theme switcher + framework menu + styled control tooltips +
+  // code-block helpers once. Only the menu injects into this component's DOM,
+  // so its detach function is the effect's cleanup.
   useEffect(() => {
     initTheme();
+    const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
+    return disposeFwMenu;
   }, []);
 
   // Restore the saved toolbar on the client (after hydration), so the
@@ -137,6 +142,7 @@ function Inner({ children }: { children: ReactNode }) {
           <a href={ROOT_HREF}>glyphnav</a>
           <span className="sep">/</span>
           <span className="crumb">next</span>
+          <button type="button" className="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
         </h1>
 
         <p className={resolving ? 'bar resolving' : 'bar'}>

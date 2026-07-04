@@ -8,6 +8,7 @@ import {
   durationToSlider,
   glyphnavOptions,
   initCodeBlocks,
+  initFwMenu,
   initTheme,
   initTooltips,
   loadToolbar,
@@ -120,6 +121,7 @@ function apply(): void {
   persist();
 }
 
+let disposeFwMenu: (() => void) | undefined;
 onMounted(() => {
   const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
   charset.value = saved.charset;
@@ -131,11 +133,15 @@ onMounted(() => {
   path.value = currentUrl();
   apply();
   applyBackForward();
-  // Wire the theme switcher + styled control tooltips + code-block helpers.
+  // Wire the theme switcher + framework menu + styled control tooltips +
+  // code-block helpers. Only the menu injects into this component's DOM, so
+  // it's the only one with something to unhook.
   initTheme();
+  disposeFwMenu = initFwMenu();
   initTooltips();
   initCodeBlocks();
 });
+onUnmounted(() => disposeFwMenu?.());
 watch([charset, duration, effect, commit, scope], apply);
 watch(backForward, () => {
   applyBackForward();
@@ -151,6 +157,7 @@ watch(backForward, () => {
         <a :href="rootHref">glyphnav</a>
         <span class="sep">/</span>
         <span class="crumb">nuxt</span>
+        <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
       </h1>
 
       <p :class="resolving ? 'bar resolving' : 'bar'">

@@ -14,11 +14,14 @@ import {
   sliderToDuration,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
+import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 
-// Mount the light/dark/system theme switcher (shared across every demo).
+// Mount the light/dark/system theme switcher and the breadcrumb's framework
+// menu (both shared across every demo).
 initTheme();
+initFwMenu();
 
 const BASE = import.meta.env.BASE_URL + 'vanilla';
 

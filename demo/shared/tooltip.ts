@@ -15,14 +15,14 @@
  * performs. The `title` text lives in `CONTROL_TOOLTIPS` (see ./content).
  */
 
+import { clamp, onViewportShift, supportsPopover, VIEWPORT_MARGIN } from './internal/popover';
+
 /** Shared id, so the active control can point at the tip via `aria-describedby`. */
 const TIP_ID = 'glyph-tip';
 /** Delay before a cold tooltip appears — long enough to ignore a passing sweep. */
 const SHOW_DELAY = 140;
 /** Grace before hiding, so crossing the gap between controls glides, not flickers. */
 const HIDE_DELAY = 110;
-/** Minimum inset kept when clamping the tip into the viewport. */
-const MARGIN = 8;
 /** Space between the control and the tip — leaves room for the arrow. */
 const GAP = 10;
 
@@ -62,16 +62,16 @@ function place(target: HTMLElement, el: HTMLElement): void {
 
   // Prefer above the control; flip below when it would clip the top edge.
   let top = a.top - t.height - GAP;
-  const below = top < MARGIN;
+  const below = top < VIEWPORT_MARGIN;
   if (below) top = a.bottom + GAP;
-  top = Math.max(MARGIN, Math.min(top, vh - t.height - MARGIN));
+  top = clamp(top, VIEWPORT_MARGIN, vh - t.height - VIEWPORT_MARGIN);
 
   // Centre over the control, then clamp horizontally into the viewport.
   const centre = a.left + a.width / 2;
-  const left = Math.max(MARGIN, Math.min(centre - t.width / 2, vw - t.width - MARGIN));
+  const left = clamp(centre - t.width / 2, VIEWPORT_MARGIN, vw - t.width - VIEWPORT_MARGIN);
 
   // The arrow stays pointed at the control even after the box is clamped.
-  const arrow = Math.max(GAP, Math.min(centre - left, t.width - GAP));
+  const arrow = clamp(centre - left, GAP, t.width - GAP);
 
   el.classList.toggle('is-below', below);
   el.style.setProperty('--tip-arrow', `${arrow}px`);
@@ -157,7 +157,7 @@ const tipOf = (node: EventTarget | null): HTMLElement | null =>
  */
 export function initTooltips(): void {
   if (initialized || typeof document === 'undefined') return;
-  if (typeof HTMLElement === 'undefined' || !HTMLElement.prototype.showPopover) return;
+  if (!supportsPopover()) return;
   initialized = true;
 
   // Delegated on `document` so any framework re-render of the toolbar is fine.
@@ -187,9 +187,8 @@ export function initTooltips(): void {
   });
 
   // Keep a shown tip pinned to its control when the page shifts under it.
-  const reposition = (): void => {
+  // Tooltips live for the whole page, so the detach function goes unused.
+  onViewportShift(() => {
     if (anchor && tip?.matches(':popover-open')) place(anchor, tip);
-  };
-  window.addEventListener('scroll', reposition, true);
-  window.addEventListener('resize', reposition);
+  });
 }

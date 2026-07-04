@@ -283,6 +283,139 @@ h1 {
   content: url('./logo-dark.svg');
 }
 
+/* Framework switcher: the ▾ disclosure button each demo authors after its
+   breadcrumb (demo/shared/fw-menu.ts finds it and fills the menu). Rests in the
+   crumb's raw accent (non-text UI, like the widget tints) and deepens to the AA
+   ink mix while hovered or holding the menu open. The chevron is a CSS mask, so
+   the authored button stays an empty, icon-free shell (nothing per-demo to
+   duplicate) and still recolours with `currentColor`. */
+.fw-switch {
+  --fw-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+
+  display: inline-flex;
+  align-self: center;
+  /* Tuck the arrow closer to the name than the h1's 0.4em token gap. */
+  margin-inline-start: -0.2em;
+  padding: 0.1em;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--accent, var(--gray));
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 0.8em;
+    height: 0.8em;
+    background-color: currentColor;
+    -webkit-mask: var(--fw-chevron) center / contain no-repeat;
+    mask: var(--fw-chevron) center / contain no-repeat;
+  }
+
+  &:hover,
+  &[aria-expanded='true'] {
+    color: var(--accent-ink);
+  }
+}
+
+/* The switcher's dropdown — a native popover in the browser top layer (no
+   z-index games); fw-menu.ts sets top/left, viewport-clamped, when it opens.
+   Same tinted fill and hairline as the .controls toolbar panel. */
+.fw-menu {
+  /* Replace the UA popover defaults (inset:0 + margin:auto = centred). */
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0.3rem;
+  max-height: calc(100dvh - 1rem); /* taller than the viewport ⇒ scrolls */
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 34px -14px rgb(0 0 0 / 0.35);
+
+  /* The popover lives inside the h1 (keyboard focus flows button → items);
+     reset the heading's type back to body scale. */
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.6;
+
+  /* :any-link outranks the h1 wordmark rules ((0,2,1) vs (0,1,2)), so the
+     items read as menu rows, not underlined heading links. */
+  a:any-link {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.25rem 0.7rem 0.25rem 0.55rem;
+    border-radius: calc(var(--radius) - 2px);
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+
+    /* Each item leads with its framework mark — the same shared/icons/ files
+       the picker cards inline, here as per-[data-fw] backgrounds so the
+       runtime-built menu needs no bundler hooks: every pipeline (Vite, Next,
+       Nuxt, SvelteKit) rewrites this stylesheet's relative url()s, exactly
+       like the .glyph-mark dark swap above. Loaded as images, the SVGs keep
+       their gradient/clip-path ids to themselves (no DOM id collisions). */
+    &::before {
+      content: '';
+      width: 1.1em;
+      height: 1.1em;
+      flex-shrink: 0;
+      background: center / contain no-repeat;
+    }
+    &[data-fw='vanilla']::before {
+      background-image: url('./icons/javascript.svg');
+    }
+    &[data-fw='core']::before {
+      background-image: url('./logo.svg');
+    }
+    :root[data-theme='dark'] &[data-fw='core']::before {
+      background-image: url('./logo-dark.svg');
+    }
+    &[data-fw='vue-router']::before {
+      background-image: url('./icons/vue.svg');
+    }
+    &[data-fw='react-router']::before,
+    &[data-fw='tanstack-react']::before {
+      background-image: url('./icons/react.svg');
+    }
+    &[data-fw='solid-router']::before,
+    &[data-fw='tanstack-solid']::before {
+      background-image: url('./icons/solid.svg');
+    }
+    &[data-fw='angular-router']::before {
+      background-image: url('./icons/angular.svg');
+    }
+    &[data-fw='preact-iso']::before {
+      background-image: url('./icons/preact.svg');
+    }
+    &[data-fw='next']::before {
+      background-image: url('./icons/nextjs.svg');
+    }
+    &[data-fw='nuxt']::before {
+      background-image: url('./icons/nuxt.svg');
+    }
+    &[data-fw='sveltekit']::before {
+      background-image: url('./icons/svelte.svg');
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--accent-bg-active);
+      color: var(--ink);
+    }
+
+    /* The demo you're on: a raised chip — the page surface colour on the
+       tinted panel, like the toolbar's select controls — plus bold. */
+    &[aria-current='page'] {
+      background-color: var(--white);
+      font-weight: 700;
+    }
+  }
+}
+
 h2 {
   font-size: 1rem;
   margin: 0 0 0.5rem;

@@ -20,6 +20,7 @@ import {
   TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
+import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 
@@ -141,11 +142,15 @@ export default function App() {
     saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
   }, [charset, duration, effect, commit, scope, backForward]);
 
-  // Wire the theme switcher + styled control tooltips + code-block helpers once.
+  // Wire the theme switcher + framework menu + styled control tooltips +
+  // code-block helpers once. Only the menu injects into this component's DOM,
+  // so its detach function is the effect's cleanup.
   useEffect(() => {
     initTheme();
+    const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
+    return disposeFwMenu;
   }, []);
 
   return (
@@ -155,6 +160,7 @@ export default function App() {
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>
         <span className="crumb">react-router</span>
+        <button type="button" className="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>

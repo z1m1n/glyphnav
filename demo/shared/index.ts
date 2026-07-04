@@ -26,8 +26,11 @@ export {
   TOOLBAR_SELECTS,
 } from './content';
 export type { SelectOption, ToolbarState } from './content';
+export { DEMOS } from './demos';
+export type { DemoEntry } from './demos';
 export { highlight } from './highlight';
 export { initCodeBlocks } from './code-blocks';
+export { initFwMenu } from './fw-menu';
 export { initTheme, THEME_INIT_SCRIPT } from './theme';
 export type { ThemePref } from './theme';
 export { initTooltips } from './tooltip';

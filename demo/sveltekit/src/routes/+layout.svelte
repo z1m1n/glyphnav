@@ -15,6 +15,7 @@
     durationToSlider,
     glyphnavOptions,
     initCodeBlocks,
+    initFwMenu,
     initTheme,
     initTooltips,
     loadToolbar,
@@ -101,8 +102,11 @@
     scope = saved.scope;
     backForward = saved.backForward;
     path = currentUrl();
-    // Wire the theme switcher + styled control tooltips + code-block helpers.
+    // Wire the theme switcher + framework menu + styled control tooltips +
+    // code-block helpers. Only the menu injects into this component's DOM, so
+    // it's the only one unhooked in the teardown below.
     initTheme();
+    const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
     // Flip last so the reactive blocks below first run with the restored values
@@ -111,6 +115,7 @@
     return () => {
       toggleHistory(false);
       glyph?.detach();
+      disposeFwMenu();
     };
   });
 
@@ -163,6 +168,7 @@
       <a href={rootHref} data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
       <span class="crumb">sveltekit</span>
+      <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
     </h1>
 
     <p class={resolving ? 'bar resolving' : 'bar'}>

@@ -22,6 +22,7 @@ import {
   TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
+import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 
@@ -167,9 +168,12 @@ function Layout(props: RouteSectionProps): JSX.Element {
     });
   });
 
-  // Wire the theme switcher + styled control tooltips + code-block helpers once.
+  // Wire the theme switcher + framework menu + styled control tooltips +
+  // code-block helpers once. Only the menu injects into this component's DOM,
+  // so it's the only one with something to unhook.
   onMount(() => {
     initTheme();
+    onCleanup(initFwMenu());
     initTooltips();
     initCodeBlocks();
   });
@@ -181,6 +185,7 @@ function Layout(props: RouteSectionProps): JSX.Element {
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span class="sep">/</span>
         <span class="crumb">solid-router</span>
+        <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
       </h1>
 
       <p class={resolving() ? 'bar resolving' : 'bar'}>

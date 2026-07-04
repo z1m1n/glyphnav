@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { GLYPHNAV } from 'glyphnav/angular-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -17,6 +17,7 @@ import {
   TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
+import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logoSrc from '../shared/logo.svg';
@@ -33,6 +34,7 @@ const STORE_KEY = 'angular-router';
       <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
       <span class="crumb">angular-router</span>
+      <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
     </h1>
 
     <p class="bar" [class.resolving]="resolving()">
@@ -165,6 +167,11 @@ export class AppComponent {
     initTheme();
     initTooltips();
     initCodeBlocks();
+    // The framework menu hooks into the rendered breadcrumb, so it must wait
+    // for the template (the other inits are DOM-independent or delegated),
+    // and it injects into this component's DOM, so it unhooks on destroy.
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => destroyRef.onDestroy(initFwMenu()));
     this.toggleHistory(this.backForward());
     inject(Router).events.subscribe((event) => {
       if (event instanceof NavigationEnd) {

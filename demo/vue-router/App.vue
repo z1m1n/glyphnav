@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useGlyphnav } from 'glyphnav/vue-router';
 import {
@@ -16,6 +16,7 @@ import {
   TOOLBAR_SELECTS,
 } from '../shared/content';
 import { initCodeBlocks } from '../shared/code-blocks';
+import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
 import logo from '../shared/logo.svg';
@@ -88,12 +89,17 @@ watch(backForward, (on) => {
   persist();
 });
 
-// Wire the theme switcher, styled control tooltips and code-block helpers once.
+// Wire the theme switcher, framework menu, styled control tooltips and
+// code-block helpers once. Only the menu injects into this component's DOM,
+// so it's the only one with something to unhook.
+let disposeFwMenu: (() => void) | undefined;
 onMounted(() => {
   initTheme();
+  disposeFwMenu = initFwMenu();
   initTooltips();
   initCodeBlocks();
 });
+onUnmounted(() => disposeFwMenu?.());
 </script>
 
 <template>
@@ -102,6 +108,7 @@ onMounted(() => {
     <a :href="base">glyphnav</a>
     <span class="sep">/</span>
     <span class="crumb">vue-router</span>
+    <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
   </h1>
 
   <p class="bar" :class="{ resolving }">
