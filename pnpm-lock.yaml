@@ -181,6 +181,9 @@ importers:
       glyphnav:
         specifier: workspace:*
         version: link:../..
+      sugar-high:
+        specifier: 1.2.1
+        version: 1.2.1
 
   demo/sveltekit:
     dependencies:
@@ -4895,6 +4898,9 @@ packages:
     engines: {node: ^22.11.0 || ^24.11.0 || >=26.0}
     peerDependencies:
       postcss: ^8.5.15
+
+  sugar-high@1.2.1:
+    resolution: {integrity: sha512-C2E0iSC0Gwv+7t32ATFxgiH6fxskoSfd/nF5z11pQSrgJHYjY8/U11K+X0izV9ZyPNPwaomtn6uF7y11MxVNQA==}
 
   supports-color@10.2.2:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
@@ -10239,6 +10245,8 @@ snapshots:
       browserslist: 4.28.2
       postcss: 8.5.15
       postcss-selector-parser: 7.1.4
+
+  sugar-high@1.2.1: {}
 
   supports-color@10.2.2: {}
 

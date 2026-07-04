@@ -12,6 +12,7 @@
     "./icons/*": "./icons/*"
   },
   "dependencies": {
-    "glyphnav": "workspace:*"
+    "glyphnav": "workspace:*",
+    "sugar-high": "1.2.1"
   }
 }

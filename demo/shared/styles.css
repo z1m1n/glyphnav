@@ -45,18 +45,19 @@
   --bp-md: 768px;
   --bp-xl: 1280px;
 
-  /* Syntax-highlight tokens (see demo/highlight.ts) — light values; the dark
-     theme overrides each one below, so the highlighter markup stays the same. */
-  --tok-keyword: #8959a8; /* control / declaration */
-  --tok-function: #2f6fb0; /* calls & definitions */
-  --tok-type: #0e7c86; /* Components / Types */
-  --tok-constant: #a3238e; /* ALL_CAPS values */
-  --tok-literal: #c0392b; /* true / false / null / this */
-  --tok-string: #357a5b;
-  --tok-number: #9e6217;
-  --tok-property: #5b6ea8; /* member after `.` */
-  --tok-operator: #717171;
-  --tok-comment: #6e6e6e;
+  /* Syntax-highlight tokens — the `--sh-*` custom properties sugar-high's token
+     spans reference inline (see demo/shared/highlight.ts). Light values; the
+     dark theme overrides each one below, so the highlighter markup stays the
+     same. */
+  --sh-keyword: #8959a8; /* control / declaration, true / false */
+  --sh-entity: #2f6fb0; /* calls & definitions */
+  --sh-class: #0e7c86; /* Components / Types, numbers, null */
+  --sh-string: #357a5b;
+  --sh-property: #5b6ea8; /* member after `.`, JSX attributes */
+  --sh-sign: #717171; /* operators & punctuation */
+  --sh-comment: #6e6e6e;
+  --sh-identifier: var(--ink); /* plain identifiers stay base text */
+  --sh-jsxliterals: var(--ink); /* JSX text children stay base text */
 }
 
 /* Dark theme. The shared switcher (demo/shared/theme.ts) sets data-theme on
@@ -81,16 +82,14 @@
 
   --shadow: 0 6px 18px -6px rgb(0 0 0 / 0.6);
 
-  --tok-keyword: #c792ea;
-  --tok-function: #82aaff;
-  --tok-type: #5fd0c5;
-  --tok-constant: #f78fdf;
-  --tok-literal: #ff8b7c;
-  --tok-string: #9ece6a;
-  --tok-number: #e0a458;
-  --tok-property: #9aa9e0;
-  --tok-operator: #8b929c;
-  --tok-comment: #84898f;
+  --sh-keyword: #c792ea;
+  --sh-entity: #82aaff;
+  --sh-class: #5fd0c5;
+  --sh-string: #9ece6a;
+  --sh-property: #9aa9e0;
+  --sh-sign: #8b929c;
+  --sh-comment: #84898f;
+  /* --sh-identifier / --sh-jsxliterals track var(--ink) and re-resolve here. */
 }
 
 * {
@@ -562,37 +561,36 @@ nav {
       }
     }
 
-    /* Syntax highlighting (see demo/highlight.ts). Colours come from the --tok-*
-       custom properties so the same markup themes light and dark. */
-    .tok-keyword {
-      color: var(--tok-keyword);
+    /* Syntax highlighting (see demo/shared/highlight.ts → sugar-high). The token
+       spans carry an inline `color: var(--sh-*)`, but Angular's [innerHTML]
+       sanitizer strips inline styles, so each class also sets its colour here —
+       the same `--sh-*` custom properties theme light and dark either way. */
+    .sh__token--keyword {
+      color: var(--sh-keyword);
     }
-    .tok-function {
-      color: var(--tok-function);
+    .sh__token--entity {
+      color: var(--sh-entity);
     }
-    .tok-type {
-      color: var(--tok-type);
+    .sh__token--class {
+      color: var(--sh-class);
     }
-    .tok-constant {
-      color: var(--tok-constant);
+    .sh__token--string {
+      color: var(--sh-string);
     }
-    .tok-literal {
-      color: var(--tok-literal);
+    .sh__token--property {
+      color: var(--sh-property);
     }
-    .tok-string {
-      color: var(--tok-string);
+    .sh__token--sign {
+      color: var(--sh-sign);
     }
-    .tok-number {
-      color: var(--tok-number);
+    .sh__token--identifier {
+      color: var(--sh-identifier);
     }
-    .tok-property {
-      color: var(--tok-property);
+    .sh__token--jsxliterals {
+      color: var(--sh-jsxliterals);
     }
-    .tok-operator {
-      color: var(--tok-operator);
-    }
-    .tok-comment {
-      color: var(--tok-comment);
+    .sh__token--comment {
+      color: var(--sh-comment);
       font-style: italic;
     }
   }
