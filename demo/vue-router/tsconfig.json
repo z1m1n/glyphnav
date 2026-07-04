@@ -1,0 +1,11 @@
+{
+  // Full single-file-component type-checking for the Vue Router demo. Plain tsc
+  // treats *.vue as an opaque shim (see ../shims-vue.d.ts), so App.vue's
+  // <script setup> — the toolbar wiring, the framework menu, etc. — goes
+  // unchecked in demo/tsconfig.json. vue-tsc parses the SFC for real here.
+  // Extends the shared demo config (strictness + the src/ aliases) and just
+  // swaps in this app's files; the shim is intentionally left out so imports of
+  // App.vue resolve to the real component type instead of the opaque stub.
+  "extends": "../tsconfig.json",
+  "include": ["App.vue", "main.ts", "../vite-env.d.ts"]
+}

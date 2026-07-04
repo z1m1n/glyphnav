@@ -160,7 +160,13 @@ export default function App() {
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span className="sep">/</span>
         <span className="crumb">react-router</span>
-        <button type="button" className="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
+        <button
+          type="button"
+          className="fw-switch"
+          aria-label="Switch demo"
+          aria-expanded="false"
+          aria-controls="fw-menu"
+        ></button>
       </h1>
 
       <p className={resolving ? 'bar resolving' : 'bar'}>

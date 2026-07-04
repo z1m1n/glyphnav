@@ -7,11 +7,16 @@
   "scripts": {
     "dev": "nuxi dev --no-open",
     "build": "nuxi build",
-    "generate": "nuxi generate"
+    "generate": "nuxi generate",
+    "typecheck": "nuxi prepare && vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
     "nuxt": "4.4.8"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vue-tsc": "3.3.6"
   }
 }

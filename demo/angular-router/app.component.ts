@@ -34,7 +34,13 @@ const STORE_KEY = 'angular-router';
       <a [href]="base" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
       <span class="crumb">angular-router</span>
-      <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
+      <button
+        type="button"
+        class="fw-switch"
+        aria-label="Switch demo"
+        aria-expanded="false"
+        aria-controls="fw-menu"
+      ></button>
     </h1>
 
     <p class="bar" [class.resolving]="resolving()">

@@ -14,6 +14,9 @@ demo/sveltekit/.svelte-kit/
 demo/sveltekit/build/
 *.local
 *.log
+# TypeScript incremental-build cache (e.g. demo/next/tsconfig.tsbuildinfo from
+# `incremental: true`) — machine-local, regenerated on every tsc/build.
+*.tsbuildinfo
 .DS_Store
 .vite/
 .idea/

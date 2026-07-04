@@ -142,7 +142,13 @@ function Inner({ children }: { children: ReactNode }) {
           <a href={ROOT_HREF}>glyphnav</a>
           <span className="sep">/</span>
           <span className="crumb">next</span>
-          <button type="button" className="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
+          <button
+            type="button"
+            className="fw-switch"
+            aria-label="Switch demo"
+            aria-expanded="false"
+            aria-controls="fw-menu"
+          ></button>
         </h1>
 
         <p className={resolving ? 'bar resolving' : 'bar'}>

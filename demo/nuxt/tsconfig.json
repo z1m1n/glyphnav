@@ -1,5 +1,12 @@
 {
   // Nuxt generates the real config (with auto-import + alias types) into .nuxt
   // during `nuxi prepare`/build; this just extends it.
-  "extends": "./.nuxt/tsconfig.json"
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    // Nuxt 4's generated config turns on noUncheckedIndexedAccess; the library
+    // and every other demo leave it off, and the flagged array accesses (in
+    // src/ and shared/) are guarded by surrounding logic. Match the repo's
+    // strictness so this demo's typecheck reports real errors, not config drift.
+    "noUncheckedIndexedAccess": false
+  }
 }

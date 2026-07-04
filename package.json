@@ -111,7 +111,11 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test-solid.json && tsc --noEmit -p tsconfig.test-preact.json && pnpm run typecheck:demo",
-    "typecheck:demo": "tsc --noEmit -p demo/tsconfig.json && tsc --noEmit -p demo/solid-router/tsconfig.json && tsc --noEmit -p demo/tanstack-router/solid/tsconfig.json && tsc --noEmit -p demo/angular-router/tsconfig.json && tsc --noEmit -p demo/preact-iso/tsconfig.json",
+    "typecheck:demo": "tsc --noEmit -p demo/tsconfig.json && tsc --noEmit -p demo/solid-router/tsconfig.json && tsc --noEmit -p demo/tanstack-router/solid/tsconfig.json && tsc --noEmit -p demo/angular-router/tsconfig.json && tsc --noEmit -p demo/preact-iso/tsconfig.json && vue-tsc --noEmit -p demo/vue-router/tsconfig.json",
+    "typecheck:next": "pnpm --filter @glyphnav-demo/next run typecheck",
+    "typecheck:nuxt": "pnpm --filter @glyphnav-demo/nuxt run typecheck",
+    "typecheck:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit run check",
+    "typecheck:apps": "run-s typecheck:next typecheck:nuxt typecheck:sveltekit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
@@ -170,7 +174,8 @@
     "vite-plugin-solid": "2.11.12",
     "vitest": "4.1.9",
     "vue": "3.5.39",
-    "vue-router": "5.1.0"
+    "vue-router": "5.1.0",
+    "vue-tsc": "3.3.6"
   },
   "peerDependencies": {
     "@angular/core": ">=16",

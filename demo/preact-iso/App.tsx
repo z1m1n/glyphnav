@@ -234,7 +234,13 @@ export function App() {
         </a>
         <span class="sep">/</span>
         <span class="crumb">preact-iso</span>
-        <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
+        <button
+          type="button"
+          class="fw-switch"
+          aria-label="Switch demo"
+          aria-expanded="false"
+          aria-controls="fw-menu"
+        ></button>
       </h1>
 
       <p class={resolving ? 'bar resolving' : 'bar'}>

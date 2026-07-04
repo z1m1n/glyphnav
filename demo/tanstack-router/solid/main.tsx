@@ -184,7 +184,13 @@ function Layout(): JSX.Element {
         <a href={import.meta.env.BASE_URL}>glyphnav</a>
         <span class="sep">/</span>
         <span class="crumb">tanstack-router/solid</span>
-        <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
+        <button
+          type="button"
+          class="fw-switch"
+          aria-label="Switch demo"
+          aria-expanded="false"
+          aria-controls="fw-menu"
+        ></button>
       </h1>
 
       <p class={resolving() ? 'bar resolving' : 'bar'}>
