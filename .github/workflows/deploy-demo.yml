@@ -63,3 +63,7 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+        # The action's own dependencies trip Node 24's punycode DEP0040
+        # warning; suppress deprecation noise we can't act on.
+        env:
+          NODE_OPTIONS: --no-deprecation
