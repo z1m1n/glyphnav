@@ -60,5 +60,5 @@ export default defineConfig({
   // The shared helpers and aliased glyphnav are TypeScript source, so bundle
   // (don't externalize) them for SSR/prerender — otherwise Node would try to
   // import the raw `.ts` during the static export.
-  ssr: { noExternal: ['@glyphnav-demo/shared', 'glyphnav'] },
+  ssr: { noExternal: ['@glyphnav-demo/shared', 'glyphnav', 'glyphnav/core', 'glyphnav/sveltekit'] },
 });
