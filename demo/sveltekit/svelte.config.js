@@ -17,6 +17,11 @@ export default {
     // deep-link reload still boots on GitHub Pages' static host.
     adapter: adapter({ fallback: '404.html' }),
     paths: { base },
+    alias: {
+      glyphnav: '../../src/index.ts',
+      'glyphnav/core': '../../src/core/index.ts',
+      'glyphnav/sveltekit': '../../src/sveltekit/index.ts',
+    },
     prerender: {
       // The breadcrumb links out of the app to the picker, which isn't a route —
       // warn (don't fail the prerender) on that expected miss.
