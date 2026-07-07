@@ -1,0 +1,24 @@
+{
+  // The repo's own build/tooling configs. tsconfig.json excludes `**/*.config.ts`
+  // (they can't sit in the library program — Node types, no DOM, not part of the
+  // shipped build), so without this program they'd never be type-checked. Wired
+  // into `pnpm typecheck`.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "vitest.config.ts"]
+}

@@ -34,8 +34,9 @@
   "include": [
     "main.ts",
     "changelog/main.ts",
-    "shared/content.ts",
-    "shared/highlight.ts",
+    // Every top-level shared browser helper (barrel included); the Node-only
+    // shared/internal/version.ts lives under demo/tsconfig.node.json instead.
+    "shared/*.ts",
     "shims-vue.d.ts",
     "vite-env.d.ts",
     "react-router/**/*.ts",
@@ -43,6 +44,7 @@
     "tanstack-router/react/**/*.ts",
     "tanstack-router/react/**/*.tsx",
     "vue-router/**/*.ts",
-    "vanilla/**/*.ts"
+    "vanilla/**/*.ts",
+    "core/**/*.ts"
   ]
 }

@@ -28,10 +28,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Quality gate — never publish a red build.
-      - run: pnpm run typecheck
-      - run: pnpm run lint
-      - run: pnpm test
+      # Quality gate — never publish a red build. `check` runs the full gate
+      # (typecheck across the library, its tooling configs and every demo; lint
+      # with a zero-warning budget; format check; tests).
+      - run: pnpm run check
 
       # `prepublishOnly` runs the production build before packing. `--provenance`
       # needs the id-token permission above and a public repo; `--no-git-checks`

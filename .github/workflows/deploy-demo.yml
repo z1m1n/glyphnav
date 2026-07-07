@@ -35,14 +35,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Fully check every demo before building/deploying. The library plus the
-      # Vite-bundled demos (including the Vue SFC, via vue-tsc) go through the
-      # standard typecheck; the Nuxt and SvelteKit apps have their own
-      # generated-type checks (nuxi prepare + vue-tsc, svelte-kit sync +
-      # svelte-check). The Next.js app is type-checked by `next build` in the
-      # step below, so it needs no separate check here.
-      - run: pnpm run typecheck
-      - run: pnpm run lint
+      # Fully check every demo before building/deploying. `pnpm run check` runs
+      # the library gate — typecheck (the library, its tooling configs and the
+      # Vite-bundled demos, including the Vue SFC via vue-tsc), lint with a
+      # zero-warning budget, format check and tests. The Nuxt and SvelteKit apps
+      # have their own generated-type checks (nuxi prepare + vue-tsc,
+      # svelte-kit sync + svelte-check). The Next.js app is type-checked by
+      # `next build` in the step below, so it needs no separate check here.
+      - run: pnpm run check
       - run: pnpm run typecheck:nuxt
       - run: pnpm run typecheck:sveltekit
 

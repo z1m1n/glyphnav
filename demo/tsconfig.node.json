@@ -1,0 +1,27 @@
+{
+  // Type-checks the demo's Node-side build code — the Vite config, its plugins
+  // and helpers (demo/vite/**), the shared port config, and the version reader —
+  // which the browser-facing demo/tsconfig.json (an explicit file list) leaves
+  // out. Adds the Node types so `process`/`node:*`/`import.meta` resolve. DOM
+  // libs are kept because one plugin (inject-theme-init) imports the browser
+  // theme module for its pre-paint script string; that module is DOM-checked by
+  // demo/tsconfig.json too. Part of `pnpm typecheck:demo`.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "ports.ts", "vite/**/*.ts", "shared/internal/version.ts"]
+}

@@ -10,8 +10,14 @@
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "types": [],
     // Resolve `glyphnav/*` to the live src (matching demo/vite.config.ts) so the
     // editor and typecheck see real types, not the published dist build.
@@ -21,5 +27,5 @@
       "glyphnav/angular-router": ["../../src/angular-router/index.ts"]
     }
   },
-  "include": ["*.ts", "../highlight.ts", "../shared/content.ts", "../vite-env.d.ts"]
+  "include": ["*.ts", "../shared/highlight.ts", "../shared/content.ts", "../vite-env.d.ts"]
 }
