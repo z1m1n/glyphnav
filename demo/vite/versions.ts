@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { glyphnavVersion } from '../shared/internal/version';
+import { glyphnavVersion, stackTip } from '../shared/internal/version';
 
 const nodeRequire = createRequire(import.meta.url);
 
@@ -77,17 +77,18 @@ export const stackForFile = (filename: string): string => {
 const NO_TIP_APPS = new Set(['vanilla', 'core', 'changelog']);
 
 /**
- * Tooltip text for the footer's `.stack` span, spelling out the exact package
+ * Tooltip HTML for the footer's `.stack` span, spelling out the exact package
  * versions this page runs (the footer text itself, restated) alongside the
- * glyphnav version. `''` for pages where that would just repeat the footer
- * (see {@link NO_TIP_APPS}) — the demo omits the tooltip entirely in that case.
+ * glyphnav version, each token wrapped in a `<code>` chip (see {@link stackTip}).
+ * `''` for pages where that would just repeat the footer (see {@link NO_TIP_APPS})
+ * — the demo omits the tooltip entirely in that case.
  *
  * @param filename - The HTML file being transformed.
- * @returns The tooltip text, or `''` for a page with no tooltip.
+ * @returns The tooltip HTML, or `''` for a page with no tooltip.
  */
 export const stackTipForFile = (filename: string): string => {
   const path = filename.replace(/\\/g, '/').replace(/\/?index\.html$/, '');
   const app = Object.keys(STACK_BY_APP).find((name) => path.endsWith(name));
   if (!app || NO_TIP_APPS.has(app)) return '';
-  return `This page runs ${STACK_BY_APP[app]()}, paired with glyphnav v${glyphnavVersion}.`;
+  return stackTip(STACK_BY_APP[app]());
 };

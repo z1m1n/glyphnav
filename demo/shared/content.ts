@@ -170,18 +170,22 @@ export function saveToolbar(key: string, state: object): void {
  * Text describing what each toolbar control does. Demos set it as `data-tip`
  * on the control's `<label>`; {@link initTooltips} renders it as a styled
  * top-layer popover (see ./tooltip), replacing the unstyled native `title`.
+ *
+ * The copy may include `<code>` markup — the tip renders as HTML, so the option
+ * values it names (`decode`, `tail`, …) get the same inline-code chip as the
+ * demos' body text. Escape any literal `<`/`>` as entities, as in the demos.
  */
 export const CONTROL_TOOLTIPS = {
   charset:
-    'Pool of random glyphs used for the "noise" characters while the URL decodes. Non-URL-safe pools (matrix, symbols) get percent-encoded in the real address bar.',
+    'Pool of random glyphs used for the "noise" characters while the URL decodes. Non-URL-safe pools (<code>matrix</code>, <code>symbols</code>) get percent-encoded in the real address bar.',
   speed:
     'Total animation time in milliseconds, spread across every frame. The slider is inverted: drag right for a faster (shorter) animation.',
   effect:
-    "'decode' grows the path one glyph at a time, then resolves the real characters left-to-right. 'scramble' bursts to full length immediately, then locks characters in random order.",
+    '<code>decode</code> grows the path one glyph at a time, then resolves the real characters left-to-right. <code>scramble</code> bursts to full length immediately, then locks characters in random order.',
   commit:
-    "'navigate first' changes the route instantly and decodes the bar on top; 'animate first' plays the animation, then performs the real navigation.",
+    '<code>navigate first</code> changes the route instantly and decodes the bar on top; <code>animate first</code> plays the animation, then performs the real navigation.',
   scope:
-    "'full' animates the whole path; 'tail' keeps the prefix shared with the current path and animates only the part that differs.",
+    '<code>full</code> animates the whole path; <code>tail</code> keeps the prefix shared with the current path and animates only the part that differs.',
   backForward:
     'Also animate the browser Back/Forward buttons (history traversals), not just link clicks and programmatic navigation.',
 } as const;

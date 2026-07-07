@@ -8,7 +8,7 @@
 // deep-link reloads serve a real file.
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { glyphnavVersion } from '@glyphnav-demo/shared/internal/version';
+import { stackTip } from '@glyphnav-demo/shared/internal/version';
 import { ports } from '../ports';
 
 const base = process.env.DEMO_BASE ?? '/';
@@ -23,16 +23,13 @@ const ver = (name: string): string =>
   (nodeRequire(`${name}/package.json`) as { version: string }).version;
 const stack = `nuxt ${ver('nuxt')} · vue ${ver('vue')}`;
 
-// Tooltip for the footer's `.stack` span — spells out the exact versions above
-// alongside the glyphnav version, since the footer text alone doesn't repeat it.
-const stackTip = `This page runs ${stack}, paired with glyphnav v${glyphnavVersion}.`;
-
 export default defineNuxtConfig({
   ssr: true,
   app: { baseURL },
-  // Surfaced to the client so the footer can show which stack this demo runs
-  // and explain it in a tooltip.
-  runtimeConfig: { public: { stack, stackTip } },
+  // Surfaced to the client so the footer can show which stack this demo runs and
+  // explain it in a tooltip — the versions above, each in a `<code>` chip
+  // alongside the glyphnav version (see stackTip).
+  runtimeConfig: { public: { stack, stackTip: stackTip(stack) } },
   css: ['@glyphnav-demo/shared/styles.css'],
   devtools: { enabled: false },
   // No phoning home from the demo.

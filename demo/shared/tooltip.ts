@@ -91,7 +91,11 @@ function open(target: HTMLElement): void {
 
   const el = tip ?? (tip = build());
   const wasOpen = el.matches(':popover-open');
-  el.textContent = text;
+  // Rendered as HTML, not text: the tip copy carries `<code>` chips so versions
+  // and option values highlight exactly like the demos' body text. Every source
+  // is authored demo copy (CONTROL_TOOLTIPS, the build-injected version tip), the
+  // same trusted-string contract as the demos' own `innerHTML` views.
+  el.innerHTML = text;
 
   if (anchor && anchor !== target) anchor.removeAttribute('aria-describedby');
   anchor = target;
