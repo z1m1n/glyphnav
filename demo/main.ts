@@ -9,10 +9,19 @@ import {
   SYMBOLS,
 } from 'glyphnav';
 import type { FrameInfo, GlyphEffect } from 'glyphnav';
+import { highlight } from './shared/highlight';
 import { initTheme } from './shared/theme';
 
 // Mount the light/dark/system theme switcher (shared across every demo).
 initTheme();
+
+// Colourise the code chips inside the picker cards — the same sugar-high pass
+// the demo docs pages run (see shared/highlight.ts). The chips are authored as
+// plain text in index.html; highlight() escapes on the way out, so this swaps
+// text for token spans without ever re-injecting markup.
+for (const code of document.querySelectorAll<HTMLElement>('.card code')) {
+  code.innerHTML = highlight(code.textContent ?? '');
+}
 
 const bar = document.getElementById('bar')!;
 const el = document.getElementById('path')!;

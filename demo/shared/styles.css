@@ -694,38 +694,8 @@ nav {
       }
     }
 
-    /* Syntax highlighting (see demo/shared/highlight.ts → sugar-high). The token
-       spans carry an inline `color: var(--sh-*)`, but Angular's [innerHTML]
-       sanitizer strips inline styles, so each class also sets its colour here —
-       the same `--sh-*` custom properties theme light and dark either way. */
-    .sh__token--keyword {
-      color: var(--sh-keyword);
-    }
-    .sh__token--entity {
-      color: var(--sh-entity);
-    }
-    .sh__token--class {
-      color: var(--sh-class);
-    }
-    .sh__token--string {
-      color: var(--sh-string);
-    }
-    .sh__token--property {
-      color: var(--sh-property);
-    }
-    .sh__token--sign {
-      color: var(--sh-sign);
-    }
-    .sh__token--identifier {
-      color: var(--sh-identifier);
-    }
-    .sh__token--jsxliterals {
-      color: var(--sh-jsxliterals);
-    }
-    .sh__token--comment {
-      color: var(--sh-comment);
-      font-style: italic;
-    }
+    /* The syntax-token colours (.sh__token--*) are global — they live next to
+       the inline-code chip rule below, shared with the landing-page cards. */
   }
 
   /* Every demo renders each page as a semantic <article>: a <header> lead, code
@@ -1080,6 +1050,17 @@ nav {
   margin: 0;
 }
 
+/* Card chips are syntax-highlighted (demo/main.ts runs them through the same
+   sugar-high pass the docs pages use), so they swap the accent-tinted chip fill
+   for the neutral docs-block one: the `--sh-*` palette is contrast-tuned against
+   --fill-soft, and on the darker --accent-fill the sign / property tokens would
+   dip under the 4.5:1 text minimum in light mode. Base ink for the same reason
+   docs blocks use it — unhighlighted identifier tokens read as primary text. */
+.card code {
+  background: var(--fill-soft);
+  color: var(--ink);
+}
+
 /* Per-framework accent hues — the single --accent source every accent-derived
    token on `body` mixes from. Light-mode values are darkened to clear the 3:1
    non-text minimum on white (#ffffff); dark-mode overrides are brightened to
@@ -1221,6 +1202,40 @@ code {
   color: var(--accent-fill-ink);
   padding: 1px 4px;
   border-radius: 3px; /* a touch tighter than --radius for the tiny inline chip */
+}
+
+/* Syntax highlighting (see demo/shared/highlight.ts → sugar-high) — global, so
+   both the docs code blocks and the landing-page card chips colourise. The token
+   spans carry an inline `color: var(--sh-*)`, but Angular's [innerHTML]
+   sanitizer strips inline styles, so each class also sets its colour here — the
+   same `--sh-*` custom properties theme light and dark either way. */
+.sh__token--keyword {
+  color: var(--sh-keyword);
+}
+.sh__token--entity {
+  color: var(--sh-entity);
+}
+.sh__token--class {
+  color: var(--sh-class);
+}
+.sh__token--string {
+  color: var(--sh-string);
+}
+.sh__token--property {
+  color: var(--sh-property);
+}
+.sh__token--sign {
+  color: var(--sh-sign);
+}
+.sh__token--identifier {
+  color: var(--sh-identifier);
+}
+.sh__token--jsxliterals {
+  color: var(--sh-jsxliterals);
+}
+.sh__token--comment {
+  color: var(--sh-comment);
+  font-style: italic;
 }
 
 /* Floating light / dark / system theme switcher — one element injected into the
