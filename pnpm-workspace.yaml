@@ -13,6 +13,13 @@ strictPeerDependencies: false
 # Pin dependencies to exact versions on `pnpm add` (ranges are reserved for
 # peerDependencies, which are edited by hand).
 saveExact: true
+# @sveltejs/kit is auto-installed at the root only to satisfy the lib's own
+# optional peer (adapter types); its typescript peer range tops out at ^6 while
+# the root runs the Go-native typescript@7 for `tsc`. The actual SvelteKit demo
+# workspace supplies typescript 6.x. Drop when kit allows TS 7.
+peerDependencyRules:
+  allowedVersions:
+    '@sveltejs/kit>typescript': '7'
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true

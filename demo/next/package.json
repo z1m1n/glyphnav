@@ -19,9 +19,10 @@
     "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@types/node": "26.0.1",
+    "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "typescript": "6.0.3"
-  }
+  },
+  "//typescript": "next build's type-check step needs the JS Compiler API that the Go-native typescript@7 no longer ships (Next then thinks TypeScript is missing); stays 6.x until Next supports TS7"
 }
