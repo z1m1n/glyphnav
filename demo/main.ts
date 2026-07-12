@@ -20,7 +20,7 @@ initTheme();
 // plain text in index.html; highlight() escapes on the way out, so this swaps
 // text for token spans without ever re-injecting markup.
 for (const code of document.querySelectorAll<HTMLElement>('.card code')) {
-  code.innerHTML = highlight(code.textContent ?? '', code.dataset.lang);
+  code.innerHTML = highlight(code.textContent ?? '');
 }
 
 const bar = document.getElementById('bar')!;
