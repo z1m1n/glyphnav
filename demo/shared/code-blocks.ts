@@ -16,6 +16,7 @@
  */
 
 import { DOCS_INSTALL } from './content';
+import { initInlineCode } from './inline-code';
 
 /** A package manager offered by the install tabs, and how it spells `install`. */
 interface PackageManager {
@@ -216,6 +217,11 @@ let initialized = false;
 export function initCodeBlocks(): void {
   if (initialized || typeof document === 'undefined') return;
   initialized = true;
+
+  // Inline `<code>` chips in prose are highlighted by their own shared pass —
+  // kicked off here so every demo that shows code blocks also gets its inline
+  // chips highlighted, without a second call site per demo.
+  initInlineCode();
 
   const run = (): void => {
     if (document.body) enhance();

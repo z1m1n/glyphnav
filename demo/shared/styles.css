@@ -1005,6 +1005,13 @@ nav {
   .card::after {
     display: none;
   }
+
+  /* Chips still adopt the accent on hover, but instantly — no glide, no sweep. */
+  .card code,
+  .card code [class*='sh__token--'] {
+    transition: none;
+    transition-delay: 0s;
+  }
 }
 
 /* Card internals. */
@@ -1059,6 +1066,48 @@ nav {
 .card code {
   background: var(--fill-soft);
   color: var(--ink);
+  transition: background 0.3s ease;
+}
+
+/* The framework accent (--accent, per [data-fw]) is set on the card itself, but
+   the pre-mixed --accent-ink / --accent-bg tokens are computed up on <body> where
+   --accent is unset — so on this multi-framework landing page they'd freeze to the
+   blue fallback. Re-derive the two the hover needs here, on the card, so
+   var(--accent) resolves to each card's own hue. Same mix formulas (and AA
+   guarantees) as the body tokens they mirror; the dark values match too. */
+.card {
+  --chip-ink: color-mix(in srgb, var(--accent, var(--blue)) 70%, var(--ink));
+  --chip-bg: color-mix(in srgb, var(--accent, var(--blue)) 10%, var(--white));
+}
+:root[data-theme='dark'] .card {
+  --chip-ink: color-mix(in srgb, var(--accent, var(--blue)) 60%, var(--ink));
+  --chip-bg: color-mix(in srgb, var(--accent, var(--blue)) 20%, var(--white));
+}
+
+/* On card hover the chips adopt the framework's own hue: the multi-colour syntax
+   palette melts into a single contextual accent (--chip-ink) and the chip fill
+   warms to the matching tint (--chip-bg) — the same AA-safe ink-on-tint pairing
+   the buttons use on hover. A tiny per-token delay sweeps the recolour
+   left-to-right, echoing the shimmer that crosses the card on the same hover. The
+   delay lives on the base rule so hover-out unwinds the sweep the same way. */
+.card code [class*='sh__token--'] {
+  transition: color 0.35s ease;
+}
+.card code [class*='sh__token--']:nth-child(2) {
+  transition-delay: 0.03s;
+}
+.card code [class*='sh__token--']:nth-child(3) {
+  transition-delay: 0.06s;
+}
+.card code [class*='sh__token--']:nth-child(n + 4) {
+  transition-delay: 0.09s;
+}
+
+.card:hover code {
+  background: var(--chip-bg);
+}
+.card:hover code [class*='sh__token--'] {
+  color: var(--chip-ink);
 }
 
 /* Per-framework accent hues — the single --accent source every accent-derived
@@ -1204,11 +1253,25 @@ code {
   border-radius: 3px; /* a touch tighter than --radius for the tiny inline chip */
 }
 
+/* A highlighted inline chip — its `.sh__token--*` spans now own the colour —
+   drops the accent-tinted fill for the neutral docs-block one (same reasoning as
+   the landing-page cards). `--fill-soft` is as far from the page surface as the
+   fill can go in *either* theme before a syntax token fails AA 4.5:1 on it: the
+   darker `--fill` sinks the light-mode punctuation to 4.36 and the dark-mode
+   comment to 4.09, so this is the strongest token-safe fill — no border. No hover
+   recolour and no transition either: that's a landing-card-only flourish, and
+   easing this animates the chips on load. */
+code.hl {
+  background: var(--fill-soft);
+  color: var(--ink);
+}
+
 /* Syntax highlighting (see demo/shared/highlight.ts → sugar-high) — global, so
-   both the docs code blocks and the landing-page card chips colourise. The token
-   spans carry an inline `color: var(--sh-*)`, but Angular's [innerHTML]
-   sanitizer strips inline styles, so each class also sets its colour here — the
-   same `--sh-*` custom properties theme light and dark either way. */
+   the docs code blocks, the landing-page card chips and the inline prose chips
+   (demo/shared/inline-code.ts) all colourise. The token spans carry an inline
+   `color: var(--sh-*)`, but Angular's [innerHTML] sanitizer strips inline styles,
+   so each class also sets its colour here — the same `--sh-*` custom properties
+   theme light and dark either way. */
 .sh__token--keyword {
   color: var(--sh-keyword);
 }

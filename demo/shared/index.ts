@@ -30,6 +30,7 @@ export { DEMOS } from './demos';
 export type { DemoEntry } from './demos';
 export { highlight } from './highlight';
 export { initCodeBlocks } from './code-blocks';
+export { initInlineCode } from './inline-code';
 export { initFwMenu } from './fw-menu';
 export { initTheme, THEME_INIT_SCRIPT } from './theme';
 export type { ThemePref } from './theme';

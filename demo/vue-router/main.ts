@@ -67,7 +67,7 @@ const router = createRouter({
       path: '/',
       component: page(
         'Home',
-        'Vue Router edition. The glyphnav plugin wraps <code>router.push</code> and <code>router.replace</code>, so every <code>&lt;router-link&gt;</code> click animates the address bar. With <code>commit: "navigate first"</code> the route swaps instantly and the bar decodes on top.',
+        'Vue Router edition. The glyphnav plugin wraps <code>router.push</code> and <code>router.replace</code>, so every <code data-lang="html">&lt;router-link&gt;</code> click animates the address bar. With <code>commit: "navigate first"</code> the route swaps instantly and the bar decodes on top.',
       ),
     },
     {

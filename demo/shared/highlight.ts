@@ -9,10 +9,21 @@
  * (innerHTML / dangerouslySetInnerHTML / Angular [innerHTML]). Token colours
  * come from the `.sh__token--*` rules in ./styles.css (via the `--sh-*` custom
  * properties, once for light and once for dark).
+ *
+ * A `lang` hint switches to a tiny markup highlighter for tag chips — sugar-high
+ * is JS/JSX-only and mis-reads a custom element like `<router-link>` (the hyphen
+ * parses as a minus, splitting the name into two mismatched colours).
  */
 import { highlight as sugarHighlight } from 'sugar-high';
 
-/** Highlight a code snippet into HTML safe to place inside `<code>`. */
+/**
+ * Highlight a code snippet into HTML safe to place inside `<code>`.
+ *
+ * @param code - The snippet to tokenize.
+ * @param lang - Optional language hint (a chip's `data-lang`). `html` / `vue` /
+ *   `svelte` / `xml` / `svg` / `markup` use the tag-aware highlighter; anything
+ *   else (the default) uses sugar-high's JS/TS/JSX tokenizer.
+ */
 export function highlight(code: string): string {
   // sugar-high inlines `style="color:var(--sh-*)"` on every token span. The
   // ./styles.css class rules already set the same colours, so the inline copy
