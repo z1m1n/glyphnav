@@ -33,9 +33,8 @@ function enhance(): void {
     if (code.classList.contains('hl') && code.childElementCount > 0) continue;
     const text = code.textContent ?? '';
     if (!text.trim()) continue; // nothing to tokenize
-    // `data-lang` opts a chip into a non-default syntax (e.g. `html` for a tag
-    // chip like <router-link>, which the JS tokenizer would mangle).
-    code.innerHTML = highlight(text, code.dataset.lang);
+
+    code.innerHTML = highlight(text);
     code.classList.add('hl');
   }
 }
