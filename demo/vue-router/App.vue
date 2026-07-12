@@ -182,8 +182,7 @@ onUnmounted(() => disposeFwMenu?.());
   <router-view />
 
   <p class="foot">
-    Every <code>&lt;router-link&gt;</code> goes through the wrapped
-    <code>router.push</code>. The title link is a plain anchor, so it leaves the SPA with a normal
-    page load.
+    Every <code>&lt;router-link&gt;</code> goes through the wrapped <code>router.push</code>. The
+    title link is a plain anchor, so it leaves the SPA with a normal page load.
   </p>
 </template>
