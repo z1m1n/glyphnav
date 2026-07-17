@@ -23,8 +23,6 @@ peerDependencyRules:
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
-  lmdb: true
-  msgpackr-extract: true
   # sharp ships prebuilt binaries; the demos don't process images (Next uses
   # images.unoptimized), so its postinstall build script isn't needed.
   sharp: false

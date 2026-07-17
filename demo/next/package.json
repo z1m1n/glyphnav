@@ -24,5 +24,5 @@
     "@types/react-dom": "19.2.3",
     "typescript": "6.0.3"
   },
-  "//typescript": "next build's type-check step needs the JS Compiler API that the Go-native typescript@7 no longer ships (Next then thinks TypeScript is missing); stays 6.x until Next supports TS7"
+  "//typescript": "next build's type-check step needs the JS Compiler API that the Go-native typescript@7 no longer ships (Next then thinks TypeScript is missing); stays 6.x until Next supports TS7. Checked 2026-07: experimental.useTypeScriptCli backend in vercel/next.js#95639, not yet released"
 }

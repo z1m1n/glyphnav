@@ -19,5 +19,5 @@
     "typescript": "6.0.3",
     "vue-tsc": "3.3.7"
   },
-  "//typescript": "vue-tsc (the only tsc consumer here) needs the JS Compiler API that the Go-native typescript@7 no longer ships; stays 6.x until vue-tsc supports TS7"
+  "//typescript": "vue-tsc (the only tsc consumer here) needs the JS Compiler API that the Go-native typescript@7 no longer ships; stays 6.x until vue-tsc supports TS7. Checked 2026-07: vuejs/language-tools#5381 still open, blocked on the TS 7.1 JS API"
 }
