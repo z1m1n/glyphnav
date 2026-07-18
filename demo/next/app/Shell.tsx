@@ -15,6 +15,7 @@ import {
   initFwMenu,
   initTheme,
   initTooltips,
+  initWordmark,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
@@ -107,6 +108,7 @@ function Inner({ children }: { children: ReactNode }) {
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
+    initWordmark();
     return disposeFwMenu;
   }, []);
 
@@ -139,7 +141,9 @@ function Inner({ children }: { children: ReactNode }) {
         <h1>
           {/* eslint-disable-next-line @next/next/no-img-element -- tiny shared brand mark, not a content image */}
           <img className="glyph-mark" src={logo.src} alt="" />
-          <a href={ROOT_HREF}>glyphnav</a>
+          <a href={ROOT_HREF} className="wordmark">
+            glyphnav
+          </a>
           <span className="sep">/</span>
           <span className="crumb">next</span>
           <button

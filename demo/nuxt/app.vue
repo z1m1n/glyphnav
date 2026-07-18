@@ -11,6 +11,7 @@ import {
   initFwMenu,
   initTheme,
   initTooltips,
+  initWordmark,
   loadToolbar,
   saveToolbar,
   sliderToDuration,
@@ -140,6 +141,7 @@ onMounted(() => {
   disposeFwMenu = initFwMenu();
   initTooltips();
   initCodeBlocks();
+  initWordmark();
 });
 onUnmounted(() => disposeFwMenu?.());
 watch([charset, duration, effect, commit, scope], apply);
@@ -154,7 +156,7 @@ watch(backForward, () => {
     <main>
       <h1>
         <img class="glyph-mark" :src="logo" alt="" />
-        <a :href="rootHref">glyphnav</a>
+        <a :href="rootHref" class="wordmark">glyphnav</a>
         <span class="sep">/</span>
         <span class="crumb">nuxt</span>
         <button

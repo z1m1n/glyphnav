@@ -11,9 +11,12 @@ import {
 import type { FrameInfo, GlyphEffect } from 'glyphnav';
 import { highlight } from './shared/highlight';
 import { initTheme } from './shared/theme';
+import { initWordmark } from './shared/wordmark';
 
-// Mount the light/dark/system theme switcher (shared across every demo).
+// Mount the light/dark/system theme switcher (shared across every demo) and
+// decode the header wordmark once on load.
 initTheme();
+initWordmark();
 
 // Colourise the code chips inside the picker cards — the same sugar-high pass
 // the demo docs pages run (see shared/highlight.ts). The chips are authored as

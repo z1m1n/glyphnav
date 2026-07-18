@@ -19,6 +19,7 @@ import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
+import { initWordmark } from '../shared/wordmark';
 import logo from '../shared/logo.svg';
 
 const controller = useGlyphnav();
@@ -98,6 +99,7 @@ onMounted(() => {
   disposeFwMenu = initFwMenu();
   initTooltips();
   initCodeBlocks();
+  initWordmark();
 });
 onUnmounted(() => disposeFwMenu?.());
 </script>
@@ -105,7 +107,7 @@ onUnmounted(() => disposeFwMenu?.());
 <template>
   <h1>
     <img class="glyph-mark" :src="logo" alt="" />
-    <a :href="base">glyphnav</a>
+    <a :href="base" class="wordmark">glyphnav</a>
     <span class="sep">/</span>
     <span class="crumb">vue-router</span>
     <button

@@ -23,6 +23,7 @@ import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
+import { initWordmark } from '../shared/wordmark';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'react-router';
@@ -150,6 +151,7 @@ export default function App() {
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
+    initWordmark();
     return disposeFwMenu;
   }, []);
 
@@ -157,7 +159,9 @@ export default function App() {
     <>
       <h1>
         <img className="glyph-mark" src={logo} alt="" />
-        <a href={import.meta.env.BASE_URL}>glyphnav</a>
+        <a href={import.meta.env.BASE_URL} className="wordmark">
+          glyphnav
+        </a>
         <span className="sep">/</span>
         <span className="crumb">react-router</span>
         <button

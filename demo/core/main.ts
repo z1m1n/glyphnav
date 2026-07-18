@@ -24,12 +24,14 @@ import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
-import { createGlyphText } from './glyph-text';
+import { createGlyphText } from '../shared/glyph-text';
+import { initWordmark } from '../shared/wordmark';
 
 // Mount the light/dark/system theme switcher and the breadcrumb's framework
-// menu (both shared across every demo).
+// menu (both shared across every demo), then decode the header wordmark once.
 initTheme();
 initFwMenu();
+initWordmark();
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'core';

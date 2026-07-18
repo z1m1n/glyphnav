@@ -23,6 +23,7 @@ import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
+import { initWordmark } from '../shared/wordmark';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'preact-iso';
@@ -221,6 +222,7 @@ export function App() {
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
+    initWordmark();
     return disposeFwMenu;
   }, []);
 
@@ -229,7 +231,7 @@ export function App() {
       <h1>
         <img class="glyph-mark" src={logo} alt="" />
         {/* Cross-app link — exclude from interceptLinks so it full-loads. */}
-        <a href={import.meta.env.BASE_URL} data-glyphnav="off">
+        <a href={import.meta.env.BASE_URL} class="wordmark" data-glyphnav="off">
           glyphnav
         </a>
         <span class="sep">/</span>

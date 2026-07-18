@@ -7,6 +7,9 @@
  * through them on a timer. The address-bar adapter writes each frame to
  * `history.replaceState`; here we write `frame.text` to `el.textContent`. Same
  * frames, same knobs (charset, effect, duration) — different sink.
+ *
+ * Shared across the demos: the /core demo points it at its stage `<span>`, and
+ * the header brand wordmark decodes through it once on load (see wordmark.ts).
  */
 
 import { createPlayer, generateFrames, MIN_FRAME_MS, prefersReducedMotion } from 'glyphnav/core';

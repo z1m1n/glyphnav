@@ -20,6 +20,7 @@ import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
+import { initWordmark } from '../shared/wordmark';
 import logoSrc from '../shared/logo.svg';
 
 /** This page's own localStorage key — not shared with the other demos. */
@@ -31,7 +32,7 @@ const STORE_KEY = 'angular-router';
   template: `
     <h1>
       <img class="glyph-mark" [src]="logo" alt="" />
-      <a [href]="base" data-glyphnav="off">glyphnav</a>
+      <a [href]="base" class="wordmark" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
       <span class="crumb">angular-router</span>
       <button
@@ -177,7 +178,11 @@ export class AppComponent {
     // for the template (the other inits are DOM-independent or delegated),
     // and it injects into this component's DOM, so it unhooks on destroy.
     const destroyRef = inject(DestroyRef);
-    afterNextRender(() => destroyRef.onDestroy(initFwMenu()));
+    afterNextRender(() => {
+      destroyRef.onDestroy(initFwMenu());
+      // Decode the header wordmark once, now that the breadcrumb is rendered.
+      initWordmark();
+    });
     this.toggleHistory(this.backForward());
     inject(Router).events.subscribe((event) => {
       if (event instanceof NavigationEnd) {

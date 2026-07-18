@@ -18,6 +18,7 @@
     initFwMenu,
     initTheme,
     initTooltips,
+    initWordmark,
     loadToolbar,
     saveToolbar,
     sliderToDuration,
@@ -109,6 +110,7 @@
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
+    initWordmark();
     // Flip last so the reactive blocks below first run with the restored values
     // (and never clobber the saved state with the defaults on the first render).
     mounted = true;
@@ -165,7 +167,7 @@
   <main>
     <h1>
       <img class="glyph-mark" src={logo} alt="" />
-      <a href={rootHref} data-glyphnav="off">glyphnav</a>
+      <a href={rootHref} class="wordmark" data-glyphnav="off">glyphnav</a>
       <span class="sep">/</span>
       <span class="crumb">sveltekit</span>
       <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>

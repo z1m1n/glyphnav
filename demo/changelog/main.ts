@@ -5,9 +5,12 @@ import { marked } from 'marked';
 import changelog from '../../CHANGELOG.md?raw';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initTheme } from '../shared/theme';
+import { initWordmark } from '../shared/wordmark';
 
-// Mount the shared light/dark/system theme switcher, like every other demo page.
+// Mount the shared light/dark/system theme switcher, like every other demo page,
+// then decode the header wordmark once on load.
 initTheme();
+initWordmark();
 
 // The CHANGELOG is authored by us (not user input), so rendering its parsed
 // markup is safe. `marked.parse` is synchronous with the default options.

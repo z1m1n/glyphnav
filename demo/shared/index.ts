@@ -28,6 +28,8 @@ export {
 export type { SelectOption, ToolbarState } from './content';
 export { DEMOS } from './demos';
 export type { DemoEntry } from './demos';
+export { createGlyphText } from './glyph-text';
+export type { GlyphText, TextEffectOptions } from './glyph-text';
 export { highlight } from './highlight';
 export { initCodeBlocks } from './code-blocks';
 export { initInlineCode } from './inline-code';
@@ -35,3 +37,4 @@ export { initFwMenu } from './fw-menu';
 export { initTheme, THEME_INIT_SCRIPT } from './theme';
 export type { ThemePref } from './theme';
 export { initTooltips } from './tooltip';
+export { initWordmark } from './wordmark';

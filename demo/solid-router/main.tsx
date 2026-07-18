@@ -25,6 +25,7 @@ import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
 import { initTooltips } from '../shared/tooltip';
+import { initWordmark } from '../shared/wordmark';
 
 /** This page's own localStorage key — not shared with the other demos. */
 const STORE_KEY = 'solid-router';
@@ -176,13 +177,16 @@ function Layout(props: RouteSectionProps): JSX.Element {
     onCleanup(initFwMenu());
     initTooltips();
     initCodeBlocks();
+    initWordmark();
   });
 
   return (
     <>
       <h1>
         <img class="glyph-mark" src={logo} alt="" />
-        <a href={import.meta.env.BASE_URL}>glyphnav</a>
+        <a href={import.meta.env.BASE_URL} class="wordmark">
+          glyphnav
+        </a>
         <span class="sep">/</span>
         <span class="crumb">solid-router</span>
         <button
