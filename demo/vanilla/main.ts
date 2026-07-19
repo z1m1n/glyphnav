@@ -13,6 +13,7 @@ import {
   saveToolbar,
   sliderToDuration,
 } from '../shared/content';
+import { initActiveNav } from '../shared/active-nav';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
@@ -21,9 +22,11 @@ import { initWordmark } from '../shared/wordmark';
 
 // Mount the light/dark/system theme switcher and the breadcrumb's framework
 // menu (both shared across every demo), then decode the header wordmark once.
+// The nav's exact-match active pill is shared chrome too (see active-nav.ts).
 initTheme();
 initFwMenu();
 initWordmark();
+initActiveNav();
 
 const BASE = import.meta.env.BASE_URL + 'vanilla';
 
@@ -111,13 +114,6 @@ function render(): void {
     (page.html ?? '') +
     '</article>';
   pathEl.textContent = currentUrl();
-  // A tab is active only on an exact match: same path AND no query/hash, so a
-  // deep link (e.g. /about?ref=deep) never lights up the plain "About" tab.
-  const onPlainPath = !location.search && !location.hash;
-  document.querySelectorAll<HTMLAnchorElement>('#nav a').forEach((a) => {
-    const here = new URL(a.href).pathname.replace(/\/$/, '');
-    a.classList.toggle('active', onPlainPath && here === location.pathname.replace(/\/$/, ''));
-  });
 }
 
 // Restore this page's toolbar (charset is stored as its option key). Resolve the

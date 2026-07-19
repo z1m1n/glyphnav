@@ -7,6 +7,7 @@ import {
   DEFAULT_TOOLBAR,
   durationToSlider,
   glyphnavOptions,
+  initActiveNav,
   initCodeBlocks,
   initFwMenu,
   initTheme,
@@ -63,12 +64,6 @@ const tips = CONTROL_TOOLTIPS;
 const selects = TOOLBAR_SELECTS;
 const slider = SPEED_SLIDER;
 
-// A tab is active only on an exact match (full path incl. query/hash), instead
-// of <NuxtLink>'s built-in active class which ignores the query — so a deep link
-// like /about?ref=deep never lights up the plain "About" tab.
-const route = useRoute();
-const isActive = (to: string): boolean => route.fullPath === to;
-
 // Refs start at the defaults so the prerendered markup is stable; the saved
 // toolbar is restored on the client in onMounted (after hydration).
 const path = ref('/');
@@ -123,6 +118,7 @@ function apply(): void {
 }
 
 let disposeFwMenu: (() => void) | undefined;
+let disposeActiveNav: (() => void) | undefined;
 onMounted(() => {
   const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
   charset.value = saved.charset;
@@ -135,15 +131,19 @@ onMounted(() => {
   apply();
   applyBackForward();
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers. Only the menu injects into this component's DOM, so
-  // it's the only one with something to unhook.
+  // code-block helpers + the nav's exact-match active pill. The menu and the
+  // nav sync are the two with something to unhook.
   initTheme();
   disposeFwMenu = initFwMenu();
   initTooltips();
   initCodeBlocks();
   initWordmark();
+  disposeActiveNav = initActiveNav();
 });
-onUnmounted(() => disposeFwMenu?.());
+onUnmounted(() => {
+  disposeFwMenu?.();
+  disposeActiveNav?.();
+});
 watch([charset, duration, effect, commit, scope], apply);
 watch(backForward, () => {
   applyBackForward();
@@ -172,15 +172,15 @@ watch(backForward, () => {
         Watch the address bar. Current path: <span class="path">{{ path }}</span>
       </p>
 
-      <nav aria-label="demo pages">
-        <NuxtLink to="/" :class="{ active: isActive('/') }">Home</NuxtLink>
-        <NuxtLink to="/about" :class="{ active: isActive('/about') }">About</NuxtLink>
-        <NuxtLink to="/docs" :class="{ active: isActive('/docs') }">Docs</NuxtLink>
-        <NuxtLink to="/features" :class="{ active: isActive('/features') }">Features</NuxtLink>
+      <nav class="tabs" aria-label="demo pages">
+        <NuxtLink to="/">Home</NuxtLink>
+        <NuxtLink to="/about">About</NuxtLink>
+        <NuxtLink to="/docs">Docs</NuxtLink>
+        <NuxtLink to="/features">Features</NuxtLink>
       </nav>
 
       <nav class="deep" aria-label="deep links">
-        deep links:
+        <span class="deep-label">deep links:</span>
         <NuxtLink to="/about?ref=deep&page=2">?query</NuxtLink>
         <NuxtLink to="/docs#options">#hash</NuxtLink>
         <NuxtLink to="/about?q=glyph#results">?query+#hash</NuxtLink>

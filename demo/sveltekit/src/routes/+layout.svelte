@@ -3,7 +3,6 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
-  import { page } from '$app/state';
   import { attachGlyphnav } from 'glyphnav/sveltekit';
   import type { SvelteKitGlyphnavInstance } from 'glyphnav/sveltekit';
   import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -14,6 +13,7 @@
     DEFAULT_TOOLBAR,
     durationToSlider,
     glyphnavOptions,
+    initActiveNav,
     initCodeBlocks,
     initFwMenu,
     initTheme,
@@ -38,22 +38,11 @@
   // (`…/sveltekit/` → `…/`).
   const rootHref = resolve('/').replace(/sveltekit\/?$/, '');
 
-  // Base-prefixed nav targets, resolved once so each link's `href` and its
-  // active-state check below compare the exact same path.
+  // Base-prefixed nav targets, resolved once.
   const homeHref = resolve('/');
   const aboutHref = resolve('/about/');
   const docsHref = resolve('/docs/');
   const featuresHref = resolve('/features/');
-
-  // A nav link is active when it points at the current page (trailing slash
-  // ignored, so `/sveltekit/` matches home) AND there's no query/hash — so a
-  // deep link like /about?ref=deep never lights up the plain "About" tab.
-  // Called from the template's `class:active` so the `$app/state` page signal is
-  // tracked at runtime — a legacy `$:` block wouldn't react to its mutation.
-  const isActive = (href: string): boolean =>
-    page.url.pathname.replace(/\/+$/, '') === href.replace(/\/+$/, '') &&
-    page.url.search === '' &&
-    page.url.hash === '';
 
   // State starts at the defaults so the prerendered markup is stable; the saved
   // toolbar is restored on the client after mount.
@@ -104,13 +93,14 @@
     backForward = saved.backForward;
     path = currentUrl();
     // Wire the theme switcher + framework menu + styled control tooltips +
-    // code-block helpers. Only the menu injects into this component's DOM, so
-    // it's the only one unhooked in the teardown below.
+    // code-block helpers + the nav's exact-match active pill. The menu and the
+    // nav sync are the two unhooked in the teardown below.
     initTheme();
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
     initWordmark();
+    const disposeActiveNav = initActiveNav();
     // Flip last so the reactive blocks below first run with the restored values
     // (and never clobber the saved state with the defaults on the first render).
     mounted = true;
@@ -118,6 +108,7 @@
       toggleHistory(false);
       glyph?.detach();
       disposeFwMenu();
+      disposeActiveNav();
     };
   });
 
@@ -177,15 +168,15 @@
       Watch the address bar. Current path: <span class="path">{path}</span>
     </p>
 
-    <nav aria-label="demo pages">
-      <a href={homeHref} class:active={isActive(homeHref)}>Home</a>
-      <a href={aboutHref} class:active={isActive(aboutHref)}>About</a>
-      <a href={docsHref} class:active={isActive(docsHref)}>Docs</a>
-      <a href={featuresHref} class:active={isActive(featuresHref)}>Features</a>
+    <nav class="tabs" aria-label="demo pages">
+      <a href={homeHref}>Home</a>
+      <a href={aboutHref}>About</a>
+      <a href={docsHref}>Docs</a>
+      <a href={featuresHref}>Features</a>
     </nav>
 
     <nav class="deep" aria-label="deep links">
-      deep links:
+      <span class="deep-label">deep links:</span>
       <a href={resolve('/about/?ref=deep&page=2')}>?query</a>
       <a href={resolve('/docs/#options')}>#hash</a>
       <a href={resolve('/about/?q=glyph#results')}>?query+#hash</a>

@@ -14,6 +14,7 @@
 
 import { HEX, MATRIX, SYMBOLS, URL_SAFE } from 'glyphnav/core';
 import type { AnimateScope, CommitTiming, GlyphEffect, GlyphnavOptions } from 'glyphnav/core';
+import { syncActiveNav } from './active-nav';
 
 /** Glyph pools offered by the `charset` control, keyed by its option value. */
 export const charsets: Record<string, string> = {
@@ -82,14 +83,11 @@ export const DEFAULT_TOOLBAR: ToolbarState = {
  * @param state - The toolbar values to apply (`charset` is the option key).
  * @param showPath - Called with the path to display and whether the run is in
  *   its resolve phase; `(currentUrl(), false)` once the run settles.
- * @param onSettled - Extra work after the settled `showPath` call (e.g. the
- *   Next demo re-reads `location.search + location.hash` for its tab state).
  * @returns The options object for `controller.update()`.
  */
 export function glyphnavOptions(
   state: Omit<ToolbarState, 'backForward'>,
   showPath: (path: string, resolving: boolean) => void,
-  onSettled?: () => void,
 ): GlyphnavOptions {
   return {
     charset: charsets[state.charset],
@@ -101,7 +99,9 @@ export function glyphnavOptions(
       onFrame: (f) => showPath(f.path, f.phase === 'resolve'),
       onComplete: () => {
         showPath(currentUrl(), false);
-        onSettled?.();
+        // The URL has settled; lock the nav's active pill to it (see
+        // ./active-nav — this is the shared per-navigation sync point).
+        syncActiveNav();
       },
     },
   };

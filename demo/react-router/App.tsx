@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Route, Routes, useLocation } from 'react-router';
+import { Route, Routes } from 'react-router';
 import { GlyphnavLink, useGlyphnavController } from 'glyphnav/react-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
@@ -19,6 +19,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../shared/content';
+import { initActiveNav } from '../shared/active-nav';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
@@ -99,18 +100,6 @@ function Docs() {
   );
 }
 
-function NavLink({ to, children }: { to: string; children: string }) {
-  // Active only on an exact match — same path with no query/hash — so a deep
-  // link (e.g. /about?ref=deep) never lights up the plain "About" tab.
-  const { pathname, search, hash } = useLocation();
-  const active = pathname === to && !search && !hash;
-  return (
-    <GlyphnavLink to={to} className={active ? 'active' : undefined}>
-      {children}
-    </GlyphnavLink>
-  );
-}
-
 export default function App() {
   const controller = useGlyphnavController();
   const [saved] = useState(() => loadToolbar(STORE_KEY, DEFAULT_TOOLBAR));
@@ -144,15 +133,20 @@ export default function App() {
   }, [charset, duration, effect, commit, scope, backForward]);
 
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers once. Only the menu injects into this component's DOM,
-  // so its detach function is the effect's cleanup.
+  // code-block helpers + the nav's exact-match active pill once. Only the menu
+  // and the nav sync touch this component's DOM, so their detach functions are
+  // the effect's cleanup.
   useEffect(() => {
     initTheme();
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
     initWordmark();
-    return disposeFwMenu;
+    const disposeActiveNav = initActiveNav();
+    return () => {
+      disposeFwMenu();
+      disposeActiveNav();
+    };
   }, []);
 
   return (
@@ -177,15 +171,15 @@ export default function App() {
         Watch the address bar. Current path: <span className="path">{path}</span>
       </p>
 
-      <nav aria-label="demo pages">
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/about">About</NavLink>
-        <NavLink to="/docs">Docs</NavLink>
-        <NavLink to="/blog">Blog</NavLink>
+      <nav className="tabs" aria-label="demo pages">
+        <GlyphnavLink to="/">Home</GlyphnavLink>
+        <GlyphnavLink to="/about">About</GlyphnavLink>
+        <GlyphnavLink to="/docs">Docs</GlyphnavLink>
+        <GlyphnavLink to="/blog">Blog</GlyphnavLink>
       </nav>
 
       <nav className="deep" aria-label="deep links">
-        deep links:
+        <span className="deep-label">deep links:</span>
         <GlyphnavLink to="/about?ref=deep&page=2">?query</GlyphnavLink>
         <GlyphnavLink to="/docs#options">#hash</GlyphnavLink>
         <GlyphnavLink to="/about?q=glyph#results">?query+#hash</GlyphnavLink>

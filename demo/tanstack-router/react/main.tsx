@@ -7,8 +7,6 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
-  useLocation,
-  useMatchRoute,
 } from '@tanstack/react-router';
 import {
   GlyphnavLink,
@@ -32,6 +30,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../../shared/content';
+import { initActiveNav } from '../../shared/active-nav';
 import { initCodeBlocks } from '../../shared/code-blocks';
 import { initFwMenu } from '../../shared/fw-menu';
 import { initTheme } from '../../shared/theme';
@@ -114,19 +113,6 @@ function Docs() {
   );
 }
 
-function NavItem({ to, children }: { to: string; children: string }) {
-  // Active only on an exact match: the route matches AND there's no query/hash,
-  // so a deep link like /about?ref=deep never lights up the plain "About" tab.
-  const matchRoute = useMatchRoute();
-  const { searchStr, hash } = useLocation();
-  const active = Boolean(matchRoute({ to })) && !searchStr && !hash;
-  return (
-    <GlyphnavLink to={to} className={active ? 'active' : undefined}>
-      {children}
-    </GlyphnavLink>
-  );
-}
-
 function Layout() {
   const controller = useGlyphnavController();
   const [saved] = useState(() => loadToolbar(STORE_KEY, DEFAULT_TOOLBAR));
@@ -160,15 +146,20 @@ function Layout() {
   }, [charset, duration, effect, commit, scope, backForward]);
 
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers once. Only the menu injects into this component's DOM,
-  // so its detach function is the effect's cleanup.
+  // code-block helpers + the nav's exact-match active pill once. Only the menu
+  // and the nav sync touch this component's DOM, so their detach functions are
+  // the effect's cleanup.
   useEffect(() => {
     initTheme();
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
     initWordmark();
-    return disposeFwMenu;
+    const disposeActiveNav = initActiveNav();
+    return () => {
+      disposeFwMenu();
+      disposeActiveNav();
+    };
   }, []);
 
   return (
@@ -193,15 +184,15 @@ function Layout() {
         Watch the address bar. Current path: <span className="path">{path}</span>
       </p>
 
-      <nav aria-label="demo pages">
-        <NavItem to="/">Home</NavItem>
-        <NavItem to="/about">About</NavItem>
-        <NavItem to="/posts">Posts</NavItem>
-        <NavItem to="/docs">Docs</NavItem>
+      <nav className="tabs" aria-label="demo pages">
+        <GlyphnavLink to="/">Home</GlyphnavLink>
+        <GlyphnavLink to="/about">About</GlyphnavLink>
+        <GlyphnavLink to="/posts">Posts</GlyphnavLink>
+        <GlyphnavLink to="/docs">Docs</GlyphnavLink>
       </nav>
 
       <nav className="deep" aria-label="deep links">
-        deep links:
+        <span className="deep-label">deep links:</span>
         <GlyphnavLink to="/about" search={{ ref: 'deep', page: 2 }}>
           ?query
         </GlyphnavLink>

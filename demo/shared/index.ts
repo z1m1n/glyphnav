@@ -28,6 +28,7 @@ export {
 export type { SelectOption, ToolbarState } from './content';
 export { DEMOS } from './demos';
 export type { DemoEntry } from './demos';
+export { initActiveNav, syncActiveNav } from './active-nav';
 export { createGlyphText } from './glyph-text';
 export type { GlyphText, TextEffectOptions } from './glyph-text';
 export { highlight } from './highlight';

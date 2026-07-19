@@ -1,5 +1,5 @@
 import { afterNextRender, Component, DestroyRef, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { GLYPHNAV } from 'glyphnav/angular-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { GlyphnavLinkDirective } from './glyphnav-link.directive';
@@ -16,6 +16,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../shared/content';
+import { initActiveNav } from '../shared/active-nav';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
@@ -48,21 +49,15 @@ const STORE_KEY = 'angular-router';
       Watch the address bar. Current path: <span class="path">{{ path() }}</span>
     </p>
 
-    <nav aria-label="demo pages">
-      <a [href]="appBase" glyphnavLink="/" [class.active]="active() === '/'">Home</a>
-      <a [href]="appBase + 'about'" glyphnavLink="/about" [class.active]="active() === '/about'"
-        >About</a
-      >
-      <a [href]="appBase + 'docs'" glyphnavLink="/docs" [class.active]="active() === '/docs'"
-        >Docs</a
-      >
-      <a [href]="appBase + 'blog'" glyphnavLink="/blog" [class.active]="active() === '/blog'"
-        >Blog</a
-      >
+    <nav class="tabs" aria-label="demo pages">
+      <a [href]="appBase" glyphnavLink="/">Home</a>
+      <a [href]="appBase + 'about'" glyphnavLink="/about">About</a>
+      <a [href]="appBase + 'docs'" glyphnavLink="/docs">Docs</a>
+      <a [href]="appBase + 'blog'" glyphnavLink="/blog">Blog</a>
     </nav>
 
     <nav class="deep" aria-label="deep links">
-      deep links:
+      <span class="deep-label">deep links:</span>
       <a [href]="appBase + 'about?ref=deep&page=2'" glyphnavLink="/about?ref=deep&page=2">?query</a>
       <a [href]="appBase + 'docs#options'" glyphnavLink="/docs#options">#hash</a>
       <a [href]="appBase + 'about?q=glyph#results'" glyphnavLink="/about?q=glyph#results"
@@ -147,7 +142,6 @@ export class AppComponent {
 
   readonly path = signal(currentUrl());
   readonly resolving = signal(false);
-  readonly active = signal('/');
   readonly tips = CONTROL_TOOLTIPS;
   readonly selects = TOOLBAR_SELECTS;
   readonly slider = SPEED_SLIDER;
@@ -174,23 +168,18 @@ export class AppComponent {
     initTheme();
     initTooltips();
     initCodeBlocks();
-    // The framework menu hooks into the rendered breadcrumb, so it must wait
-    // for the template (the other inits are DOM-independent or delegated),
-    // and it injects into this component's DOM, so it unhooks on destroy.
+    // The framework menu and the nav's exact-match active pill hook into the
+    // rendered template, so they must wait for it (the other inits are
+    // DOM-independent or delegated); both inject into this component's DOM, so
+    // they unhook on destroy.
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
       destroyRef.onDestroy(initFwMenu());
+      destroyRef.onDestroy(initActiveNav());
       // Decode the header wordmark once, now that the breadcrumb is rendered.
       initWordmark();
     });
     this.toggleHistory(this.backForward());
-    inject(Router).events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        // Keep the full URL (incl. query/hash) so a deep link like
-        // /about?ref=deep never matches a plain tab target ('/about') below.
-        this.active.set(event.urlAfterRedirects);
-      }
-    });
   }
 
   private apply(): void {

@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { render } from 'solid-js/web';
-import { Route, Router, useLocation, useResolvedPath } from '@solidjs/router';
+import { Route, Router } from '@solidjs/router';
 import type { RouteSectionProps } from '@solidjs/router';
 import { GlyphnavLink, GlyphnavProvider, useGlyphnavController } from 'glyphnav/solid-router';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -21,6 +21,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../shared/content';
+import { initActiveNav } from '../shared/active-nav';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
@@ -95,32 +96,6 @@ function Docs(): JSX.Element {
   );
 }
 
-function normalizePath(path: string): string {
-  if (!path || path === '/') return '/';
-  return path.replace(/\/+$/, '');
-}
-
-function NavItem(props: { href: string; children: JSX.Element }): JSX.Element {
-  // Active only on an exact match: the route-resolved path (base-less) equals
-  // the current path AND there's no query/hash, so a deep link like
-  // /about?ref=deep never lights up the plain "About" tab.
-  const resolved = useResolvedPath(() => props.href);
-  const location = useLocation();
-
-  const active = (): boolean => {
-    const resolvedPath = normalizePath(resolved() ?? '');
-    const currentPath = normalizePath(location.pathname);
-
-    return resolvedPath === currentPath && !location.search && !location.hash;
-  };
-
-  return (
-    <GlyphnavLink href={props.href} class={active() ? 'active' : undefined}>
-      {props.children}
-    </GlyphnavLink>
-  );
-}
-
 function Layout(props: RouteSectionProps): JSX.Element {
   const controller = useGlyphnavController();
   const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
@@ -170,14 +145,15 @@ function Layout(props: RouteSectionProps): JSX.Element {
   });
 
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers once. Only the menu injects into this component's DOM,
-  // so it's the only one with something to unhook.
+  // code-block helpers + the nav's exact-match active pill once. The menu and
+  // the nav sync are the two with something to unhook.
   onMount(() => {
     initTheme();
     onCleanup(initFwMenu());
     initTooltips();
     initCodeBlocks();
     initWordmark();
+    onCleanup(initActiveNav());
   });
 
   return (
@@ -202,15 +178,15 @@ function Layout(props: RouteSectionProps): JSX.Element {
         Watch the address bar. Current path: <span class="path">{path()}</span>
       </p>
 
-      <nav aria-label="demo pages">
-        <NavItem href="/">Home</NavItem>
-        <NavItem href="/about">About</NavItem>
-        <NavItem href="/posts">Posts</NavItem>
-        <NavItem href="/docs">Docs</NavItem>
+      <nav class="tabs" aria-label="demo pages">
+        <GlyphnavLink href="/">Home</GlyphnavLink>
+        <GlyphnavLink href="/about">About</GlyphnavLink>
+        <GlyphnavLink href="/posts">Posts</GlyphnavLink>
+        <GlyphnavLink href="/docs">Docs</GlyphnavLink>
       </nav>
 
       <nav class="deep" aria-label="deep links">
-        deep links:
+        <span class="deep-label">deep links:</span>
         <GlyphnavLink href="/about?ref=deep&page=2">?query</GlyphnavLink>
         <GlyphnavLink href="/docs#options">#hash</GlyphnavLink>
         <GlyphnavLink href="/about?q=glyph#results">?query+#hash</GlyphnavLink>

@@ -7,8 +7,6 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
-  useLocation,
-  useMatchRoute,
 } from '@tanstack/solid-router';
 import {
   GlyphnavLink,
@@ -32,6 +30,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../../shared/content';
+import { initActiveNav } from '../../shared/active-nav';
 import { initCodeBlocks } from '../../shared/code-blocks';
 import { initFwMenu } from '../../shared/fw-menu';
 import { initTheme } from '../../shared/theme';
@@ -106,20 +105,6 @@ function Docs(): JSX.Element {
   );
 }
 
-function NavItem(props: { to: string; children: JSX.Element }): JSX.Element {
-  // Active only on an exact match: the route matches AND there's no query/hash,
-  // so a deep link like /about?ref=deep never lights up the plain "About" tab.
-  const matchRoute = useMatchRoute();
-  const match = matchRoute({ to: props.to });
-  const location = useLocation();
-  const active = (): boolean => Boolean(match()) && !location().searchStr && !location().hash;
-  return (
-    <GlyphnavLink to={props.to} class={active() ? 'active' : undefined}>
-      {props.children}
-    </GlyphnavLink>
-  );
-}
-
 function Layout(): JSX.Element {
   const controller = useGlyphnavController();
   const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
@@ -169,14 +154,15 @@ function Layout(): JSX.Element {
   });
 
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers once. Only the menu injects into this component's DOM,
-  // so it's the only one with something to unhook.
+  // code-block helpers + the nav's exact-match active pill once. The menu and
+  // the nav sync are the two with something to unhook.
   onMount(() => {
     initTheme();
     onCleanup(initFwMenu());
     initTooltips();
     initCodeBlocks();
     initWordmark();
+    onCleanup(initActiveNav());
   });
 
   return (
@@ -201,15 +187,15 @@ function Layout(): JSX.Element {
         Watch the address bar. Current path: <span class="path">{path()}</span>
       </p>
 
-      <nav aria-label="demo pages">
-        <NavItem to="/">Home</NavItem>
-        <NavItem to="/about">About</NavItem>
-        <NavItem to="/posts">Posts</NavItem>
-        <NavItem to="/docs">Docs</NavItem>
+      <nav class="tabs" aria-label="demo pages">
+        <GlyphnavLink to="/">Home</GlyphnavLink>
+        <GlyphnavLink to="/about">About</GlyphnavLink>
+        <GlyphnavLink to="/posts">Posts</GlyphnavLink>
+        <GlyphnavLink to="/docs">Docs</GlyphnavLink>
       </nav>
 
       <nav class="deep" aria-label="deep links">
-        deep links:
+        <span class="deep-label">deep links:</span>
         <GlyphnavLink to="/about" search={{ ref: 'deep', page: 2 }}>
           ?query
         </GlyphnavLink>

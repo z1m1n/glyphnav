@@ -283,27 +283,6 @@ h1 {
   content: url('./logo-dark.svg');
 }
 
-/* One-shot entrance: the mark fades and scales in on page load, alongside the
-   wordmark decode beside it (initWordmark). A plain (non-infinite) animation
-   runs only when the element is first rendered, so it fires exactly once per
-   load — and never on client route changes, where the header persists. Guarded
-   behind reduced-motion, the same courtesy the decode itself extends. */
-@media (prefers-reduced-motion: no-preference) {
-  .glyph-mark {
-    animation: glyph-mark-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-}
-@keyframes glyph-mark-in {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* Framework switcher: the ▾ disclosure button each demo authors after its
    breadcrumb (demo/shared/fw-menu.ts finds it and fills the menu). Rests in the
    crumb's raw accent (non-text UI, like the widget tints) and deepens to the AA
@@ -476,31 +455,90 @@ input {
   }
 }
 
-nav {
+/* Demo nav — the links whose clicks the library exists to animate, so they
+   read as first-class controls (chips on the shared --radius, like the pm-tabs
+   and the path readout), not body links. Two rows share one shape: the page
+   tabs (nav.tabs) and the smaller deep-link chips (nav.deep). Active state
+   comes from demo/shared/active-nav.ts in two tiers: a page tab carries
+   aria-current="page" when its PATHNAME matches the address bar (query/hash
+   don't demote it; trailing slash ignored), while a deep-link chip carries
+   aria-current="true" only on an EXACT full-URL match (pathname + query +
+   hash). So /about?ref=deep&page=2 lights the "About" tab AND its own ?query
+   chip; plain /about lights the tab alone. The routers' built-in active
+   classes are not used: they ignore the query/hash. */
+nav.tabs,
+nav.deep {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1.25rem;
-  margin: 0 0 0.5rem;
+  align-items: center;
 
-  /* Active tab styling keys off a plain `.active` class each demo sets itself
-     (exact full-URL match), not the routers' built-in active classes: those
-     ignore the query/hash, so a deep link like `/about?ref=deep` would wrongly
-     light up the "About" tab. The deep-links row never gets `.active`. */
-  a.active {
-    font-weight: 700;
+  a {
+    display: inline-block;
+    border: 1px solid transparent; /* reserved so no state change ever shifts layout */
+    border-radius: var(--radius);
     text-decoration: none;
-    color: inherit;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  /* Hover/press: the same accent two-step every button on the page uses. */
+  a:hover,
+  a:focus-visible {
+    color: var(--accent-ink);
+    background: var(--accent-bg);
+  }
+
+  a:active {
+    color: var(--accent-ink-hover);
+    background: var(--accent-bg-active);
+  }
+
+  /* "You are here": the resting AA pair inverted — the accent link ink as the
+     fill, the page surface as the text — so the current chip is unmistakable
+     in both themes at the same ≥4.5:1 contrast (the pair just swaps roles).
+     The bare [aria-current] matches both tiers ("page" on tabs, "true" on
+     deep chips). Declared last so hovering or pressing the current chip
+     doesn't repaint it: it's a location marker, not a button. Bold is
+     reflow-safe here — the mono stack keeps bold glyph advances equal. */
+  a[aria-current] {
+    color: var(--white);
+    background: var(--accent-ink);
+    border-color: var(--accent-ink);
+    font-weight: 700;
   }
 }
 
-/* Second nav row: targets with ?query and #hash — they animate like any path. */
-.deep {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+/* Primary row: the demo's pages. */
+nav.tabs {
+  gap: 0.3rem;
+  margin: 0 0 0.5rem;
+
+  a {
+    padding: 0.25rem 0.85rem;
+    color: var(--gray-strong);
+  }
+}
+
+/* Second row: the same pages reached with ?query / #hash — they animate like
+   any path. Smaller chips on the code fill (they're URL fragments, and dress
+   like inline code), introduced by a muted label. */
+nav.deep {
+  gap: 0.3rem 0.35rem;
   margin: 0 0 1.25rem;
-  color: var(--gray);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+
+  .deep-label {
+    color: var(--gray);
+    margin-right: 0.3rem;
+  }
+
+  a {
+    padding: 0.12rem 0.6rem;
+    background: var(--fill);
+    color: var(--gray-strong);
+  }
 }
 
 .controls {

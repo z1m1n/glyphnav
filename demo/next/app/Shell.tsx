@@ -11,6 +11,7 @@ import {
   DEFAULT_TOOLBAR,
   durationToSlider,
   glyphnavOptions,
+  initActiveNav,
   initCodeBlocks,
   initFwMenu,
   initTheme,
@@ -32,17 +33,9 @@ const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 // `/glyphnav/`). A plain anchor (Next leaves it untouched) does the full reload.
 const ROOT_HREF = BASE_PATH.replace(/next$/, '') || '/';
 
-const norm = (p: string): string => (p !== '/' && p.endsWith('/') ? p.slice(0, -1) : p);
-
 function Inner({ children }: { children: ReactNode }) {
   const controller = useGlyphnavController();
   const pathname = usePathname();
-  // The current URL's query+hash, kept in sync so a deep link (?query / #hash)
-  // never lights up a plain tab. usePathname covers cross-path navigations; the
-  // listeners (and the controller's onComplete below) cover same-path hash and
-  // query changes and browser back/forward.
-  const [extra, setExtra] = useState('');
-  const isActive = (href: string): boolean => norm(pathname) === norm(href) && extra === '';
   const [path, setPath] = useState('/');
   const [resolving, setResolving] = useState(false);
   const [charset, setCharset] = useState('url');
@@ -67,30 +60,12 @@ function Inner({ children }: { children: ReactNode }) {
     setResolving(false);
   }, [pathname]);
 
-  // Keep `extra` (query+hash) in sync for the exact tab-active check above.
-  useEffect(() => {
-    const sync = (): void => setExtra(window.location.search + window.location.hash);
-    sync();
-    window.addEventListener('hashchange', sync);
-    window.addEventListener('popstate', sync);
-    return () => {
-      window.removeEventListener('hashchange', sync);
-      window.removeEventListener('popstate', sync);
-    };
-  }, [pathname]);
-
   useEffect(() => {
     controller.update(
-      glyphnavOptions(
-        { charset, duration, effect, commit, scope },
-        (p, r) => {
-          setPath(p);
-          setResolving(r);
-        },
-        // Same-path query navigations (router.push, no pathname change) settle
-        // in onComplete — refresh `extra` so the active check stays exact.
-        () => setExtra(window.location.search + window.location.hash),
-      ),
+      glyphnavOptions({ charset, duration, effect, commit, scope }, (p, r) => {
+        setPath(p);
+        setResolving(r);
+      }),
     );
   }, [controller, charset, duration, effect, commit, scope]);
 
@@ -101,15 +76,20 @@ function Inner({ children }: { children: ReactNode }) {
   }, [controller, backForward]);
 
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers once. Only the menu injects into this component's DOM,
-  // so its detach function is the effect's cleanup.
+  // code-block helpers + the nav's exact-match active pill once. Only the menu
+  // and the nav sync touch this component's DOM, so their detach functions are
+  // the effect's cleanup.
   useEffect(() => {
     initTheme();
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
     initWordmark();
-    return disposeFwMenu;
+    const disposeActiveNav = initActiveNav();
+    return () => {
+      disposeFwMenu();
+      disposeActiveNav();
+    };
   }, []);
 
   // Restore the saved toolbar on the client (after hydration), so the
@@ -159,23 +139,15 @@ function Inner({ children }: { children: ReactNode }) {
           Watch the address bar. Current path: <span className="path">{path}</span>
         </p>
 
-        <nav aria-label="demo pages">
-          <GlyphnavLink href="/" className={isActive('/') ? 'active' : undefined}>
-            Home
-          </GlyphnavLink>
-          <GlyphnavLink href="/about" className={isActive('/about') ? 'active' : undefined}>
-            About
-          </GlyphnavLink>
-          <GlyphnavLink href="/docs" className={isActive('/docs') ? 'active' : undefined}>
-            Docs
-          </GlyphnavLink>
-          <GlyphnavLink href="/blog" className={isActive('/blog') ? 'active' : undefined}>
-            Blog
-          </GlyphnavLink>
+        <nav className="tabs" aria-label="demo pages">
+          <GlyphnavLink href="/">Home</GlyphnavLink>
+          <GlyphnavLink href="/about">About</GlyphnavLink>
+          <GlyphnavLink href="/docs">Docs</GlyphnavLink>
+          <GlyphnavLink href="/blog">Blog</GlyphnavLink>
         </nav>
 
         <nav className="deep" aria-label="deep links">
-          deep links:
+          <span className="deep-label">deep links:</span>
           <GlyphnavLink href="/about?ref=deep&page=2">?query</GlyphnavLink>
           <GlyphnavLink href="/docs#options">#hash</GlyphnavLink>
           <GlyphnavLink href="/about?q=glyph#results">?query+#hash</GlyphnavLink>

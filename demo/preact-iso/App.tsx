@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { Route, Router, useLocation } from 'preact-iso';
+import { Route, Router } from 'preact-iso';
 import { GlyphnavLink, useGlyphnavController } from 'glyphnav/preact-iso';
 import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
 import { highlight } from '../shared/highlight';
@@ -19,6 +19,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../shared/content';
+import { initActiveNav } from '../shared/active-nav';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
@@ -166,22 +167,6 @@ const Fallback = () => (
   <View title="Home" body="Pick a tab above to watch the address bar decode." />
 );
 
-/**
- * A plain `<a>` — the animation comes from `interceptLinks` on the provider, not
- * a component swap. Active only on an exact match (same path, no query/hash), so
- * a deep link like /about?ref=deep never lights up the plain "About" tab.
- */
-function NavItem({ sub, children }: { sub: string; children: string }) {
-  const href = ROOT + sub;
-  const { path } = useLocation();
-  const active = path === href;
-  return (
-    <a href={href} class={active ? 'active' : undefined}>
-      {children}
-    </a>
-  );
-}
-
 export function App() {
   const controller = useGlyphnavController();
   const [saved] = useState(() => loadToolbar(STORE_KEY, DEFAULT_TOOLBAR));
@@ -215,15 +200,20 @@ export function App() {
   }, [charset, duration, effect, commit, scope, backForward]);
 
   // Wire the theme switcher + framework menu + styled control tooltips +
-  // code-block helpers once. Only the menu injects into this component's DOM,
-  // so its detach function is the effect's cleanup.
+  // code-block helpers + the nav's exact-match active pill once. Only the menu
+  // and the nav sync touch this component's DOM, so their detach functions are
+  // the effect's cleanup.
   useEffect(() => {
     initTheme();
     const disposeFwMenu = initFwMenu();
     initTooltips();
     initCodeBlocks();
     initWordmark();
-    return disposeFwMenu;
+    const disposeActiveNav = initActiveNav();
+    return () => {
+      disposeFwMenu();
+      disposeActiveNav();
+    };
   }, []);
 
   return (
@@ -249,15 +239,17 @@ export function App() {
         Watch the address bar. Current path: <span class="path">{path}</span>
       </p>
 
-      <nav aria-label="demo pages">
-        <NavItem sub="">Home</NavItem>
-        <NavItem sub="/about">About</NavItem>
-        <NavItem sub="/posts">Posts</NavItem>
-        <NavItem sub="/docs">Docs</NavItem>
+      {/* Plain anchors — the animation comes from `interceptLinks` on the
+          provider, not a component swap. */}
+      <nav class="tabs" aria-label="demo pages">
+        <a href={ROOT}>Home</a>
+        <a href={`${ROOT}/about`}>About</a>
+        <a href={`${ROOT}/posts`}>Posts</a>
+        <a href={`${ROOT}/docs`}>Docs</a>
       </nav>
 
       <nav class="deep" aria-label="deep links">
-        deep links:
+        <span class="deep-label">deep links:</span>
         <GlyphnavLink href={`${ROOT}/about?ref=deep&page=2`}>?query</GlyphnavLink>
         <GlyphnavLink href={`${ROOT}/docs#options`}>#hash</GlyphnavLink>
         <GlyphnavLink href={`${ROOT}/about?q=glyph#results`}>?query+#hash</GlyphnavLink>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import { useGlyphnav } from 'glyphnav/vue-router';
 import {
   CONTROL_TOOLTIPS,
@@ -15,6 +14,7 @@ import {
   SPEED_SLIDER,
   TOOLBAR_SELECTS,
 } from '../shared/content';
+import { initActiveNav } from '../shared/active-nav';
 import { initCodeBlocks } from '../shared/code-blocks';
 import { initFwMenu } from '../shared/fw-menu';
 import { initTheme } from '../shared/theme';
@@ -23,12 +23,6 @@ import { initWordmark } from '../shared/wordmark';
 import logo from '../shared/logo.svg';
 
 const controller = useGlyphnav();
-
-// A tab is active only on an exact match (full path incl. query/hash), instead
-// of <router-link>'s built-in active class which ignores the query — so a deep
-// link like /about?ref=deep never lights up the plain "About" tab.
-const route = useRoute();
-const isActive = (to: string): boolean => route.fullPath === to;
 
 // '/' in dev, '/glyphnav/' on the deployed project page.
 const base = import.meta.env.BASE_URL;
@@ -90,18 +84,23 @@ watch(backForward, (on) => {
   persist();
 });
 
-// Wire the theme switcher, framework menu, styled control tooltips and
-// code-block helpers once. Only the menu injects into this component's DOM,
-// so it's the only one with something to unhook.
+// Wire the theme switcher, framework menu, styled control tooltips, code-block
+// helpers and the nav's exact-match active pill once. The menu and the nav
+// sync are the two with something to unhook.
 let disposeFwMenu: (() => void) | undefined;
+let disposeActiveNav: (() => void) | undefined;
 onMounted(() => {
   initTheme();
   disposeFwMenu = initFwMenu();
   initTooltips();
   initCodeBlocks();
   initWordmark();
+  disposeActiveNav = initActiveNav();
 });
-onUnmounted(() => disposeFwMenu?.());
+onUnmounted(() => {
+  disposeFwMenu?.();
+  disposeActiveNav?.();
+});
 </script>
 
 <template>
@@ -123,15 +122,15 @@ onUnmounted(() => disposeFwMenu?.());
     Watch the address bar. Current path: <span class="path">{{ displayPath }}</span>
   </p>
 
-  <nav aria-label="demo pages">
-    <router-link to="/" :class="{ active: isActive('/') }">Home</router-link>
-    <router-link to="/about" :class="{ active: isActive('/about') }">About</router-link>
-    <router-link to="/features" :class="{ active: isActive('/features') }">Features</router-link>
-    <router-link to="/docs" :class="{ active: isActive('/docs') }">Docs</router-link>
+  <nav class="tabs" aria-label="demo pages">
+    <router-link to="/">Home</router-link>
+    <router-link to="/about">About</router-link>
+    <router-link to="/features">Features</router-link>
+    <router-link to="/docs">Docs</router-link>
   </nav>
 
   <nav class="deep" aria-label="deep links">
-    deep links:
+    <span class="deep-label">deep links:</span>
     <router-link to="/about?ref=deep&page=2">?query</router-link>
     <router-link to="/docs#options">#hash</router-link>
     <router-link to="/about?q=glyph#results">?query+#hash</router-link>
