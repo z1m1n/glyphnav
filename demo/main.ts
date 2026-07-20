@@ -14,7 +14,6 @@ import { highlight } from './shared/highlight';
 import { initTheme } from './shared/theme';
 import { initWordmark } from './shared/wordmark';
 
-
 initTheme();
 initWordmark();
 initCardScramble();
