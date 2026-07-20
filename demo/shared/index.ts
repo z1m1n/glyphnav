@@ -26,6 +26,7 @@ export {
   TOOLBAR_SELECTS,
 } from './content';
 export type { SelectOption, ToolbarState } from './content';
+export { initCardScramble } from './card-scramble';
 export { DEMOS } from './demos';
 export type { DemoEntry } from './demos';
 export { initActiveNav, syncActiveNav } from './active-nav';
