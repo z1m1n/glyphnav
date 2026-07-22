@@ -14,9 +14,9 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "next": "16.2.10",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@types/node": "26.1.1",
@@ -24,5 +24,5 @@
     "@types/react-dom": "19.2.3",
     "typescript": "6.0.3"
   },
-  "//typescript": "next build's type-check step needs the JS Compiler API that the Go-native typescript@7 no longer ships (Next then thinks TypeScript is missing); stays 6.x until Next supports TS7. Checked 2026-07: experimental.useTypeScriptCli backend in vercel/next.js#95639, not yet released"
+  "//typescript": "next build's type-check step needs the JS Compiler API that the Go-native typescript@7 no longer ships (Next then thinks TypeScript is missing); stays 6.x until Next supports TS7. Checked 2026-07-22 on next 16.2.11: still blocked — `next build` type-check phase reports TypeScript 'not installed' with typescript@7 and crashes (auto-install then `id must be of type string`). 16.2.11 only added @typescript/native-preview detection (warns build type-checking needs the standard typescript package); no useTypeScriptCli release yet (vercel/next.js#95639)"
 }

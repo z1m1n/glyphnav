@@ -16,12 +16,12 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "3.0.10",
-    "@sveltejs/kit": "2.69.3",
+    "@sveltejs/kit": "2.70.1",
     "@sveltejs/vite-plugin-svelte": "7.2.0",
-    "svelte": "5.56.5",
+    "svelte": "5.56.7",
     "svelte-check": "4.7.3",
     "typescript": "6.0.3",
     "vite": "8.1.5"
   },
-  "//typescript": "svelte-check (the only tsc consumer here) needs the JS Compiler API that the Go-native typescript@7 no longer ships; stays 6.x until svelte-check supports TS7. Checked 2026-07: svelte-check 4.7 added experimental --tsgo/--tsgo-experimental-api (verified working here) but they resolve only the @typescript/native-preview nightly, not the typescript@7 GA package, and kit's typescript peer still caps at ^6"
+  "//typescript": "svelte-check (the only tsc consumer here) needs the JS Compiler API that the Go-native typescript@7 no longer ships; stays 6.x until svelte-check supports TS7. Checked 2026-07-22: svelte-check still 4.7.3, empirically fails on typescript@7 (`typescript.sys` undefined -> can't read useCaseSensitiveFileNames). @sveltejs/kit 2.70.1's typescript peer still caps at ^5.3.3||^6.0.0. svelte-check 4.7's experimental --tsgo/--tsgo-experimental-api resolve only the @typescript/native-preview nightly, not the typescript@7 GA package"
 }

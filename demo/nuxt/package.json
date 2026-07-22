@@ -13,11 +13,11 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "nuxt": "4.4.8"
+    "nuxt": "4.5.0"
   },
   "devDependencies": {
     "typescript": "6.0.3",
-    "vue-tsc": "3.3.7"
+    "vue-tsc": "3.3.8"
   },
-  "//typescript": "vue-tsc (the only tsc consumer here) needs the JS Compiler API that the Go-native typescript@7 no longer ships; stays 6.x until vue-tsc supports TS7. Checked 2026-07: vuejs/language-tools#5381 still open, blocked on the TS 7.1 JS API"
+  "//typescript": "vue-tsc (the only tsc consumer here) needs the JS Compiler API that the Go-native typescript@7 no longer ships; stays 6.x until vue-tsc supports TS7. Checked 2026-07-22 on vue-tsc 3.3.8: still blocked — resolveTscPath requires `typescript/lib/tsc`, which TS7 does not export (ERR_PACKAGE_PATH_NOT_EXPORTED). vuejs/language-tools#5381 still open, blocked on the TS 7.1 JS API"
 }
