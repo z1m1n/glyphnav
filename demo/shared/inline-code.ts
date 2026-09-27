@@ -53,6 +53,10 @@ function isInlineCode(node: Node): boolean {
   return !!code && !code.closest('pre');
 }
 
+function run(): void {
+  if (document.body) enhance();
+}
+
 let initialized = false;
 
 /**
@@ -65,9 +69,6 @@ export function initInlineCode(): void {
   if (initialized || typeof document === 'undefined') return;
   initialized = true;
 
-  const run = (): void => {
-    if (document.body) enhance();
-  };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run, { once: true });
   } else {

@@ -55,10 +55,12 @@ function Inner({ children }: { children: ReactNode }) {
   // controller's onComplete), so this — not onComplete — is the authority for
   // the resting readout. Also covers the client-only initial value (the server
   // has no location), avoiding a hydration mismatch.
+  /* oxlint-disable react/set-state-in-effect, react/exhaustive-effect-dependencies -- Synchronize the external browser URL after hydration and Next navigation. */
   useEffect(() => {
     setPath(currentUrl());
     setResolving(false);
   }, [pathname]);
+  /* oxlint-enable react/set-state-in-effect, react/exhaustive-effect-dependencies */
 
   useEffect(() => {
     controller.update(
@@ -94,6 +96,7 @@ function Inner({ children }: { children: ReactNode }) {
 
   // Restore the saved toolbar on the client (after hydration), so the
   // statically prerendered markup — which has no localStorage — never mismatches.
+  /* oxlint-disable react/set-state-in-effect -- Restore external localStorage values after hydration to match the prerendered markup. */
   useEffect(() => {
     const s = loadToolbar(STORE_KEY, { ...DEFAULT_TOOLBAR, commit: 'after' as CommitTiming });
     setCharset(s.charset);
@@ -103,6 +106,7 @@ function Inner({ children }: { children: ReactNode }) {
     setScope(s.scope);
     setBackForward(s.backForward);
   }, []);
+  /* oxlint-enable react/set-state-in-effect */
 
   // Persist on change, under this page's own key. Skip the initial mount so the
   // restore above wins instead of writing the defaults back over it.

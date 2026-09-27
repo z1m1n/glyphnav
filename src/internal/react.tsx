@@ -4,7 +4,7 @@
  * directly so the controller-lifecycle and link-click boilerplate is written
  * once instead of being re-implemented per adapter.
  */
-import { createContext, createElement, useContext, useEffect, useRef } from 'react';
+import { createContext, createElement, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions } from '../core';
@@ -73,11 +73,10 @@ export const createControllerContext = (): ReactControllerContext => {
  * @returns The stable provider controller.
  */
 export const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
-  const ref = useRef<GlyphnavController | null>(null);
-  if (ref.current) ref.current.update(options);
-  else ref.current = new GlyphnavController(options);
+  const [controller] = useState(() => new GlyphnavController(options));
+  controller.update(options);
 
-  return ref.current;
+  return controller;
 };
 
 /**
@@ -93,10 +92,14 @@ export const useFallbackController = (
   enabled: boolean,
   options?: GlyphnavOptions,
 ): GlyphnavController | null => {
-  const ref = useRef<GlyphnavController | null>(null);
-  if (enabled && !ref.current) ref.current = new GlyphnavController(options);
+  const [controller, setController] = useState<GlyphnavController | null>(null);
+  if (enabled && controller === null) {
+    const fallback = new GlyphnavController(options);
+    setController(fallback);
+    return fallback;
+  }
 
-  return ref.current;
+  return controller;
 };
 
 /**

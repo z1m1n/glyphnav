@@ -206,6 +206,10 @@ function enhance(): void {
   }
 }
 
+function run(): void {
+  if (document.body) enhance();
+}
+
 let initialized = false;
 
 /**
@@ -223,9 +227,6 @@ export function initCodeBlocks(): void {
   // chips highlighted, without a second call site per demo.
   initInlineCode();
 
-  const run = (): void => {
-    if (document.body) enhance();
-  };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run, { once: true });
   } else {

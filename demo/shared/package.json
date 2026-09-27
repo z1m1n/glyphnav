@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "glyphnav": "workspace:*",
-    "sugar-high": "1.2.1"
+    "sugar-high": "1.3.0"
   }
 }
