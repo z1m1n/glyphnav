@@ -19,7 +19,7 @@
  */
 import { createContext, createElement } from 'preact';
 import type { ComponentChildren, JSX } from 'preact';
-import { useCallback, useContext, useEffect, useRef } from 'preact/hooks';
+import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
@@ -39,11 +39,10 @@ const GlyphnavContext = createContext<GlyphnavController | null>(null);
  * without tearing down the controller.
  */
 const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
-  const ref = useRef<GlyphnavController | null>(null);
-  if (ref.current) ref.current.update(options);
-  else ref.current = new GlyphnavController(options);
+  const [controller] = useState(() => new GlyphnavController(options));
+  controller.update(options);
 
-  return ref.current;
+  return controller;
 };
 
 /**
@@ -55,10 +54,14 @@ const useFallbackController = (
   enabled: boolean,
   options?: GlyphnavOptions,
 ): GlyphnavController | null => {
-  const ref = useRef<GlyphnavController | null>(null);
-  if (enabled && !ref.current) ref.current = new GlyphnavController(options);
+  const [controller, setController] = useState<GlyphnavController | null>(null);
+  if (enabled && controller === null) {
+    const fallback = new GlyphnavController(options);
+    setController(fallback);
+    return fallback;
+  }
 
-  return ref.current;
+  return controller;
 };
 
 /**

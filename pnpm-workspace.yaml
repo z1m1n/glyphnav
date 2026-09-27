@@ -37,3 +37,7 @@ minimumReleaseAgeExclude:
   - preact-iso
   - react-router
   - vue-tsc
+
+# SvelteKit still requests cookie ^0.6.0; 0.7.2 fixes GHSA-pxg6-pf52-xh8x.
+overrides:
+  '@sveltejs/kit>cookie': '0.7.2'

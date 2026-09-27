@@ -14,15 +14,15 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "next": "16.2.11",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@types/node": "26.1.1",
-    "@types/react": "19.2.17",
-    "@types/react-dom": "19.2.3",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "typescript": "6.0.3"
   },
-  "//typescript": "next build's type-check step needs the JS Compiler API that the Go-native typescript@7 no longer ships (Next then thinks TypeScript is missing); stays 6.x until Next supports TS7. Checked 2026-07-22 on next 16.2.11: still blocked — `next build` type-check phase reports TypeScript 'not installed' with typescript@7 and crashes (auto-install then `id must be of type string`). 16.2.11 only added @typescript/native-preview detection (warns build type-checking needs the standard typescript package); no useTypeScriptCli release yet (vercel/next.js#95639)"
+  "//typescript": "Checked 2026-09-27: Next 16.3.6 supports TypeScript 7 via experimental.useTypeScriptCli (enabled by default). A reversible build probe with typescript 7.0.2 passed, including static export. The demo keeps TypeScript 6.0.3; a separate TS7 migration can now use the supported CLI path."
 }

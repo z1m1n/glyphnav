@@ -625,7 +625,7 @@ The demos alias `glyphnav` to `src/`, so editing the library updates them live.
 
 ## Development
 
-The repo is a [pnpm](https://pnpm.io) **11.5** workspace: the library is the root
+The repo is a [pnpm](https://pnpm.io) **12.6** workspace: the library is the root
 package, with the Next.js, Nuxt and SvelteKit demos as members under `demo/` (the other demos
 are plain files in the root package).
 
