@@ -4,12 +4,13 @@ import {
   Outlet,
   RouterProvider,
   createMemoryHistory,
+  createBrowserHistory,
   createRootRoute,
   createRoute,
   createRouter,
   useRouterState,
 } from '@tanstack/react-router';
-import { GlyphnavLink, useGlyphnavNavigate } from '../src/tanstack-router/react';
+import { GlyphnavLink, GlyphnavProvider, useGlyphnavNavigate } from '../src/tanstack-router/react';
 
 const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
 
@@ -118,5 +119,79 @@ describe('tanstack react router adapter', () => {
     });
 
     expect(screen.getByTestId('loc').textContent).toBe('/');
+  });
+
+  it.each([{ target: '_blank' }, { download: '' }, { rel: 'external' }])(
+    'leaves browser-owned link behavior intact: %j',
+    async (props) => {
+      const click = vi.fn();
+      const testRoot = createRootRoute({
+        component: () => (
+          <>
+            <GlyphnavLink to="/other" {...props} onClick={click}>
+              link
+            </GlyphnavLink>
+            <LocationLabel />
+            <Outlet />
+          </>
+        ),
+      });
+      const testTree = testRoot.addChildren([
+        createRoute({ getParentRoute: () => testRoot, path: '/' }),
+        createRoute({ getParentRoute: () => testRoot, path: '/other' }),
+      ]);
+      const router = createRouter({
+        routeTree: testTree,
+        history: createMemoryHistory({ initialEntries: ['/'] }),
+      });
+      render(<RouterProvider router={router} />);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(50);
+      });
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      fireEvent(screen.getByText('link'), event);
+      expect(event.defaultPrevented).toBe(false);
+      expect(click).toHaveBeenCalledOnce();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+      expect(screen.getByTestId('loc').textContent).toBe('/');
+    },
+  );
+
+  it('applies per-link options under a provider and actually writes animation frames', async () => {
+    window.history.replaceState(null, '', '/');
+    const frames: string[] = [];
+    const testRoot = createRootRoute({
+      component: () => (
+        <GlyphnavProvider {...fast} commit="after">
+          <GlyphnavLink
+            to="/other"
+            glyphOptions={{ hooks: { onFrame: (frame) => frames.push(frame.path) } }}
+          >
+            link
+          </GlyphnavLink>
+          <LocationLabel />
+          <Outlet />
+        </GlyphnavProvider>
+      ),
+    });
+    const testTree = testRoot.addChildren([
+      createRoute({ getParentRoute: () => testRoot, path: '/' }),
+      createRoute({ getParentRoute: () => testRoot, path: '/other' }),
+    ]);
+    const router = createRouter({ routeTree: testTree, history: createBrowserHistory() });
+    render(<RouterProvider router={router} />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(50);
+    });
+    fireEvent.click(screen.getByText('link'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    expect(frames.length).toBeGreaterThan(1);
+    expect(frames.at(-1)).toBe('/other');
+    expect(window.location.pathname).toBe('/other');
+    expect(screen.getByTestId('loc').textContent).toBe('/other');
   });
 });

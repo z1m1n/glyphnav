@@ -1,0 +1,41 @@
+name: Pull request quality
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run quality
+      - run: pnpm run test:browser:next:built
+      - run: pnpm run typecheck:nuxt
+      - run: pnpm run typecheck:sveltekit
+      - name: Build all demos under a deployment prefix
+        env:
+          DEMO_BASE: /glyphnav/
+        run: pnpm run demo:build
+      - name: Save failed browser traces
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: browser-test-results
+          path: test-results
+          if-no-files-found: ignore

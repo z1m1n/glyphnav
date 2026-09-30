@@ -2,7 +2,7 @@
   import '@glyphnav-demo/shared/styles.css';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { resolve } from '$app/paths';
+  import { base, resolve } from '$app/paths';
   import { attachGlyphnav } from 'glyphnav/sveltekit';
   import type { SvelteKitGlyphnavInstance } from 'glyphnav/sveltekit';
   import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -33,10 +33,9 @@
   const stack = GLYPHNAV_STACK;
   const stackTip = GLYPHNAV_STACK_TIP;
 
-  // `resolve` prefixes the configured `paths.base` (the non-deprecated successor
-  // to the `base` string). The picker lives one level up from this app's base
-  // (`…/sveltekit/` → `…/`).
-  const rootHref = resolve('/').replace(/sveltekit\/?$/, '');
+  // Derive links outside this app from the absolute configured base. resolve()
+  // can emit relative paths during prerender, which cannot identify the parent.
+  const rootHref = base.replace(/\/sveltekit$/, '') + '/';
 
   // Base-prefixed nav targets, resolved once.
   const homeHref = resolve('/');

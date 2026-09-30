@@ -2,7 +2,7 @@
  * Adapter for Preact with `preact-iso` — Preact's official isomorphic router.
  *
  *  - `<GlyphnavProvider>` shares a single controller across the tree (optional).
- *  - `useGlyphnavRoute()` mirrors `useLocation().route()` but animates first.
+ *  - `useGlyphnavRoute()` mirrors `useLocation().route()` with address-bar animation.
  *  - `<GlyphnavLink>` is a drop-in for `<a>` that animates on click.
  *  - `useGlyphnavLinks()` (or `<GlyphnavProvider interceptLinks>`) animates the
  *    plain `<a>` clicks `preact-iso` already handles, without swapping them out.
@@ -23,7 +23,7 @@ import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
-import { eligibleAnchor, isModifiedClick } from '../internal/links';
+import { eligibleAnchor, reportNavigationError } from '../internal/links';
 
 /** `preact-iso`'s imperative navigate, from `useLocation().route`. */
 type RouteFn = (url: string, replace?: boolean) => void;
@@ -41,6 +41,7 @@ const GlyphnavContext = createContext<GlyphnavController | null>(null);
 const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
   const [controller] = useState(() => new GlyphnavController(options));
   controller.update(options);
+  useEffect(() => () => controller.destroy(), [controller]);
 
   return controller;
 };
@@ -65,8 +66,8 @@ const useFallbackController = (
 };
 
 /**
- * Intercept same-origin `<a>` clicks and play the animation before handing the
- * navigation to `preact-iso`. The listener sits on `document` (bubble), so it
+ * Intercept same-origin `<a>` clicks and animate around the navigation to
+ * `preact-iso`. The listener sits on `document` (bubble), so it
  * runs before `preact-iso`'s own `window` listener; `stopPropagation` then keeps
  * that handler from navigating a second time. A no-op outside the browser.
  *
@@ -74,18 +75,34 @@ const useFallbackController = (
  * @param route - `preact-iso`'s `route()` that performs the real navigation.
  * @returns A cleanup that detaches the click listener.
  */
-const attachLinkInterceptor = (controller: GlyphnavController, route: RouteFn): (() => void) => {
+const attachLinkInterceptor = (
+  controller: GlyphnavController,
+  route: RouteFn,
+  options?: GlyphnavOptions,
+): (() => void) => {
   if (typeof document === 'undefined') return () => {};
 
   const handler = (event: Event): void => {
     const anchor = eligibleAnchor(event as MouseEvent);
-    if (!anchor) return;
+    if (!anchor) {
+      const target = event.target as Node | null;
+      const element = target?.nodeType === 1 ? (target as Element) : target?.parentElement;
+      const nativeAnchor = element?.closest('a') as HTMLAnchorElement | null;
+      // preact-iso ignores defaultPrevented and some browser-owned link
+      // attributes. Keep those clicks away from its window listener while
+      // preserving the browser default. Opted-out internal links remain native
+      // preact-iso navigations.
+      if (nativeAnchor && !eligibleAnchor(event as MouseEvent, nativeAnchor, false)) {
+        event.stopPropagation();
+      }
+      return;
+    }
 
     const url = new URL(anchor.href, window.location.href);
     const to = url.pathname + url.search + url.hash;
     event.preventDefault();
     event.stopPropagation();
-    void controller.run(to, () => route(to));
+    void controller.run(to, () => route(to), options).catch(reportNavigationError);
   };
 
   document.addEventListener('click', handler);
@@ -150,8 +167,8 @@ export const useGlyphnavController = (options?: GlyphnavOptions): GlyphnavContro
 };
 
 /**
- * A `useLocation().route` replacement that plays the glyph animation before
- * navigating.
+ * A `useLocation().route` replacement that navigates and animates according to
+ * the configured commit timing.
  *
  * @param options - Base animation options for navigations made through the
  * returned function.
@@ -167,8 +184,8 @@ export const useGlyphnavRoute = (options?: GlyphnavOptions): GlyphnavRouteFn => 
   const { route } = useLocation();
 
   return useCallback<GlyphnavRouteFn>(
-    (url, replace) => controller.run(url, () => route(url, replace)),
-    [controller, route],
+    (url, replace) => controller.run(url, () => route(url, replace), options),
+    [controller, route, options],
   );
 };
 
@@ -183,7 +200,7 @@ export const useGlyphnavLinks = (options?: GlyphnavOptions): void => {
   const controller = useGlyphnavController(options);
   const { route } = useLocation();
 
-  useEffect(() => attachLinkInterceptor(controller, route), [controller, route]);
+  useEffect(() => attachLinkInterceptor(controller, route, options), [controller, route, options]);
 };
 
 export interface GlyphnavLinkProps extends Omit<JSX.HTMLAttributes<HTMLAnchorElement>, 'href'> {
@@ -217,13 +234,18 @@ export const GlyphnavLink = ({
   const handleClick = useCallback(
     (event: JSX.TargetedMouseEvent<HTMLAnchorElement>): void => {
       onClick?.(event);
-      if (isModifiedClick(event)) return; // let the browser handle modified clicks
+      if (!eligibleAnchor(event, event.currentTarget)) {
+        if (!eligibleAnchor(event, event.currentTarget, false)) event.stopPropagation();
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();
-      void controller.run(href, () => route(href, replace));
+      void controller
+        .run(href, () => route(href, replace), glyphOptions)
+        .catch(reportNavigationError);
     },
-    [onClick, controller, route, href, replace],
+    [onClick, controller, route, href, replace, glyphOptions],
   );
 
   return createElement('a', { href, onClick: handleClick, ...rest });

@@ -15,7 +15,7 @@ export const MIN_FRAME_MS = 15;
 const frameBudget = (duration: number | null, maxFrames: number): number => {
   if (duration == null) return maxFrames;
 
-  return Math.max(2, Math.min(maxFrames, Math.floor(duration / MIN_FRAME_MS)));
+  return Math.min(maxFrames, Math.max(2, Math.floor(duration / MIN_FRAME_MS)));
 };
 
 /**

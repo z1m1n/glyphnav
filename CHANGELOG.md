@@ -5,6 +5,33 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Navigation cancellation, superseding runs and throwing hooks now settle their
+  promises and restore the address bar; animate-first navigation keeps the
+  previous path and back/forward animation state current.
+- Router links preserve browser targets, downloads, external and cancelled
+  clicks, per-link options and Next object-form query/navigation options.
+- Asynchronous router navigation is awaited, failures propagate, and pending
+  URL settlement is cancellable. Nuxt hash navigation preserves deployment bases.
+- Animation scheduling coalesces overdue frames, honors `maxFrames: 1`, and
+  avoids duplicate history writes.
+- Published declarations resolve in NodeNext ESM and CommonJS consumers, with
+  separate declaration formats and explicit import extensions.
+- Next demo development builds/watches the library from a fresh checkout.
+  Nuxt and SvelteKit static builds fail on unexpected prerender errors, and
+  SvelteKit links to the surrounding demo use the correct deployment prefix.
+
+### Added
+
+- Packaged consumer checks, Chromium address-bar integration regressions and a
+  pull-request CI quality gate; coverage includes adapter implementation files.
+- Explicit controller destruction and provider/application cleanup, while
+  fallback navigations can finish after the source component unmounts.
+- Release tag/version validation before npm publishing.
+
 ## [2.3.1] - 2026-07-01
 
 ### Added

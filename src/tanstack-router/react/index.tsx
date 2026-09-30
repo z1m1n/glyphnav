@@ -2,7 +2,7 @@
  * Adapter for TanStack Router (`@tanstack/react-router`).
  *
  *  - `<GlyphnavProvider>` shares a single controller across the tree (optional).
- *  - `useGlyphnavNavigate()` mirrors `useNavigate()` but animates first.
+ *  - `useGlyphnavNavigate()` mirrors `useNavigate()` with address-bar animation.
  *  - `<GlyphnavLink>` renders an `<a>` that animates on click.
  *
  * Nothing is patched globally: only navigations made through these entry
@@ -39,12 +39,12 @@ export const GlyphnavProvider = context.GlyphnavProvider;
 export const useGlyphnavController = context.useGlyphnavController;
 
 /**
- * A `useNavigate()` replacement that plays the glyph animation before handing
- * the navigation to TanStack Router.
+ * A `useNavigate()` replacement that follows the configured commit timing:
+ * navigation happens first by default, followed by the glyph animation.
  *
  * @param options - Base animation options for navigations made through the
  * returned function.
- * @returns An imperative navigate function that animates, then navigates.
+ * @returns An imperative navigate function with address-bar animation.
  */
 export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigateFn => {
   const router = useRouter();
@@ -55,9 +55,9 @@ export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigate
       // `buildLocation` yields the basepath-aware href that will really end up
       // in the address bar.
       const target = router.buildLocation(opts).href;
-      return controller.run(target, () => router.navigate(opts) as Promise<void>);
+      return controller.run(target, () => router.navigate(opts) as Promise<void>, options);
     },
-    [router, controller],
+    [router, controller, options],
   );
 };
 
@@ -70,8 +70,8 @@ export interface GlyphnavLinkProps
 }
 
 /**
- * An anchor that animates, then navigates via TanStack Router. Modified clicks
- * (new tab, etc.) fall through to the browser as usual. For fully type-safe
+ * An anchor that navigates and animates using the configured commit timing.
+ * Modified clicks fall through to the browser as usual. For fully type-safe
  * links wrap {@link useGlyphnavNavigate} in your own component instead.
  */
 export const GlyphnavLink = ({
@@ -102,8 +102,9 @@ export const GlyphnavLink = ({
         controller,
         href,
         () => router.navigate(navOpts) as Promise<void>,
+        glyphOptions,
       ),
-    [onClick, controller, router, href, navOpts],
+    [onClick, controller, router, href, navOpts, glyphOptions],
   );
 
   return createElement('a', { href, onClick: handleClick, ...rest }, children);

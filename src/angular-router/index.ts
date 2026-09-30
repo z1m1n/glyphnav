@@ -12,7 +12,7 @@
  * animate.
  */
 import { Location } from '@angular/common';
-import { InjectionToken } from '@angular/core';
+import { DestroyRef, InjectionToken } from '@angular/core';
 import type { Provider } from '@angular/core';
 import { Router } from '@angular/router';
 import type { NavigationExtras, UrlTree } from '@angular/router';
@@ -31,7 +31,7 @@ export interface AngularGlyphnavOptions extends GlyphnavOptions {
   animatePopState?: boolean;
 }
 
-/** An Angular-aware navigator that animates before delegating to the Router. */
+/** An Angular-aware navigator that animates around navigation to the Router. */
 export interface GlyphnavNavigator {
   /** The underlying controller (e.g. for `cancel()` / `update()`). */
   readonly controller: GlyphnavController;
@@ -39,6 +39,8 @@ export interface GlyphnavNavigator {
   navigateByUrl: (url: string | UrlTree, extras?: NavigationExtras) => Promise<RunResult>;
   /** Like `Router.navigate`, but animated. */
   navigate: (commands: unknown[], extras?: NavigationExtras) => Promise<RunResult>;
+  /** Stop history animation and cancel the current navigation animation. */
+  detach: () => void;
 }
 
 /**
@@ -50,7 +52,7 @@ export interface GlyphnavNavigator {
  * really lands in the address bar — {@link provideGlyphnav} wires it to
  * `Location.prepareExternalUrl` so apps served under a base href animate the
  * full path. Defaults to identity.
- * @returns A navigator whose `navigate`/`navigateByUrl` animate first.
+ * @returns A navigator whose `navigate`/`navigateByUrl` follow the configured commit timing.
  */
 export const createGlyphnavNavigator = (
   router: Router,
@@ -58,10 +60,16 @@ export const createGlyphnavNavigator = (
   prepareUrl: (routerUrl: string) => string = (url) => url,
 ): GlyphnavNavigator => {
   const controller = new GlyphnavController(options);
-  if (options.animatePopState) controller.enableHistoryAnimation();
+  const stopPopState = options.animatePopState
+    ? controller.enableHistoryAnimation()
+    : (): void => {};
 
   return {
     controller,
+    detach() {
+      stopPopState();
+      controller.cancel();
+    },
     navigateByUrl(url, extras) {
       const target = typeof url === 'string' ? url : router.serializeUrl(url);
       return controller.run(
@@ -102,9 +110,14 @@ export const provideGlyphnav = (options: AngularGlyphnavOptions = {}): Provider[
   return [
     {
       provide: GLYPHNAV,
-      useFactory: (router: Router, location: Location) =>
-        createGlyphnavNavigator(router, options, (url) => location.prepareExternalUrl(url)),
-      deps: [Router, Location],
+      useFactory: (router: Router, location: Location, destroyRef: DestroyRef) => {
+        const navigator = createGlyphnavNavigator(router, options, (url) =>
+          location.prepareExternalUrl(url),
+        );
+        destroyRef.onDestroy(navigator.detach);
+        return navigator;
+      },
+      deps: [Router, Location, DestroyRef],
     },
   ];
 };

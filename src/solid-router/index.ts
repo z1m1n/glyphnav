@@ -14,10 +14,10 @@
  * router's handler bail). Only navigations made through these entry points
  * animate.
  */
-import { createComponent, mergeProps, splitProps } from 'solid-js';
+import { createComponent, createSignal, mergeProps, splitProps } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { useHref, useNavigate, useResolvedPath } from '@solidjs/router';
+import { useHref, useLocation, useNavigate, useResolvedPath } from '@solidjs/router';
 import type { NavigateOptions } from '@solidjs/router';
 import type { GlyphnavOptions, RunResult } from '../core';
 import { settleAfter } from '../internal/links';
@@ -40,6 +40,17 @@ export type GlyphnavNavigateFn = (
 const SETTLE_TIMEOUT_MS = 1000;
 
 const context = createSolidControllerContext();
+
+/** `resolve: false` roots paths; query-only calls retain the live router pathname. */
+const unresolvedPath = (to: string, pathname: string): string | undefined => {
+  if (/^(?:[a-z0-9]+:)?\/\//i.test(to)) return undefined;
+  const normalized = to.replace(/^\/+|(\/)\/+$/g, '$1');
+  if (!to || to.startsWith('?')) {
+    const current = pathname.replace(/^\/+|(\/)\/+$/g, '$1');
+    return '/' + current + normalized;
+  }
+  return '/' + normalized;
+};
 
 /**
  * Provide a shared controller (and base options) to the subtree. Optional —
@@ -68,6 +79,13 @@ export const useGlyphnavController = context.useGlyphnavController;
 export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigateFn {
   const navigate = useNavigate();
   const controller = useGlyphnavController(options);
+  const location = useLocation();
+  const [destination, setDestination] = createSignal({ to: '', resolve: true });
+  const resolved = useResolvedPath(() => destination().to);
+  const href = useHref(() => {
+    const request = destination();
+    return request.resolve ? resolved() : unresolvedPath(request.to, location.pathname);
+  });
 
   return (to, navOptions) => {
     if (typeof to === 'number') {
@@ -75,7 +93,17 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
       return Promise.resolve<RunResult>('skipped');
     }
 
-    return controller.run(to, () => settleAfter(() => navigate(to, navOptions), SETTLE_TIMEOUT_MS));
+    const queryOnly = !to || to.startsWith('?');
+    const resolve = navOptions && 'resolve' in navOptions ? !!navOptions.resolve : !queryOnly;
+    setDestination({ to, resolve });
+    // Read the router's route-relative/base-aware destination before animation
+    // rewrites the bar. useHref also handles HashRouter's fragment URLs.
+    const target = href() ?? to;
+    return controller.run(
+      target,
+      (signal) => settleAfter(() => navigate(to, navOptions), SETTLE_TIMEOUT_MS, signal),
+      options,
+    );
   };
 }
 
@@ -118,19 +146,26 @@ export function GlyphnavLink(props: GlyphnavLinkProps): JSX.Element {
   const href = (): string => rendered() ?? local.href;
 
   const handleClick: JSX.EventHandler<HTMLAnchorElement, MouseEvent> = (event) =>
-    runSolidLinkClick(event, local.onClick, controller, href(), () =>
-      // Navigate the already-resolved (base-less) path with `resolve: false`,
-      // exactly as Solid Router's own anchor handler does.
-      settleAfter(
-        () =>
-          navigate(resolved() ?? local.href, {
-            resolve: false,
-            replace: local.replace,
-            scroll: local.scroll,
-            state: local.state,
-          }),
-        SETTLE_TIMEOUT_MS,
-      ),
+    runSolidLinkClick(
+      event,
+      local.onClick,
+      controller,
+      href(),
+      (signal) =>
+        // Navigate the already-resolved (base-less) path with `resolve: false`,
+        // exactly as Solid Router's own anchor handler does.
+        settleAfter(
+          () =>
+            navigate(resolved() ?? local.href, {
+              resolve: false,
+              replace: local.replace,
+              scroll: local.scroll,
+              state: local.state,
+            }),
+          SETTLE_TIMEOUT_MS,
+          signal,
+        ),
+      local.glyphOptions,
     );
 
   return createComponent(

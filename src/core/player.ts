@@ -35,7 +35,9 @@ export const defaultScheduler: Scheduler = {
       : Date.now(),
   requestFrame: (callback) =>
     hasRaf
-      ? requestAnimationFrame(callback)
+      ? // Use our own clock for both timestamps. Environments that expose a
+        // window's RAF alongside another performance object need this too.
+        requestAnimationFrame(() => callback(defaultScheduler.now()))
       : setTimeout(() => callback(defaultScheduler.now()), 16),
   cancelFrame: (handle) =>
     hasRaf
@@ -53,14 +55,15 @@ export interface Player {
   /** True while a run is in flight. */
   readonly running: boolean;
   /**
-   * Fire `tick(0..count-1)` in order, scheduling each for `index * stepDuration`
-   * ms after the run starts (the first fires on the next animation frame).
+   * Schedule `tick(0..count-1)` for `index * stepDuration` ms after the run
+   * starts (the first fires on the next animation frame).
    * Timing is keyed off the run's start, not the previous tick, so the run never
-   * drifts slow and a stalled or backgrounded frame simply catches up.
+   * drifts slow. Each repaint renders only the latest due tick, coalescing
+   * states missed during a stall while always preserving the final tick.
    *
    * @param count - Number of ticks to fire.
    * @param stepDuration - Target milliseconds between ticks.
-   * @param tick - Called with the zero-based index of each tick.
+   * @param tick - Called with the zero-based index of each rendered tick.
    * @returns `'completed'` after the last tick, or `'cancelled'` if interrupted.
    */
   play(count: number, stepDuration: number, tick: (index: number) => void): Promise<PlayResult>;
@@ -76,66 +79,79 @@ export interface Player {
  * @returns A player that runs one timed sequence of ticks at a time.
  */
 export const createPlayer = (scheduler: Scheduler = defaultScheduler): Player => {
-  let frame: unknown = null;
-  let running = false;
-  let settle: ((result: PlayResult) => void) | null = null;
+  interface Playback {
+    frame: unknown;
+    resolve: (result: PlayResult) => void;
+    reject: (error: unknown) => void;
+  }
+  let active: Playback | null = null;
 
-  const finish = (result: PlayResult): void => {
-    running = false;
-    if (frame != null) {
-      scheduler.cancelFrame(frame);
-      frame = null;
-    }
+  const finish = (run: Playback, result: PlayResult): void => {
+    if (active !== run) return;
+    active = null;
+    if (run.frame != null) scheduler.cancelFrame(run.frame);
+    run.resolve(result);
+  };
 
-    const resolve = settle;
-    settle = null;
-    if (resolve) resolve(result);
+  const fail = (run: Playback, error: unknown): void => {
+    if (active !== run) return;
+    active = null;
+    if (run.frame != null) scheduler.cancelFrame(run.frame);
+    run.reject(error);
   };
 
   return {
     get running(): boolean {
-      return running;
+      return active != null;
     },
 
     play(count, stepDuration, tick): Promise<PlayResult> {
       // A new run supersedes any in-flight one.
-      if (running) finish('cancelled');
+      if (active) finish(active, 'cancelled');
 
-      return new Promise<PlayResult>((resolve) => {
-        settle = resolve;
+      return new Promise<PlayResult>((resolve, reject) => {
+        const run: Playback = { frame: null, resolve, reject };
+        active = run;
         if (count <= 0) {
-          finish('completed');
+          finish(run, 'completed');
           return;
         }
-        running = true;
-        let i = 0;
-        const start = scheduler.now();
-
-        const loop = (now: number): void => {
-          frame = null;
-          if (!running) return; // cancelled between frames
-          const elapsed = now - start;
-          // Fire every tick whose scheduled time has arrived, in order. After a
-          // stall (or a backgrounded tab resuming) this catches up to "now" in a
-          // single frame rather than replaying in slow motion.
-          while (i < count && elapsed >= i * stepDuration) {
-            tick(i);
-            if (!running) return; // a tick cancelled the run (e.g. external nav)
-            i += 1;
-          }
-          if (i >= count) {
-            finish('completed');
-            return;
-          }
-          frame = scheduler.requestFrame(loop);
-        };
-
-        frame = scheduler.requestFrame(loop);
+        try {
+          let next = 0;
+          const start = scheduler.now();
+          const loop = (now: number): void => {
+            if (active !== run) return;
+            run.frame = null;
+            try {
+              const due =
+                stepDuration <= 0
+                  ? count - 1
+                  : Math.min(count - 1, Math.floor((now - start) / stepDuration));
+              if (due >= next) {
+                tick(due);
+                // A tick can cancel or replace playback. Never let this
+                // callback finish or schedule frames for its successor.
+                if (active !== run) return;
+                next = due + 1;
+              }
+              if (next >= count) {
+                finish(run, 'completed');
+                return;
+              }
+              run.frame = scheduler.requestFrame(loop);
+            } catch (error) {
+              fail(run, error);
+            }
+          };
+          run.frame = scheduler.requestFrame(loop);
+        } catch (error) {
+          fail(run, error);
+        }
       });
     },
 
     cancel(): void {
-      if (running) finish('cancelled');
+      if (active) finish(active, 'cancelled');
     },
   };
 };

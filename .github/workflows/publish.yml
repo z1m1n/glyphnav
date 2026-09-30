@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       # pnpm version comes from the "packageManager" field in package.json.
       - uses: pnpm/action-setup@v6
@@ -26,12 +28,18 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: pnpm
 
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/validate-release.mjs
+
       - run: pnpm install --frozen-lockfile
 
       # Quality gate — never publish a red build. `check` runs the full gate
       # (typecheck across the library, its tooling configs and every demo; lint
       # with a zero-warning budget; format check; tests).
       - run: pnpm run check
+      - run: pnpm run test:package
 
       # `prepublishOnly` runs the production build before packing. `--provenance`
       # needs the id-token permission above and a public repo; `--no-git-checks`

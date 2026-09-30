@@ -21,22 +21,13 @@
  */
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
-import { eligibleAnchor, settleAfter } from '../internal/links';
+import { eligibleAnchor, reportNavigationError } from '../internal/links';
 
 /**
  * SvelteKit's `goto` from `$app/navigation`, typed structurally so the adapter
  * needs no `@sveltejs/kit` import.
  */
 export type Goto = (url: string | URL, opts?: GotoOptions) => Promise<void>;
-
-/**
- * How long to wait for a `goto` navigation to land before giving up. `goto`
- * resolves a tick before `window.location` settles, so with the default
- * `commit: 'before'` the bar is animated to the *settled* path rather than the
- * old one read back too early; see {@link settleAfter}. A no-op navigation never
- * changes the URL and falls through after this budget.
- */
-const SETTLE_MS = 1000;
 
 /** The subset of SvelteKit `goto` options {@link SvelteKitGlyphnavInstance.navigate} forwards. */
 export interface GotoOptions {
@@ -151,7 +142,7 @@ const targetPath = (to: string | URL): string =>
  *   import { goto } from '$app/navigation';
  *   import { attachGlyphnav } from 'glyphnav/sveltekit';
  *
- *   // Every <a> click and goto() now animates first.
+ *   // Eligible <a> clicks navigate, then animate the landed URL.
  *   onMount(() => attachGlyphnav(goto, { duration: 250, commit: 'before' }).detach);
  * </script>
  * ```
@@ -168,13 +159,9 @@ export const attachGlyphnav = (
   } = options;
   const controller = new GlyphnavController(glyph);
 
-  // Fire `goto` and resolve once the address bar actually settles. `goto`'s
-  // promise resolves a tick early, so awaiting it directly would let the core
-  // read the old path back and skip the on-top decode (the default
-  // `commit: 'before'`); polling the URL via `settleAfter` animates to the path
-  // that really landed, redirects included.
-  const commitGoto = (to: string | URL, opts?: GotoOptions): void | Promise<void> =>
-    settleAfter(() => void goto(to, opts).catch(() => {}), SETTLE_MS);
+  // SvelteKit's promise settles after navigation, including redirects and
+  // blocked/rejected routes. Let the controller await it and propagate errors.
+  const commitGoto = (to: string | URL, opts?: GotoOptions): Promise<void> => goto(to, opts);
 
   // The target shown in the bar is exactly the path handed to `goto`: SvelteKit
   // resolves `goto` against the live URL and never auto-prefixes `paths.base`
@@ -193,7 +180,7 @@ export const attachGlyphnav = (
     const url = new URL(anchor.href, window.location.href);
     const to = url.pathname + url.search + url.hash;
     event.preventDefault();
-    void controller.run(to, () => commitGoto(to));
+    void controller.run(to, () => commitGoto(to)).catch(reportNavigationError);
   };
   const onClick = handleClick as EventListener;
 

@@ -71,6 +71,7 @@ const fitStep = (n: number, configuredStep: number, budget: number): number => {
 export const scrambleFrames = (target: string, config: ScrambleConfig): ScrambleFrame[] => {
   const n = target.length;
   if (n === 0) return [];
+  if (config.maxFrames <= 1) return [{ text: target, phase: 'resolve' }];
 
   const budget = Math.max(1, Math.floor(config.maxFrames / 2));
   const growStep = fitStep(n, config.growStep, budget);
@@ -129,6 +130,7 @@ export const shuffledIndices = (n: number, rng: Rng): number[] => {
 export const scrambleBurst = (target: string, config: ScrambleConfig): ScrambleFrame[] => {
   const n = target.length;
   if (n === 0) return [];
+  if (config.maxFrames <= 1) return [{ text: target, phase: 'resolve' }];
 
   const resolveStep = fitStep(n, config.resolveStep, Math.max(1, config.maxFrames - 1));
   const order = shuffledIndices(n, config.rng);

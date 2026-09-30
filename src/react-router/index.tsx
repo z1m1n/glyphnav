@@ -17,7 +17,7 @@
  */
 import { createElement, useCallback } from 'react';
 import type { AnchorHTMLAttributes, MouseEvent, ReactElement } from 'react';
-import { useHref, useNavigate } from 'react-router';
+import { createPath, parsePath, resolvePath, useHref, useNavigate } from 'react-router';
 import type { NavigateOptions, To } from 'react-router';
 import type { GlyphnavOptions, RunResult } from '../core';
 import { toPath } from '../internal/links';
@@ -57,20 +57,29 @@ export const useGlyphnavController = context.useGlyphnavController;
 export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigateFn => {
   const navigate = useNavigate();
   const controller = useGlyphnavController(options);
+  const rootHref = useHref('/');
 
   return useCallback<GlyphnavNavigateFn>(
-    (to, navOptions) => {
+    async (to, navOptions) => {
       if (typeof to === 'number') {
-        navigate(to);
-        return Promise.resolve<RunResult>('skipped');
+        await navigate(to);
+        return 'skipped';
       }
 
-      const target = toPath(to);
-      return controller.run(target, () => {
-        navigate(to, navOptions);
-      });
+      let target = toPath(to);
+      const path = typeof to === 'string' ? parsePath(to) : to;
+      if (path.pathname?.startsWith('/')) {
+        const resolved = resolvePath(to);
+        // The root href carries BrowserRouter's basename or HashRouter's
+        // fragment prefix. Root navigation keeps its exact trailing-slash form.
+        target =
+          resolved.pathname === '/'
+            ? rootHref + resolved.search + resolved.hash
+            : rootHref.replace(/\/$/, '') + createPath(resolved);
+      }
+      return controller.run(target, () => navigate(to, navOptions), options);
     },
-    [navigate, controller],
+    [navigate, controller, options, rootHref],
   );
 };
 
@@ -81,6 +90,14 @@ export interface GlyphnavLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorE
   replace?: boolean;
   /** History state to associate with the new location. */
   state?: unknown;
+  /** Resolve `..` against route boundaries (default) or URL path segments. */
+  relative?: 'route' | 'path';
+  /** Preserve scroll position when the router supplies scroll restoration. */
+  preventScrollReset?: boolean;
+  /** Ask the router to use the browser's view transition API. */
+  viewTransition?: boolean;
+  /** Leave navigation to the browser, like React Router's `<Link reloadDocument>`. */
+  reloadDocument?: boolean;
   /** Per-link option overrides. */
   glyphOptions?: GlyphnavOptions;
 }
@@ -97,6 +114,10 @@ export const GlyphnavLink = ({
   onClick,
   replace,
   state,
+  relative,
+  preventScrollReset,
+  viewTransition,
+  reloadDocument,
   glyphOptions,
   ...rest
 }: GlyphnavLinkProps): ReactElement => {
@@ -104,12 +125,58 @@ export const GlyphnavLink = ({
   const controller = useGlyphnavController(glyphOptions);
   // `useHref` resolves `to` to a basename-aware path, so the rendered href and
   // the animated bar both match what React Router actually navigates to.
-  const href = useHref(to);
+  const resolvedHref = useHref(to, { relative });
+  const rootHref = useHref('/');
+  const absolute = typeof to === 'string' && /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(to);
+  const href = absolute ? to : resolvedHref;
 
   const handleClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) =>
-      runLinkClick(event, onClick, controller, href, () => navigate(to, { replace, state })),
-    [onClick, controller, navigate, href, to, replace, state],
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      if (reloadDocument) {
+        onClick?.(event);
+        return;
+      }
+      let destination = to;
+      if (absolute) {
+        const url = new URL(href, window.location.href);
+        const base = rootHref.replace(/\/$/, '');
+        // React Router's Link leaves same-origin URLs outside its basename to
+        // the browser, and removes the basename before an internal navigation.
+        if (
+          url.origin !== window.location.origin ||
+          (base && url.pathname !== base && !url.pathname.startsWith(base + '/'))
+        ) {
+          onClick?.(event);
+          return;
+        }
+        destination = (url.pathname.slice(base.length) || '/') + url.search + url.hash;
+      }
+      runLinkClick(
+        event,
+        onClick,
+        controller,
+        href,
+        () =>
+          navigate(destination, { replace, state, relative, preventScrollReset, viewTransition }),
+        glyphOptions,
+      );
+    },
+    [
+      onClick,
+      controller,
+      navigate,
+      href,
+      to,
+      replace,
+      state,
+      relative,
+      preventScrollReset,
+      viewTransition,
+      reloadDocument,
+      glyphOptions,
+      absolute,
+      rootHref,
+    ],
   );
 
   return createElement('a', { href, onClick: handleClick, ...rest });

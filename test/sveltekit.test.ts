@@ -41,6 +41,7 @@ describe('sveltekit adapter', () => {
   afterEach(() => {
     while (live.length) live.pop()!.detach();
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it('navigate animates the bar, then hands off to goto', async () => {
@@ -233,5 +234,81 @@ describe('sveltekit adapter', () => {
 
     expect(frames.length).toBeGreaterThan(0);
     expect(frames.at(-1)).toBe('/start');
+  });
+
+  it('awaits a delayed navigation and animates its redirected destination', async () => {
+    let complete!: () => void;
+    const goto: Goto = () =>
+      new Promise<void>((resolve) => {
+        complete = () => {
+          window.history.pushState({}, '', '/redirected?q=1#top');
+          resolve();
+        };
+      });
+    const frames: string[] = [];
+    const instance = attach(goto, {
+      intercept: 'none',
+      stepDuration: 5,
+      hooks: { onFrame: (frame) => frames.push(frame.path) },
+    });
+    const result = instance.navigate('/slow');
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(frames).toHaveLength(0);
+    complete();
+    await vi.advanceTimersByTimeAsync(500);
+    expect(await result).toBe('completed');
+    expect(frames.at(-1)).toBe('/redirected?q=1#top');
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe(
+      '/redirected?q=1#top',
+    );
+  });
+
+  it('propagates goto rejection immediately and skips a blocked route without polling', async () => {
+    const error = new Error('load failed');
+    const instance = attach(() => Promise.reject(error), { intercept: 'none' });
+    await expect(instance.navigate('/failed')).rejects.toBe(error);
+    expect(window.location.pathname).toBe('/');
+    expect(vi.getTimerCount()).toBe(0);
+
+    const onFrame = vi.fn();
+    const blocked = attach(async () => {}, { intercept: 'none', hooks: { onFrame } });
+    expect(await blocked.navigate('/blocked')).toBe('skipped');
+    expect(onFrame).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('settles a cancelled pending navigation and ignores its late rejection', async () => {
+    let reject!: (error: Error) => void;
+    const onFrame = vi.fn();
+    const instance = attach(
+      () =>
+        new Promise<void>((_, fail) => {
+          reject = fail;
+        }),
+      {
+        intercept: 'none',
+        hooks: { onFrame },
+      },
+    );
+    const result = instance.navigate('/slow');
+    instance.controller.cancel();
+    expect(await result).toBe('cancelled');
+    reject(new Error('superseded'));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(onFrame).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('reports click navigation errors without an unhandled promise rejection', async () => {
+    const error = new Error('click navigation failed');
+    const reportError = vi.fn();
+    vi.stubGlobal('reportError', reportError);
+    attach(() => Promise.reject(error));
+    const anchor = makeAnchor({ href: '/failed' });
+    anchor.dispatchEvent(plainClick());
+    await vi.advanceTimersByTimeAsync(0);
+    expect(reportError).toHaveBeenCalledWith(error);
+    expect(window.location.pathname).toBe('/');
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

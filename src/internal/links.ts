@@ -64,6 +64,12 @@ export const currentPath = (): string => {
   return pathname + search + hash;
 };
 
+/** Report failures from click handlers, whose caller cannot await a run. */
+export const reportNavigationError = (error: unknown): void => {
+  if (typeof globalThis.reportError === 'function') globalThis.reportError(error);
+  else console.error('[glyphnav] navigation failed', error);
+};
+
 /**
  * Run `navigate`, then resolve only once the address-bar path actually changes
  * (or a short budget elapses). Some routers commit navigations asynchronously —
@@ -76,27 +82,57 @@ export const currentPath = (): string => {
  *
  * @param navigate - Performs the real navigation; may resolve before the URL updates.
  * @param timeoutMs - How long to wait for the URL to change before giving up.
- * @returns A promise that settles once the URL changes or the budget elapses,
- * or `void` when there is no `window` to observe.
+ * @param signal - Cancels navigation settlement and releases polling timers.
+ * @returns A promise that settles after navigation and any URL polling,
+ * rejecting if navigation fails or the signal aborts.
  */
-export const settleAfter = (navigate: () => void, timeoutMs: number): void | Promise<void> => {
-  if (typeof window === 'undefined' || !window.location) {
-    navigate();
-    return;
-  }
+export const settleAfter = (
+  navigate: () => void | Promise<unknown>,
+  timeoutMs: number,
+  signal?: AbortSignal,
+): Promise<void> => {
+  const browser = typeof window !== 'undefined' && !!window.location;
   const before = currentPath();
-  navigate();
 
-  return new Promise<void>((resolve) => {
-    const start = Date.now();
-    const tick = (): void => {
-      if (currentPath() !== before || Date.now() - start >= timeoutMs) {
-        resolve();
-        return;
-      }
-      setTimeout(tick, 16);
+  return new Promise<void>((resolve, reject) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let settled = false;
+    const finish = (error?: unknown, failed = false): void => {
+      if (settled) return;
+      settled = true;
+      if (timer !== undefined) clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      if (failed) reject(error);
+      else resolve();
     };
-    tick();
+    const abort = (): void => finish(new DOMException('Navigation cancelled', 'AbortError'), true);
+    if (signal?.aborted) {
+      abort();
+      return;
+    }
+    signal?.addEventListener('abort', abort, { once: true });
+
+    try {
+      Promise.resolve(navigate()).then(
+        () => {
+          if (settled) return null;
+          const start = Date.now();
+          const tick = (): void => {
+            if (settled) return;
+            if (!browser || currentPath() !== before || Date.now() - start >= timeoutMs) {
+              finish();
+              return;
+            }
+            timer = setTimeout(tick, 16);
+          };
+          tick();
+          return null;
+        },
+        (error: unknown) => finish(error, true),
+      );
+    } catch (error) {
+      finish(error, true);
+    }
   });
 };
 
@@ -109,23 +145,37 @@ export const settleAfter = (navigate: () => void, timeoutMs: number): void | Pro
  * rails are defined once.
  *
  * @param event - The click event to evaluate.
+ * @param explicitAnchor - Anchor supplied by a component's own click handler.
+ * @param respectOptOut - Whether data-glyphnav="off" excludes the anchor;
+ * adapters can ignore it when protecting native browser behavior from a router.
  * @returns The anchor to animate, or `null` if the click should pass through.
  */
-export const eligibleAnchor = (event: MouseEvent): HTMLAnchorElement | null => {
+export const eligibleAnchor = (
+  event: ClickModifiers & { target: EventTarget | null },
+  explicitAnchor?: HTMLAnchorElement,
+  respectOptOut = true,
+): HTMLAnchorElement | null => {
   if (isModifiedClick(event)) return null;
+  if (typeof window === 'undefined' || !window.location) return null;
 
-  const target = event.target as Element | null;
-  const anchor = target?.closest?.('a') as HTMLAnchorElement | null;
+  const target = event.target as Node | null;
+  const element = target?.nodeType === 1 ? (target as Element) : target?.parentElement;
+  const anchor = explicitAnchor ?? (element?.closest?.('a') as HTMLAnchorElement | null);
   if (!anchor || !anchor.getAttribute('href')) return null;
-  if (anchor.target && anchor.target !== '_self') return null;
+  const browsingTarget = anchor.target || anchor.ownerDocument.querySelector('base')?.target;
+  if (browsingTarget && browsingTarget.toLowerCase() !== '_self') return null;
   if (anchor.hasAttribute('download')) return null;
-  if (anchor.dataset.glyphnav === 'off') return null;
+  if (respectOptOut && anchor.dataset.glyphnav === 'off') return null;
 
   const rel = anchor.getAttribute('rel');
-  if (rel && rel.split(/\s+/).includes('external')) return null;
+  if (rel && rel.toLowerCase().split(/\s+/).includes('external')) return null;
 
-  const url = new URL(anchor.href, window.location.href);
-  if (url.origin !== window.location.origin) return null;
+  try {
+    const url = new URL(anchor.href, window.location.href);
+    if (url.origin !== window.location.origin) return null;
+  } catch {
+    return null;
+  }
 
   return anchor;
 };

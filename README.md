@@ -12,7 +12,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/npm/l/glyphnav?color=blue" alt="MIT license" /></a>
 </p>
 
-> Animate navigation: watch the URL **decode itself, glyph by glyph**, right in the address bar — then commit the real navigation.
+> Animate navigation: watch the URL **decode itself, glyph by glyph**, right in the address bar.
 
 **[GitHub](https://github.com/z1m1n/glyphnav)** · **[Live demo](https://z1m1n.github.io/glyphnav/)** · **[npm](https://www.npmjs.com/package/glyphnav)**
 
@@ -37,16 +37,18 @@ Jump straight to an integration:
 
 `glyphnav` rewrites `history.replaceState` frame by frame: it fills the destination
 path with random glyphs (the **grow** phase), then resolves the real characters
-left‑to‑right (the **resolve** phase). When the animation finishes it performs the
-actual navigation — a hard reload for plain links, or a hand‑off to your router for SPAs.
+left‑to‑right (the **resolve** phase). Router navigation starts first by default;
+the animation begins after navigation completes and ends at the landed URL.
+Choose `commit: 'after'` to animate before navigating. Hard reloads use that order
+because unloading the document would end the animation.
 
 - 🧩 **Framework‑agnostic core** — a tiny, dependency‑free engine.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
   `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`,
   `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/preact-iso`,
   `glyphnav/next` (App **and** Pages Router), `glyphnav/nuxt` and `glyphnav/sveltekit`.
-- ⚡ **Navigate‑first by default** (`commit: 'before'`) — the page changes
-  instantly and the animation plays on top; switch to `commit: 'after'` for the
+- ⚡ **Navigate‑first by default** (`commit: 'before'`) — navigation starts
+  immediately and the animation plays after it lands; switch to `commit: 'after'` for the
   classic animate‑then‑commit order.
 - 🎞️ **Two effects**: `decode` (grow + resolve left‑to‑right) and `scramble`
   (full‑length noise at once, characters lock in random order).
@@ -58,7 +60,7 @@ actual navigation — a hard reload for plain links, or a hand‑off to your rou
 - 🔋 Frames run on `requestAnimationFrame` — vsync-aligned and **paused while the tab is backgrounded**.
 - 🛡️ Writes only rooted same‑origin paths and backs off if the URL changes
   underneath it (back button mid‑animation) — the address bar can't be corrupted.
-- 🧪 ESM + CJS + types, built with **Vite**, covered by **Vitest**.
+- 🧪 ESM + CJS + NodeNext types, tested with **Vitest** and **Chromium**.
 
 ---
 
@@ -242,8 +244,9 @@ app.use(glyphnav, { router, duration: 250, commit: 'before' });
 ```
 
 The plugin wraps `router.push`/`router.replace`, so every `<router-link>` click and
-programmatic navigation animates first — `await router.push(...)` still resolves to the
-real navigation result. Read the controller anywhere with `useGlyphnav()`, or attach to
+programmatic navigation starts immediately with the default `commit: 'before'`,
+then animates after the route lands. Set `commit: 'after'` to animate first.
+`await router.push(...)` still resolves to the real navigation result. Read the controller anywhere with `useGlyphnav()`, or attach to
 a router manually with `attachGlyphnav(router, options)`.
 
 Prefer to leave the router untouched? Pass `intercept: 'none'` and use the animated
@@ -275,7 +278,17 @@ await navigate('/dashboard');
 
 `GlyphnavLink` is a drop‑in for `<Link>` (basename‑aware via `useHref`), and
 `useGlyphnavNavigate()` mirrors `useNavigate()`. The provider is optional — without it,
-hooks create their own controller.
+hooks create their own controller. Data Router navigation promises are awaited,
+so delayed loaders and redirects animate the URL that actually landed.
+For imperative `commit: 'after'` calls, use rooted destinations; the core's
+browser-relative resolution cannot reproduce React Router's route boundaries.
+`GlyphnavLink` resolves route-relative destinations through the router.
+
+Link handlers preserve modified clicks, new-tab targets, downloads, external
+links and cancelled clicks. `glyphOptions` overrides provider options for that
+navigation. Provider controllers are destroyed when the provider unmounts;
+fallback controllers allow a navigation already in progress to finish after its
+source component unmounts.
 
 ### Solid Router — `glyphnav/solid-router`
 
@@ -457,10 +470,14 @@ await navigate('/dashboard');
 
 `GlyphnavLink` is a drop‑in for `next/link` (prefetch and all) that animates on
 click; `useGlyphnavNavigate()` mirrors `useRouter().push` (pass `{ replace: true }`
-for `replace`). Pass `basePath` if the app is served under one. **App Router note:**
-its navigations are asynchronous, so `commit: 'after'` (animate, then navigate) is
-the reliable mode there; the Pages Router resolves synchronously and works with
-either timing.
+for `replace`). Pass `basePath` if the app is served under one. Pages Router
+promises are awaited. The App Router's void-returning navigation waits up to
+1.2 seconds for the browser URL to change with `commit: 'before'`; a slower
+navigation can finish without a decode animation. Choose `commit: 'after'` to
+animate before starting navigation. Settlement waits are cancelled when a newer
+navigation supersedes them. Object-form link destinations preserve their query,
+and Next's native link handling preserves cancellation, prefetch, pending state
+and navigation options.
 
 ### Nuxt — `glyphnav/nuxt`
 
@@ -508,7 +525,8 @@ prerender):
   import { goto } from '$app/navigation';
   import { attachGlyphnav } from 'glyphnav/sveltekit';
 
-  // Every <a> click and goto() now animates first.
+  // Eligible <a> clicks navigate first, then animate their landed URL.
+  // Use the returned instance.navigate() to animate imperative navigation.
   onMount(() => attachGlyphnav(goto, { duration: 250, commit: 'before' }).detach);
 </script>
 ```
@@ -516,9 +534,9 @@ prerender):
 `goto` is passed in because `$app/navigation` is a virtual module only resolvable
 inside a SvelteKit app — the adapter never imports SvelteKit and stays compiler‑free.
 With the default `commit: 'before'` the navigation goes out first and the bar decodes
-on top of the path that actually landed (redirects included): `goto` resolves a tick
-before the address bar settles, so the adapter waits for the URL to land — the same
-approach the Next App Router adapter uses.
+on top of the path that actually landed (redirects included). The adapter awaits
+the actual `goto` promise; rejected navigation rejects imperative `navigate()`
+and click failures are reported through `reportError` (or the console).
 
 Pass `intercept: 'none'` to leave clicks to SvelteKit and animate only the instance's
 own `navigate()` — a drop‑in for `goto` — or links you opt in with the `use:link`
@@ -561,7 +579,9 @@ generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
 `createGlyphnav(options, deps)` returns a controller with `run(to, commit, perCall?)`,
 `replay(from, to, perCall?)` (decode between two known paths without committing),
 `enableHistoryAnimation(perCall?)` (animate back/forward; returns a cleanup),
-`cancel()`, `update(options)` and an `animating` flag. `deps` lets you inject `history`,
+`cancel()`, `destroy()` (cancel work and detach history listeners), `update(options)`
+and an `animating` flag. A destroyed controller can be reused. Run promises settle
+on cancellation and reject when navigation or lifecycle hooks throw. `deps` lets you inject `history`,
 `getCurrentPath`, a `scheduler` and a reduced‑motion probe (used throughout the tests).
 
 ---
@@ -571,14 +591,15 @@ generateFrames('/', '/test', { charset: 'xyzw' }).map((f) => f.path);
 **▶ Hosted live at <https://z1m1n.github.io/glyphnav/>** — the same playground,
 deployed to GitHub Pages.
 
-One Vite playground covers **seven** integrations — vanilla, Vue Router,
-React Router, Solid Router, TanStack Router (React **and** Solid) and Angular Router:
+One Vite playground covers **eight** integrations — vanilla, Vue Router,
+React Router, Solid Router, TanStack Router (React **and** Solid), Angular Router
+and Preact (preact-iso), plus a core API playground:
 
 ```bash
 pnpm install
-pnpm demo                  # → http://localhost:5173  (picker + all ten, live)
+pnpm demo                  # → http://localhost:5173  (picker + all eleven, live)
 # …or run one server individually:
-pnpm demo:vite             # → http://localhost:5173  (just the seven Vite demos)
+pnpm demo:vite             # → http://localhost:5173  (the eight Vite integrations + core)
 pnpm demo:next             # → http://localhost:5174/next   (Next.js, own dev server)
 pnpm demo:nuxt             # → http://localhost:5176/nuxt   (Nuxt, own dev server)
 pnpm demo:sveltekit        # → http://localhost:5177/sveltekit   (SvelteKit, own dev server)
@@ -602,7 +623,9 @@ server first. For the deployed artifact,
 `pnpm demo:build` (`run-s`) builds the Vite playground, statically exports Next
 (`output: 'export'`), Nuxt (`nuxi generate`) and SvelteKit (`adapter-static`), and
 copies their output into `demo/dist/{next,nuxt,sveltekit}` so a single `demo/dist`
-deploys all ten. All demos — Vite, Next, Nuxt and SvelteKit — share one
+deploys all eleven. Nuxt and SvelteKit fail on unexpected prerender errors;
+only known links to the surrounding picker/changelog and the intentional
+SvelteKit `about#results` demo link are exempt. All demos — Vite, Next, Nuxt and SvelteKit — share one
 `@glyphnav-demo/shared` workspace package for the charsets,
 address‑bar helpers, syntax highlighter and styles.
 
@@ -619,7 +642,10 @@ with copy‑paste integration snippets, **deep links with `?query` and `#hash`**
 (they animate like any path), and controls for charset, speed (whole‑animation
 duration 20–1000 ms, slider inverted so full right is fastest), effect
 (`decode`/`scramble`), commit order (`navigate first`/`animate first`) and scope.
-The demos alias `glyphnav` to `src/`, so editing the library updates them live.
+The Vite, Nuxt and SvelteKit demos alias `glyphnav` to `src/`. The Next demo consumes
+`dist/`; `pnpm demo:next` builds the library before starting Next and keeps a
+library build watcher running, so a fresh checkout starts correctly and source
+edits update the demo live.
 
 ---
 
@@ -634,13 +660,26 @@ pnpm test            # Vitest (jsdom) — core, controller, vanilla + all adapte
 pnpm run typecheck   # tsc --noEmit
 pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
+pnpm test:package    # pack tarball; NodeNext ESM/CJS declarations + runtime imports
+pnpm exec playwright install chromium  # browser setup (once)
+pnpm test:browser    # build + Chromium address-bar integration regressions
+pnpm test:browser:next # build + native Next Link regression in the Next demo
+pnpm run quality    # PR gate: build, types, lint, format, coverage, package + browser
 ```
 
-The package is built with **Vite 8** in library mode with eleven entry points
+The package is built with **Vite 8** in library mode with twelve entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./solid-router`,
-`./tanstack-router/react`, `./tanstack-router/solid`, `./angular-router`, `./next`,
+`./tanstack-router/react`, `./tanstack-router/solid`, `./angular-router`, `./preact-iso`, `./next`,
 `./nuxt`, `./sveltekit`); router/framework deps are always externalized. Declarations are
-generated against `tsconfig.build.json` so they mirror the entry layout in `dist/`.
+generated against `tsconfig.build.json`, with explicit relative extensions and
+separate `.d.ts` / `.d.cts` graphs selected by the package's import/require exports.
+The installed `@tanstack/solid-router@1.170.36` peer has a native Node `require()`
+limitation: its CJS build requires `@solid-primitives/refs`, whose exports are
+import-only. The packaged checks verify both declaration formats and ESM runtime
+for this adapter, and recognize only that specific upstream CJS failure; the
+adapter remains available to bundler consumers.
+Release publishing validates that its tag matches `package.json` before running
+checks and packed consumer tests.
 
 ---
 

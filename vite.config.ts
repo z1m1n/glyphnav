@@ -1,5 +1,45 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import { writeFile } from 'node:fs/promises';
+import { dirname, relative, resolve } from 'node:path';
+
+/** Keep both declaration graphs resolvable by NodeNext, including directory imports. */
+async function writeNodeDeclarations(files: Map<string, string>): Promise<void> {
+  const declarations = new Map(
+    [...files]
+      .filter(([path]) => path.endsWith('.d.ts'))
+      .map(([path, content]) => [resolve(path), content]),
+  );
+  for (const [path, content] of declarations) {
+    const rewrite = (extension: 'js' | 'cjs'): string =>
+      content.replace(
+        /(from\s*|import\s*\(\s*)(['"])([^'"]+)\2/g,
+        (match, prefix: string, quote: string, specifier: string) => {
+          if (!specifier.startsWith('.')) {
+            // Next exposes file subpaths without an exports map. NodeNext needs
+            // their runtime extension even when the declaration only uses types.
+            return specifier.startsWith('next/') && !specifier.endsWith('.js')
+              ? `${prefix}${quote}${specifier}.js${quote}`
+              : match;
+          }
+          const target = resolve(dirname(path), specifier);
+          const declaration = [
+            target.replace(/\.js$/, '') + '.d.ts',
+            resolve(target, 'index.d.ts'),
+          ].find((candidate) => declarations.has(candidate));
+          if (!declaration)
+            throw new Error(`Unresolved declaration import ${specifier} in ${path}`);
+          let resolved = relative(dirname(path), declaration)
+            .replaceAll('\\', '/')
+            .replace(/\.d\.ts$/, `.${extension}`);
+          if (!resolved.startsWith('.')) resolved = `./${resolved}`;
+          return `${prefix}${quote}${resolved}${quote}`;
+        },
+      );
+    await writeFile(path, rewrite('js'));
+    await writeFile(path.replace(/\.d\.ts$/, '.d.cts'), rewrite('cjs'));
+  }
+}
 
 export default defineConfig({
   build: {
@@ -8,11 +48,7 @@ export default defineConfig({
     sourcemap: false,
     emptyOutDir: true,
     lib: {
-      // Entries emit as `dist/<name>/index.{js,cjs}` so each subpath's JS sits
-      // next to its `index.d.ts` (the dts plugin mirrors `src/`). Co-locating
-      // them lets the extensionless relative imports inside the emitted `.d.ts`
-      // (`from '../core'`) resolve to the directory index instead of being
-      // shadowed by a flat `core.js` that has no sibling declaration file.
+      // Each subpath's runtime and ESM/CJS declarations share one directory.
       entry: {
         index: 'src/index.ts',
         'core/index': 'src/core/index.ts',
@@ -31,6 +67,9 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
+      output: {
+        paths: (id) => (id.startsWith('next/') && !id.endsWith('.js') ? `${id}.js` : id),
+      },
       external: [
         /^vue/,
         /^react/,
@@ -53,6 +92,7 @@ export default defineConfig({
       // Hoist inferred `import('react').ReactNode`-style references to
       // top-of-file static imports instead of inline dynamic imports.
       staticImport: true,
+      afterBuild: writeNodeDeclarations,
     }),
   ],
 });

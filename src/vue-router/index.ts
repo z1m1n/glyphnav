@@ -3,7 +3,7 @@
  *
  * By default it wraps `router.push` / `router.replace` so every navigation
  * (including `<router-link>` clicks, which call `push` under the hood) plays
- * the glyph-scramble first, preserving the original return value so
+ * the glyph animation according to commit timing, preserving the original return value so
  * `await router.push(...)` still works. With `intercept: 'none'` the router is
  * left untouched and only the animated `push`/`replace` exposed by the adapter
  * animate.
@@ -92,6 +92,9 @@ export const glyphnav = {
     const instance = attachGlyphnav(router, rest);
     app.provide(GLYPHNAV_KEY, instance.controller);
     app.provide(GLYPHNAV_ROUTER_KEY, instance);
+    // Vue 3.5+ provides an app-level cleanup hook. Earlier versions can call
+    // the instance's detach() explicitly through useGlyphnavRouter().
+    app.onUnmount?.(instance.detach);
   },
 };
 

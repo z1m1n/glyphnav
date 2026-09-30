@@ -11,7 +11,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/index.ts', 'src/**/index.tsx', '**/*.d.ts'],
+      // Only these two index files are pure re-export barrels. Adapter entry
+      // files contain implementation and must remain visible in coverage.
+      exclude: ['src/index.ts', 'src/core/index.ts', '**/*.d.ts'],
     },
     projects: [
       {
@@ -21,7 +23,11 @@ export default defineConfig({
           ...shared,
           name: 'node',
           include: ['test/**/*.test.{ts,tsx}'],
-          exclude: ['test/tanstack-solid-router.test.ts', 'test/solid-router.test.ts'],
+          exclude: [
+            'test/tanstack-solid-router.test.ts',
+            'test/solid-router.test.ts',
+            'test/browser/**',
+          ],
         },
       },
       {

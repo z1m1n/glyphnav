@@ -143,7 +143,7 @@ export interface FrameInfo {
 export interface GlyphnavHooks {
   /** Fired once before the first frame (skipped runs do not fire this). */
   onStart?: (ctx: AnimationContext) => void;
-  /** Fired for every frame written to the address bar. */
+  /** Fired for each rendered frame; overdue intermediate frames may be skipped. */
   onFrame?: (frame: FrameInfo, ctx: AnimationContext) => void;
   /**
    * Fired right before the real navigation is committed — after the last
@@ -152,6 +152,6 @@ export interface GlyphnavHooks {
   onCommit?: (ctx: AnimationContext) => void;
   /** Fired if the run is cancelled (e.g. a newer navigation superseded it). */
   onCancel?: (ctx: AnimationContext) => void;
-  /** Fired once the run settles, regardless of outcome. */
+  /** Fired once for completed, skipped, or cancelled runs. Hook/navigation errors reject the run. */
   onComplete?: (ctx: AnimationContext, result: RunResult) => void;
 }

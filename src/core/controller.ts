@@ -7,8 +7,22 @@ import { resolvePath } from './path';
 import { prefersReducedMotion as defaultPrefersReducedMotion } from './reduced-motion';
 import type { AnimationContext, FrameInfo, GlyphnavOptions, RunResult } from './types';
 
-/** A function that performs the *real* navigation once the animation finishes. */
-export type CommitFn = () => void | Promise<void>;
+/**
+ * Performs the real navigation. The signal aborts when the run is cancelled or
+ * superseded, allowing adapters to stop waiting for router settlement.
+ */
+export type CommitFn = (signal: AbortSignal) => void | Promise<void>;
+
+interface ActiveRun {
+  abort: AbortController;
+  ctx: AnimationContext;
+  opts: ResolvedOptions;
+  navigating: boolean;
+  /** Real path to restore while this run owns the address bar. */
+  restoreTo: string | null;
+  /** Path observed after our last write; another path belongs to external navigation. */
+  observedPath: string | null;
+}
 
 /** Environment hooks, all injectable for testing and SSR. */
 export interface ControllerDeps {
@@ -70,16 +84,9 @@ export class GlyphnavController {
    */
   private readonly replaceState: ((data: unknown, unused: string, url: string) => void) | null;
 
-  /** Monotonic id so a newer run cleanly supersedes an older one. */
-  private runId = 0;
-  /** The path the bar is put back to if the in-flight run is abandoned. */
-  private activeFrom: string | null = null;
-  /**
-   * The current path as observed right after our last frame write. If the
-   * browser reports something else, the URL was moved externally (back/forward
-   * button, another script) and we must not touch the bar again.
-   */
-  private observedPath: string | null = null;
+  /** State belongs to a single run, so an older callback cannot clean up its successor. */
+  private activeRun: ActiveRun | null = null;
+  private readonly historyCleanups = new Set<() => void>();
   /**
    * The path the bar last settled on (after a navigation or a popstate replay).
    * Read only by {@link enableHistoryAnimation} to know the path to animate
@@ -87,13 +94,6 @@ export class GlyphnavController {
    * destination. `null` until the first navigation or until seeded on enable.
    */
   private lastPath: string | null = null;
-  /**
-   * True while a {@link run} is committing/animating. The popstate listener uses
-   * it to ignore the synthetic `popstate` some adapters dispatch right after
-   * their own `pushState` (e.g. the vanilla adapter notifying popstate routers),
-   * which would otherwise look like a user back/forward traversal.
-   */
-  private navigating = false;
 
   constructor(options: GlyphnavOptions = {}, deps: ControllerDeps = {}) {
     this.options = options;
@@ -137,61 +137,55 @@ export class GlyphnavController {
    * run only.
    *
    * @param to - Destination path, resolved against the current path.
-   * @param commit - Performs the real navigation; may be async.
+   * @param commit - Performs the real navigation; may be async and receives a cancellation signal.
    * @param perCall - Options that override the base options for this run only.
-   * @returns Whether the run `completed`, was `cancelled`, or was `skipped`.
+   * @returns Whether the run `completed`, was `cancelled`, or was `skipped`. Hook and navigation
+   * failures reject after restoring the bar and releasing the run.
    */
   async run(to: string, commit: CommitFn, perCall?: GlyphnavOptions): Promise<RunResult> {
-    const myId = ++this.runId;
-    // Abandon any in-flight run and put the real path back first, so the
-    // starting point read below is never a half-scrambled string.
-    this.stopActive();
-
+    this.cancel();
     const opts = resolveOptions(perCall ? { ...this.options, ...perCall } : this.options);
-    const hooks = opts.hooks;
     const from = this.deps.getCurrentPath();
     const target = resolvePath(to, from);
-    const ctx: AnimationContext = { from, to: target };
+    const state = this.beginRun({ from, to: target }, opts, true);
 
-    const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
-    // Only animate rooted same-origin paths — anything else (cross-origin,
-    // protocol-relative, unresolvable) would corrupt the URL when written.
-    const animatable = !reduceMotion && this.deps.history != null && isRootedPath(target);
-
-    // Mark the navigation in-flight so the popstate listener ignores any
-    // synthetic `popstate` our own commit dispatches. Cleared only by the run
-    // that is still current, so a superseded run never unmarks its successor.
-    this.navigating = true;
     try {
+      const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
+      const animatable = !reduceMotion && this.deps.history != null && isRootedPath(target);
+      let outcome: RunResult;
       if (animatable && opts.commit === 'before') {
-        return await this.runNavigateFirst(myId, ctx, commit, opts);
+        outcome = await this.runNavigateFirst(state, commit);
+      } else {
+        const frames = animatable ? generateFrames(from, target, opts) : [];
+        if (frames.length === 0) {
+          outcome = (await this.commitRun(state, commit)) ? 'skipped' : 'cancelled';
+        } else {
+          outcome = await this.playFrames(state, frames, from);
+          if (outcome !== 'cancelled' && !(await this.commitRun(state, commit))) {
+            outcome = 'cancelled';
+          }
+        }
       }
-
-      const frames = animatable ? generateFrames(from, target, opts) : [];
-
-      if (frames.length === 0) {
-        await commit();
-        this.lastPath = this.deps.getCurrentPath();
-        hooks.onComplete?.(ctx, 'skipped');
-        return 'skipped';
-      }
-
-      const outcome = await this.playFrames(myId, ctx, frames, opts, from);
-      if (outcome === 'cancelled') return 'cancelled';
-
-      hooks.onCommit?.(ctx);
-      await commit();
-      hooks.onComplete?.(ctx, 'completed');
-      return 'completed';
+      return this.completeRun(state, outcome);
     } finally {
-      if (this.runId === myId) this.navigating = false;
+      this.finishRun(state);
     }
   }
 
-  /** Cancel the current animation (if any) and restore the address bar. */
+  /** Cancel the current animation or pending navigation and restore the address bar. */
   cancel(): void {
-    this.runId += 1;
-    this.stopActive();
+    const state = this.activeRun;
+    if (!state) return;
+    this.activeRun = null;
+    this.player.cancel();
+    this.restoreRun(state);
+    state.abort.abort();
+  }
+
+  /** Cancel work and detach owned history listeners. The controller may be reused. */
+  destroy(): void {
+    this.cancel();
+    for (const cleanup of this.historyCleanups) cleanup();
   }
 
   /**
@@ -209,29 +203,20 @@ export class GlyphnavController {
    * @returns Whether the run `completed`, was `cancelled`, or was `skipped`.
    */
   async replay(from: string, to: string, perCall?: GlyphnavOptions): Promise<RunResult> {
-    const myId = ++this.runId;
-    this.stopActive();
-
+    this.cancel();
     const opts = resolveOptions(perCall ? { ...this.options, ...perCall } : this.options);
-    const hooks = opts.hooks;
-    const ctx: AnimationContext = { from, to };
-
-    const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
-    const animatable =
-      !reduceMotion && this.deps.history != null && isRootedPath(from) && isRootedPath(to);
-    const frames = animatable && from !== to ? generateFrames(from, to, opts) : [];
-
-    if (frames.length === 0) {
-      this.lastPath = to;
-      hooks.onComplete?.(ctx, 'skipped');
-      return 'skipped';
+    const state = this.beginRun({ from, to }, opts, false);
+    try {
+      const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
+      const animatable =
+        !reduceMotion && this.deps.history != null && isRootedPath(from) && isRootedPath(to);
+      const frames = animatable && from !== to ? generateFrames(from, to, opts) : [];
+      const outcome = frames.length > 0 ? await this.playFrames(state, frames, to) : 'skipped';
+      if (outcome === 'skipped') this.lastPath = to;
+      return this.completeRun(state, outcome);
+    } finally {
+      this.finishRun(state);
     }
-
-    const outcome = await this.playFrames(myId, ctx, frames, opts, to);
-    if (outcome === 'cancelled') return 'cancelled';
-
-    hooks.onComplete?.(ctx, 'completed');
-    return 'completed';
   }
 
   /**
@@ -255,18 +240,25 @@ export class GlyphnavController {
     const onPopState = (): void => {
       // Ignore the synthetic popstate our own navigation dispatches; a real
       // traversal only happens while we are idle.
-      if (this.navigating) return;
+      if (this.activeRun?.navigating) return;
       const to = this.deps.getCurrentPath();
       const from = this.lastPath ?? to;
       // The browser is already at `to`; record it now so a rapid follow-up
       // traversal animates from here even if this run is superseded mid-flight.
       this.lastPath = to;
       if (from === to) return;
-      void this.replay(from, to, perCall);
+      // Event handlers have no caller to receive a rejection; restoration is
+      // handled by replay even if a user hook fails.
+      void this.replay(from, to, perCall).catch(() => {});
     };
 
     window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
+    const cleanup = (): void => {
+      window.removeEventListener('popstate', onPopState);
+      this.historyCleanups.delete(cleanup);
+    };
+    this.historyCleanups.add(cleanup);
+    return cleanup;
   }
 
   /**
@@ -275,121 +267,128 @@ export class GlyphnavController {
    * the old path to wherever the navigation actually landed (so redirects
    * animate to their true destination).
    */
-  private async runNavigateFirst(
-    myId: number,
-    ctx: AnimationContext,
-    commit: CommitFn,
-    opts: ResolvedOptions,
-  ): Promise<RunResult> {
-    const hooks = opts.hooks;
-    hooks.onCommit?.(ctx);
-    await commit();
-    if (this.runId !== myId) {
-      hooks.onCancel?.(ctx);
-      hooks.onComplete?.(ctx, 'cancelled');
-      return 'cancelled';
-    }
+  private async runNavigateFirst(state: ActiveRun, commit: CommitFn): Promise<RunResult> {
+    if (!(await this.commitRun(state, commit))) return 'cancelled';
 
-    // An unchanged URL means the navigation was a no-op (or a router guard
-    // blocked it) — animating would advertise a navigation that never happened.
+    // Redirects animate to their landed path; blocked navigation skips.
     const landed = this.deps.getCurrentPath();
     const frames =
-      landed !== ctx.from && isRootedPath(landed) ? generateFrames(ctx.from, landed, opts) : [];
-
-    if (frames.length === 0) {
-      this.lastPath = landed;
-      hooks.onComplete?.(ctx, 'skipped');
-      return 'skipped';
-    }
-
-    const outcome = await this.playFrames(myId, ctx, frames, opts, landed);
-    if (outcome === 'cancelled') return 'cancelled';
-
-    hooks.onComplete?.(ctx, 'completed');
-    return 'completed';
+      landed !== state.ctx.from && isRootedPath(landed)
+        ? generateFrames(state.ctx.from, landed, state.opts)
+        : [];
+    return frames.length > 0 ? this.playFrames(state, frames, landed) : 'skipped';
   }
 
-  /**
-   * Write `frames` to the bar one by one, guarding against superseding runs
-   * and external URL changes. When the run ends (or is abandoned) the bar is
-   * restored to `restoreTo`. Cancel hooks have already fired on a
-   * `'cancelled'` outcome.
-   */
+  private beginRun(ctx: AnimationContext, opts: ResolvedOptions, navigating: boolean): ActiveRun {
+    const state: ActiveRun = {
+      abort: new AbortController(),
+      ctx,
+      opts,
+      navigating,
+      restoreTo: null,
+      observedPath: null,
+    };
+    this.activeRun = state;
+    return state;
+  }
+
+  private isCurrent(state: ActiveRun): boolean {
+    return this.activeRun === state && !state.abort.signal.aborted;
+  }
+
+  /** Await router completion, but let cancellation settle even an uncooperative router. */
+  private async commitRun(state: ActiveRun, commit: CommitFn): Promise<boolean> {
+    if (!this.isCurrent(state)) return false;
+    state.opts.hooks.onCommit?.(state.ctx);
+    if (!this.isCurrent(state)) return false;
+
+    const signal = state.abort.signal;
+    let onAbort!: () => void;
+    const cancelled = new Promise<boolean>((resolve) => {
+      onAbort = () => resolve(false);
+      signal.addEventListener('abort', onAbort, { once: true });
+    });
+    try {
+      const committed = Promise.resolve(commit(signal)).then(() => true);
+      const completed = await Promise.race([committed, cancelled]);
+      if (!completed || !this.isCurrent(state)) return false;
+      this.lastPath = this.deps.getCurrentPath();
+      return true;
+    } finally {
+      signal.removeEventListener('abort', onAbort);
+    }
+  }
+
+  private completeRun(state: ActiveRun, outcome: RunResult): RunResult {
+    const hooks = state.opts.hooks;
+    if (outcome === 'cancelled') {
+      // onComplete still fires if a cancellation hook throws; finally cleanup
+      // also protects against a throwing completion hook.
+      try {
+        hooks.onCancel?.(state.ctx);
+      } finally {
+        hooks.onComplete?.(state.ctx, outcome);
+      }
+    } else {
+      hooks.onComplete?.(state.ctx, outcome);
+    }
+    return outcome;
+  }
+
+  /** Write one visible frame per repaint, restoring only while this run owns the bar. */
   private async playFrames(
-    myId: number,
-    ctx: AnimationContext,
+    state: ActiveRun,
     frames: FrameInfo[],
-    opts: ResolvedOptions,
     restoreTo: string,
   ): Promise<'completed' | 'cancelled'> {
-    const hooks = opts.hooks;
-    this.activeFrom = restoreTo;
-    this.observedPath = this.deps.getCurrentPath();
-    hooks.onStart?.(ctx);
-
-    let movedExternally = false;
-    const result = await this.player.play(
-      frames.length,
-      frameDelay(opts, frames.length),
-      (index) => {
-        if (this.observedPath != null && this.deps.getCurrentPath() !== this.observedPath) {
-          movedExternally = true;
-          this.player.cancel();
-          return;
-        }
-        const frame = frames[index];
-        this.writePath(frame.path);
-        this.observedPath = this.deps.getCurrentPath();
-        hooks.onFrame?.(frame, ctx);
-      },
-    );
-
-    // A newer run already restored the bar — stay out of its way.
-    if (this.runId !== myId) {
-      hooks.onCancel?.(ctx);
-      hooks.onComplete?.(ctx, 'cancelled');
-      return 'cancelled';
+    if (!this.isCurrent(state)) return 'cancelled';
+    state.restoreTo = restoreTo;
+    state.observedPath = this.deps.getCurrentPath();
+    try {
+      state.opts.hooks.onStart?.(state.ctx);
+      if (!this.isCurrent(state)) return 'cancelled';
+      const outcome = await this.player.play(
+        frames.length,
+        frameDelay(state.opts, frames.length),
+        (index) => {
+          if (!this.isCurrent(state)) return;
+          if (this.deps.getCurrentPath() !== state.observedPath) {
+            // The new location belongs to external navigation; do not restore.
+            state.restoreTo = null;
+            this.cancel();
+            return;
+          }
+          const frame = frames[index];
+          this.writePath(frame.path);
+          state.observedPath = this.deps.getCurrentPath();
+          state.opts.hooks.onFrame?.(frame, state.ctx);
+        },
+      );
+      return this.isCurrent(state) ? outcome : 'cancelled';
+    } finally {
+      if (this.activeRun === state) this.restoreRun(state);
     }
-
-    if (movedExternally) {
-      // The user navigated away (e.g. back button) mid-animation: the URL now
-      // belongs to that navigation, so neither restore nor commit.
-      this.activeFrom = null;
-      this.observedPath = null;
-      hooks.onCancel?.(ctx);
-      hooks.onComplete?.(ctx, 'cancelled');
-      return 'cancelled';
-    }
-
-    this.writePath(restoreTo);
-    this.activeFrom = null;
-    this.observedPath = null;
-    this.lastPath = restoreTo;
-
-    if (result === 'cancelled') {
-      hooks.onCancel?.(ctx);
-      hooks.onComplete?.(ctx, 'cancelled');
-      return 'cancelled';
-    }
-    return 'completed';
   }
 
-  private stopActive(): void {
-    if (this.activeFrom == null) return;
-    this.player.cancel();
-    // Restore only if the bar still shows our frame; if the URL was moved
-    // externally it belongs to that navigation now.
-    if (this.observedPath == null || this.deps.getCurrentPath() === this.observedPath) {
-      this.writePath(this.activeFrom);
+  private restoreRun(state: ActiveRun): void {
+    if (state.restoreTo != null && this.deps.getCurrentPath() === state.observedPath) {
+      this.writePath(state.restoreTo);
     }
-    this.activeFrom = null;
-    this.observedPath = null;
+    state.restoreTo = null;
+    state.observedPath = null;
+    this.lastPath = this.deps.getCurrentPath();
+  }
+
+  private finishRun(state: ActiveRun): void {
+    if (this.activeRun !== state) return;
+    this.restoreRun(state);
+    this.activeRun = null;
   }
 
   private writePath(path: string): void {
     const history = this.deps.history;
     const replace = this.replaceState;
-    if (!history || !replace) return;
+    if (!history || !replace || this.deps.getCurrentPath() === path) return;
     try {
       replace(history.state, '', path);
     } catch {

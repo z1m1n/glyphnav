@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GlyphnavController, createGlyphnav } from '../src/core/controller';
 import { seqRng } from './helpers';
+import { manualScheduler } from './core-scheduler';
 
 function resetLocation(): void {
   window.history.replaceState(null, '', '/');
@@ -22,7 +23,7 @@ describe('GlyphnavController', () => {
     const controller = new GlyphnavController({
       charset: 'xyzw',
       rng: seqRng([0, 0.25, 0.5, 0.75]),
-      stepDuration: 10,
+      stepDuration: 20,
       hooks: {
         onStart: () => (started += 1),
         onFrame: (f) => frames.push(f.path),
@@ -253,7 +254,7 @@ describe('GlyphnavController', () => {
     const controller = new GlyphnavController({
       charset: 'xyzw',
       rng: seqRng([0, 0.25, 0.5, 0.75]),
-      stepDuration: 10,
+      stepDuration: 20,
       commit: 'before',
       hooks: {
         onStart: () => order.push('start'),
@@ -400,7 +401,7 @@ describe('GlyphnavController', () => {
     const controller = new GlyphnavController({
       charset: 'xyzw',
       rng: seqRng([0, 0.25, 0.5, 0.75]),
-      stepDuration: 10,
+      stepDuration: 20,
       hooks: { onFrame: (f) => frames.push(f.path) },
     });
 
@@ -431,7 +432,7 @@ describe('GlyphnavController', () => {
     const controller = new GlyphnavController({
       charset: 'q',
       rng: () => 0,
-      stepDuration: 5,
+      stepDuration: 20,
       scope: 'tail', // only the differing tail animates → proves `from` is tracked
       hooks: { onFrame: (f) => frames.push(f.path) },
     });
@@ -478,5 +479,279 @@ describe('GlyphnavController', () => {
     await run;
 
     expect(order).toEqual(['commit-start', 'commit-end', 'complete']);
+  });
+
+  it('does not start playback after cancellation inside onStart', async () => {
+    const onFrame = vi.fn();
+    const commit = vi.fn();
+    const onComplete = vi.fn();
+    const controller = new GlyphnavController({
+      commit: 'after',
+      hooks: { onStart: () => controller.cancel(), onFrame, onComplete },
+    });
+    const done = controller.run('/destination', commit);
+    await vi.advanceTimersByTimeAsync(2000);
+
+    await expect(done).resolves.toBe('cancelled');
+    expect(onFrame).not.toHaveBeenCalled();
+    expect(commit).not.toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalledOnce();
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('settles a throwing onFrame and restores the real URL', async () => {
+    const scheduler = manualScheduler();
+    const error = new Error('onFrame failed');
+    const commit = vi.fn();
+    const controller = new GlyphnavController(
+      {
+        commit: 'after',
+        hooks: {
+          onFrame: () => {
+            throw error;
+          },
+        },
+      },
+      { scheduler },
+    );
+    let outcome: unknown = 'pending';
+    void controller.run('/destination', commit).catch((reason: unknown) => {
+      outcome = reason;
+    });
+    try {
+      scheduler.step(0);
+    } catch {
+      /* regression: a throwing hook escaped the scheduler */
+    }
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(outcome).toBe(error);
+    expect(window.location.pathname).toBe('/');
+    expect(controller.animating).toBe(false);
+    expect(commit).not.toHaveBeenCalled();
+  });
+
+  it('keeps history animation enabled after a cancelled navigation', async () => {
+    window.history.replaceState(null, '', '/users/1');
+    const frames: string[] = [];
+    const controller = new GlyphnavController({
+      commit: 'after',
+      stepDuration: 40,
+      charset: 'q',
+      scope: 'tail',
+      hooks: { onFrame: (frame) => frames.push(frame.path) },
+    });
+    const stop = controller.enableHistoryAnimation();
+    try {
+      const done = controller.run('/users/2', vi.fn());
+      await vi.advanceTimersByTimeAsync(16);
+      controller.cancel();
+      await done;
+      frames.length = 0;
+      window.history.replaceState(null, '', '/users/3');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      await vi.advanceTimersByTimeAsync(100);
+      expect(frames).toEqual(['/users/q', '/users/3']);
+    } finally {
+      stop();
+    }
+  });
+
+  it('records the landed path after commit-after for the next history traversal', async () => {
+    window.history.replaceState(null, '', '/users/1');
+    const frames: string[] = [];
+    const controller = new GlyphnavController({
+      commit: 'after',
+      stepDuration: 40,
+      charset: 'q',
+      scope: 'tail',
+      hooks: { onFrame: (frame) => frames.push(frame.path) },
+    });
+    const stop = controller.enableHistoryAnimation();
+    try {
+      const done = controller.run('/users/2', () => window.history.pushState(null, '', '/users/2'));
+      await vi.advanceTimersByTimeAsync(100);
+      await done;
+      frames.length = 0;
+      window.history.replaceState(null, '', '/users/1');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      await vi.advanceTimersByTimeAsync(100);
+      expect(frames).toEqual(['/users/q', '/users/1']);
+    } finally {
+      stop();
+    }
+  });
+
+  it.each([false, true])(
+    'settles cancellation while navigation is pending (reduced motion: %s)',
+    async (reduceMotion) => {
+      let settleCommit!: () => void;
+      const commit = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            settleCommit = resolve;
+          }),
+      );
+      const onComplete = vi.fn();
+      const controller = new GlyphnavController(
+        { hooks: { onComplete } },
+        { prefersReducedMotion: () => reduceMotion },
+      );
+      let outcome: unknown = 'pending';
+      void controller.run('/pending', commit).then((result) => {
+        outcome = result;
+        return result;
+      });
+      controller.cancel();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(outcome).toBe('cancelled');
+      expect(onComplete).toHaveBeenCalledWith({ from: '/', to: '/pending' }, 'cancelled');
+      settleCommit();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(onComplete).toHaveBeenCalledOnce();
+    },
+  );
+
+  it('does not rewrite the landed URL redundantly after the final frame', async () => {
+    const scheduler = manualScheduler();
+    let path = '/';
+    const replaceState = vi.fn((_state: unknown, _title: string, next: string) => {
+      path = next;
+    });
+    const controller = new GlyphnavController(
+      { maxFrames: 2, charset: 'q', stepDuration: 10 },
+      {
+        history: { state: { key: 'route' }, replaceState } as unknown as History,
+        getCurrentPath: () => path,
+        scheduler,
+      },
+    );
+    const done = controller.run('/destination', () => {
+      path = '/destination';
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    scheduler.step(0);
+    scheduler.step(10);
+    await expect(done).resolves.toBe('completed');
+    expect(replaceState).toHaveBeenCalledTimes(2);
+    expect(replaceState).toHaveBeenLastCalledWith({ key: 'route' }, '', '/destination');
+  });
+
+  it('aborts superseded router settlement without allowing it to affect its successor', async () => {
+    let firstSignal: AbortSignal | undefined;
+    let rejectFirst!: (error: Error) => void;
+    const firstComplete = vi.fn();
+    const controller = new GlyphnavController({ stepDuration: 40, charset: 'q' });
+    const first = controller.run(
+      '/first',
+      (signal) => {
+        firstSignal = signal;
+        return new Promise<void>((_resolve, reject) => {
+          rejectFirst = reject;
+        });
+      },
+      { hooks: { onComplete: firstComplete } },
+    );
+    const frames: string[] = [];
+    const second = controller.run('/second', () => window.history.pushState(null, '', '/second'), {
+      hooks: { onFrame: (frame) => frames.push(frame.path) },
+    });
+
+    await expect(first).resolves.toBe('cancelled');
+    expect(firstSignal?.aborted).toBe(true);
+    rejectFirst(new Error('late router rejection'));
+    await vi.advanceTimersByTimeAsync(1000);
+    await expect(second).resolves.toBe('completed');
+    expect(firstComplete).toHaveBeenCalledOnce();
+    expect(frames.at(-1)).toBe('/second');
+    expect(window.location.pathname).toBe('/second');
+  });
+
+  it.each(['onStart', 'onCommit', 'onComplete'] as const)(
+    'cleans up a throwing %s hook and allows later navigation',
+    async (hook) => {
+      const error = new Error(`${hook} failed`);
+      const controller = new GlyphnavController({ commit: 'after', maxFrames: 1 });
+      const failure = controller
+        .run('/bad', vi.fn(), {
+          hooks: {
+            [hook]: () => {
+              throw error;
+            },
+          },
+        })
+        .catch((reason: unknown) => reason);
+      await vi.advanceTimersByTimeAsync(100);
+      await expect(failure).resolves.toBe(error);
+      expect(controller.animating).toBe(false);
+      expect(window.location.pathname).toBe('/');
+
+      const next = controller.run('/good', () => window.history.pushState(null, '', '/good'));
+      await vi.advanceTimersByTimeAsync(100);
+      await expect(next).resolves.toBe('completed');
+      expect(window.location.pathname).toBe('/good');
+    },
+  );
+
+  it('finishes cancellation hooks once even when onCancel throws', async () => {
+    const error = new Error('onCancel failed');
+    const onComplete = vi.fn();
+    const controller = new GlyphnavController({
+      commit: 'after',
+      hooks: {
+        onCancel: () => {
+          throw error;
+        },
+        onComplete,
+      },
+    });
+    const failure = controller.run('/bad', vi.fn());
+    controller.cancel();
+    await expect(failure).rejects.toBe(error);
+    expect(onComplete).toHaveBeenCalledOnce();
+    expect(onComplete).toHaveBeenCalledWith({ from: '/', to: '/bad' }, 'cancelled');
+    expect(controller.animating).toBe(false);
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('rejects failed async navigation without starting animation', async () => {
+    const error = new Error('router failed');
+    const onFrame = vi.fn();
+    const controller = new GlyphnavController({ hooks: { onFrame } });
+    await expect(controller.run('/bad', () => Promise.reject(error))).rejects.toBe(error);
+    expect(onFrame).not.toHaveBeenCalled();
+    expect(controller.animating).toBe(false);
+    expect(window.location.pathname).toBe('/');
+  });
+
+  it('destroy cancels active work and detaches all history listeners, allowing reuse', async () => {
+    const onFrame = vi.fn();
+    const controller = new GlyphnavController({
+      stepDuration: 40,
+      charset: 'q',
+      hooks: { onFrame },
+    });
+    controller.enableHistoryAnimation();
+    controller.enableHistoryAnimation();
+    const active = controller.run('/active', () => window.history.pushState(null, '', '/active'));
+    await vi.advanceTimersByTimeAsync(16);
+    controller.destroy();
+    await expect(active).resolves.toBe('cancelled');
+    onFrame.mockClear();
+    window.history.replaceState(null, '', '/external');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(onFrame).not.toHaveBeenCalled();
+
+    const stop = controller.enableHistoryAnimation();
+    try {
+      window.history.replaceState(null, '', '/next');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(onFrame).toHaveBeenCalled();
+      expect(window.location.pathname).toBe('/next');
+    } finally {
+      stop();
+    }
   });
 });

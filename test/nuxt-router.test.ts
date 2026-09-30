@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createMemoryHistory, createRouter } from 'vue-router';
+import { createMemoryHistory, createRouter, createWebHashHistory } from 'vue-router';
 import type { Router } from 'vue-router';
 import { attachGlyphnav, installGlyphnav } from '../src/nuxt';
 
@@ -117,5 +117,48 @@ describe('nuxt adapter', () => {
 
     expect(provided.glyphnav).toBe(instance);
     expect(instance.controller).toBeTruthy();
+  });
+
+  it('keeps the deployment prefix in hash-mode animate-first targets', async () => {
+    window.history.replaceState(null, '', '/app/?version=1#/');
+    const history = createWebHashHistory('/app/');
+    const router = createRouter({ history, routes });
+    await router.push('/');
+    const frames: string[] = [];
+    const instance = attachGlyphnav(router, {
+      historyMode: 'hash',
+      commit: 'after',
+      stepDuration: 5,
+      charset: 'q',
+      rng: () => 0,
+      hooks: { onFrame: (frame) => frames.push(frame.path) },
+    });
+    vi.useFakeTimers();
+    try {
+      const result = instance.navigate('/test');
+      await vi.advanceTimersByTimeAsync(500);
+      expect(await result).toBe('completed');
+      expect(frames.at(-1)).toBe('/app/?version=1#/test');
+      expect(window.location.pathname + window.location.search + window.location.hash).toBe(
+        '/app/?version=1#/test',
+      );
+    } finally {
+      instance.detach();
+      history.destroy();
+      window.history.replaceState(null, '', '/');
+    }
+  });
+
+  it('registers detach with the Nuxt application lifetime', async () => {
+    const router = await makeRouter();
+    const onUnmount = vi.fn();
+    const instance = installGlyphnav({
+      $router: router,
+      provide: () => {},
+      vueApp: { onUnmount },
+    });
+    expect(onUnmount).toHaveBeenCalledWith(instance.detach);
+    onUnmount.mock.calls[0][0]();
+    expect(router.push).not.toBe(instance.push);
   });
 });

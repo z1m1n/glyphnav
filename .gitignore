@@ -1,6 +1,8 @@
 node_modules/
 dist/
 coverage/
+test-results/
+playwright-report/
 demo/dist/
 demo/angular/dist/
 demo/angular/.angular/

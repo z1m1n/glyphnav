@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { createComponent, mergeProps } from 'solid-js';
 import type { JSX } from 'solid-js';
@@ -12,14 +12,21 @@ import {
   createRouter,
   useRouterState,
 } from '@tanstack/solid-router';
-import { GlyphnavLink, useGlyphnavNavigate } from '../src/tanstack-router/solid';
+import { GlyphnavLink, GlyphnavProvider, useGlyphnavNavigate } from '../src/tanstack-router/solid';
 
 // Solid normally calls delegateEvents() from compiled templates; this test
 // builds the tree at runtime (no compiler), so install the click delegate that
 // GlyphnavLink's `onClick` relies on once, up front.
 delegateEvents(['click']);
 
-const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
+const frames: string[] = [];
+const fast = {
+  charset: 'q',
+  rng: () => 0,
+  stepDuration: 20,
+  commit: 'after',
+  hooks: { onFrame: (frame: { path: string }) => frames.push(frame.path) },
+} as const;
 
 // Build elements without JSX (createComponent + Dynamic), matching the JSX-free
 // adapter — so neither needs the Solid compiler. `mergeProps` (not object
@@ -85,11 +92,27 @@ async function renderApp(): Promise<void> {
   });
   const host = document.createElement('div');
   document.body.appendChild(host);
-  dispose = render(() => createComponent(RouterProvider, { router }), host);
+  dispose = render(
+    () =>
+      createComponent(GlyphnavProvider, {
+        // A memory router cannot land a browser URL. Per-call commit: 'after'
+        // overrides must therefore take effect for these runs to animate.
+        commit: 'before',
+        charset: 'x',
+        get children() {
+          return createComponent(RouterProvider, { router });
+        },
+      }),
+    host,
+  );
   // Let the router finish its initial load.
   await waitFor(() => expect(screen.getByTestId('loc').textContent).toBe('/'));
 }
 
+beforeEach(() => {
+  window.history.replaceState(null, '', '/');
+  frames.length = 0;
+});
 afterEach(() => {
   dispose?.();
   dispose = undefined;
@@ -107,6 +130,8 @@ describe('tanstack solid router adapter', () => {
 
     fireEvent.click(screen.getByText('go'));
     await waitFor(() => expect(screen.getByTestId('loc').textContent).toBe('/test'));
+    expect(frames[0]).toBe('/q');
+    expect(frames.at(-1)).toBe('/test');
   });
 
   it('GlyphnavLink renders a real href and animates then navigates on click', async () => {
@@ -116,6 +141,8 @@ describe('tanstack solid router adapter', () => {
 
     fireEvent.click(link);
     await waitFor(() => expect(screen.getByTestId('loc').textContent).toBe('/other'));
+    expect(frames[0]).toBe('/q');
+    expect(frames.at(-1)).toBe('/other');
   });
 
   it('GlyphnavLink lets modified clicks fall through (no SPA navigation)', async () => {

@@ -54,9 +54,14 @@ export default defineNuxtConfig({
     'glyphnav/core': r('../../src/core/index.ts'),
     'glyphnav/nuxt': r('../../src/nuxt/index.ts'),
   },
-  // Crawl from '/' so every NuxtLink-reachable route is prerendered to a file.
-  // The breadcrumb links *out* of the app to the picker (e.g. /glyphnav/), which
-  // is not a Nuxt route — `failOnError: false` keeps that expected 404 from
-  // aborting the generate while every real page still prerenders.
-  nitro: { prerender: { crawlLinks: true, routes: ['/'], failOnError: false } },
+  // Crawl the app's actual base. Only the known links back to the combined
+  // site's picker/changelog are outside this export; broken app routes fail.
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: [baseURL],
+      failOnError: true,
+      ignore: [(route) => [base, `${base}changelog/`].includes(route.split('?')[0]!)],
+    },
+  },
 });

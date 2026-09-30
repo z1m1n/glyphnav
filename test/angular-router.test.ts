@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // token in `deps`); everything else it touches is a plain method on the Router
 // instance we pass in.
 vi.mock('@angular/core', () => ({
+  DestroyRef: class {},
   InjectionToken: class {
     constructor(public description: string) {}
   },
@@ -112,14 +113,17 @@ describe('angular adapter', () => {
       useFactory: (
         router: MockRouter,
         location: { prepareExternalUrl: (url: string) => string },
-      ) => { controller: unknown; navigateByUrl: unknown };
+        destroyRef: { onDestroy: (cleanup: () => void) => void },
+      ) => { controller: unknown; navigateByUrl: unknown; detach: () => void };
     };
     expect(provider.provide).toBe(GLYPHNAV);
-    expect(provider.deps).toHaveLength(2); // Router + Location
+    expect(provider.deps).toHaveLength(3); // Router + Location + DestroyRef
 
     const location = { prepareExternalUrl: (url: string) => url };
-    const nav = provider.useFactory(makeRouter(), location);
+    const onDestroy = vi.fn();
+    const nav = provider.useFactory(makeRouter(), location, { onDestroy });
     expect(nav.controller).toBeDefined();
     expect(typeof nav.navigateByUrl).toBe('function');
+    expect(onDestroy).toHaveBeenCalledWith(nav.detach);
   });
 });

@@ -47,64 +47,124 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./core": {
-      "types": "./dist/core/index.d.ts",
-      "import": "./dist/core/index.js",
-      "require": "./dist/core/index.cjs"
+      "import": {
+        "types": "./dist/core/index.d.ts",
+        "default": "./dist/core/index.js"
+      },
+      "require": {
+        "types": "./dist/core/index.d.cts",
+        "default": "./dist/core/index.cjs"
+      }
     },
     "./vue-router": {
-      "types": "./dist/vue-router/index.d.ts",
-      "import": "./dist/vue-router/index.js",
-      "require": "./dist/vue-router/index.cjs"
+      "import": {
+        "types": "./dist/vue-router/index.d.ts",
+        "default": "./dist/vue-router/index.js"
+      },
+      "require": {
+        "types": "./dist/vue-router/index.d.cts",
+        "default": "./dist/vue-router/index.cjs"
+      }
     },
     "./react-router": {
-      "types": "./dist/react-router/index.d.ts",
-      "import": "./dist/react-router/index.js",
-      "require": "./dist/react-router/index.cjs"
+      "import": {
+        "types": "./dist/react-router/index.d.ts",
+        "default": "./dist/react-router/index.js"
+      },
+      "require": {
+        "types": "./dist/react-router/index.d.cts",
+        "default": "./dist/react-router/index.cjs"
+      }
     },
     "./solid-router": {
-      "types": "./dist/solid-router/index.d.ts",
-      "import": "./dist/solid-router/index.js",
-      "require": "./dist/solid-router/index.cjs"
+      "import": {
+        "types": "./dist/solid-router/index.d.ts",
+        "default": "./dist/solid-router/index.js"
+      },
+      "require": {
+        "types": "./dist/solid-router/index.d.cts",
+        "default": "./dist/solid-router/index.cjs"
+      }
     },
     "./tanstack-router/react": {
-      "types": "./dist/tanstack-router/react/index.d.ts",
-      "import": "./dist/tanstack-router/react/index.js",
-      "require": "./dist/tanstack-router/react/index.cjs"
+      "import": {
+        "types": "./dist/tanstack-router/react/index.d.ts",
+        "default": "./dist/tanstack-router/react/index.js"
+      },
+      "require": {
+        "types": "./dist/tanstack-router/react/index.d.cts",
+        "default": "./dist/tanstack-router/react/index.cjs"
+      }
     },
     "./tanstack-router/solid": {
-      "types": "./dist/tanstack-router/solid/index.d.ts",
-      "import": "./dist/tanstack-router/solid/index.js",
-      "require": "./dist/tanstack-router/solid/index.cjs"
+      "import": {
+        "types": "./dist/tanstack-router/solid/index.d.ts",
+        "default": "./dist/tanstack-router/solid/index.js"
+      },
+      "require": {
+        "types": "./dist/tanstack-router/solid/index.d.cts",
+        "default": "./dist/tanstack-router/solid/index.cjs"
+      }
     },
     "./angular-router": {
-      "types": "./dist/angular-router/index.d.ts",
-      "import": "./dist/angular-router/index.js",
-      "require": "./dist/angular-router/index.cjs"
+      "import": {
+        "types": "./dist/angular-router/index.d.ts",
+        "default": "./dist/angular-router/index.js"
+      },
+      "require": {
+        "types": "./dist/angular-router/index.d.cts",
+        "default": "./dist/angular-router/index.cjs"
+      }
     },
     "./preact-iso": {
-      "types": "./dist/preact-iso/index.d.ts",
-      "import": "./dist/preact-iso/index.js",
-      "require": "./dist/preact-iso/index.cjs"
+      "import": {
+        "types": "./dist/preact-iso/index.d.ts",
+        "default": "./dist/preact-iso/index.js"
+      },
+      "require": {
+        "types": "./dist/preact-iso/index.d.cts",
+        "default": "./dist/preact-iso/index.cjs"
+      }
     },
     "./next": {
-      "types": "./dist/next/index.d.ts",
-      "import": "./dist/next/index.js",
-      "require": "./dist/next/index.cjs"
+      "import": {
+        "types": "./dist/next/index.d.ts",
+        "default": "./dist/next/index.js"
+      },
+      "require": {
+        "types": "./dist/next/index.d.cts",
+        "default": "./dist/next/index.cjs"
+      }
     },
     "./nuxt": {
-      "types": "./dist/nuxt/index.d.ts",
-      "import": "./dist/nuxt/index.js",
-      "require": "./dist/nuxt/index.cjs"
+      "import": {
+        "types": "./dist/nuxt/index.d.ts",
+        "default": "./dist/nuxt/index.js"
+      },
+      "require": {
+        "types": "./dist/nuxt/index.d.cts",
+        "default": "./dist/nuxt/index.cjs"
+      }
     },
     "./sveltekit": {
-      "types": "./dist/sveltekit/index.d.ts",
-      "import": "./dist/sveltekit/index.js",
-      "require": "./dist/sveltekit/index.cjs"
+      "import": {
+        "types": "./dist/sveltekit/index.d.ts",
+        "default": "./dist/sveltekit/index.js"
+      },
+      "require": {
+        "types": "./dist/sveltekit/index.d.cts",
+        "default": "./dist/sveltekit/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -135,7 +195,15 @@
     "demo:build:nuxt": "pnpm --filter @glyphnav-demo/nuxt generate && cp -rT demo/nuxt/.output/public demo/dist/nuxt",
     "demo:build:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit build && cp -rT demo/sveltekit/build demo/dist/sveltekit",
     "demo:preview": "vite preview --config demo/vite.config.ts",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "test:package": "run-s build test:package:built",
+    "test:package:built": "node scripts/test-package.mjs",
+    "test:browser": "run-s build test:browser:built",
+    "test:browser:built": "playwright test",
+    "validate:release": "node scripts/validate-release.mjs",
+    "quality": "run-s build typecheck lint format:check coverage test:package:built test:browser:built",
+    "test:browser:next": "run-s build test:browser:next:built",
+    "test:browser:next:built": "playwright test --config playwright.next.config.mjs"
   },
   "devDependencies": {
     "@angular/common": "22.2.0",
@@ -144,6 +212,7 @@
     "@angular/platform-browser": "22.2.0",
     "@angular/router": "22.2.0",
     "@microsoft/api-extractor": "7.59.2",
+    "@playwright/test": "1.58.1",
     "@solidjs/router": "0.16.3",
     "@tanstack/react-router": "1.170.39",
     "@tanstack/solid-router": "1.170.36",

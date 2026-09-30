@@ -3,7 +3,7 @@
  * same as the Vue Router adapter — only the wiring is Nuxt-idiomatic.
  *
  * By default it wraps `router.push`/`router.replace`, so every `<NuxtLink>`
- * click and every `navigateTo()` call animates first (both ultimately go
+ * click and every `navigateTo()` call animates around navigation (both ultimately go
  * through Vue Router). With `intercept: 'none'` the router is left untouched and
  * only the animated `push`/`replace`/`navigate` exposed by the instance animate.
  *
@@ -63,12 +63,18 @@ export interface NuxtGlyphnavInstance {
 
 /**
  * The path the address bar actually shows for `to`. `resolve().href` is
- * base-aware; in hash mode it lives in the fragment, so root it (`#/x` →
- * `/#/x`) to match `location.pathname + hash` — what the controller reads.
+ * base-aware; in hash mode the href may contain only the fragment. Recover
+ * the deployment path from the router's history base before appending it.
  */
 const resolveTarget = (router: Router, to: RouteLocationRaw, mode: NuxtHistoryMode): string => {
   const href = router.resolve(to).href;
-  if (mode === 'hash' && href.startsWith('#')) return '/' + href;
+  if (mode === 'hash' && href.startsWith('#')) {
+    const base = router.options.history.base.split('#')[0];
+    const documentPath =
+      typeof window === 'undefined' ? '/' : window.location.pathname + window.location.search;
+    const usesBaseElement = typeof document !== 'undefined' && !!document.querySelector('base');
+    return (usesBaseElement ? base || documentPath : documentPath) + href;
+  }
 
   return href;
 };
@@ -96,7 +102,12 @@ export const attachGlyphnav = (
     ...glyph
   } = options;
   const controller = new GlyphnavController(glyph);
-  const resolveHref = (to: RouteLocationRaw): string => resolveTarget(router, to, historyMode);
+  const resolveHref = (to: RouteLocationRaw): string => {
+    // Superseding hash navigation must resolve against the restored document,
+    // rather than a pathname/query still displaying an animation frame.
+    controller.cancel();
+    return resolveTarget(router, to, historyMode);
+  };
   // Skip the animation when navigating to the path already on screen.
   const shouldSkip = (target: string): boolean =>
     samePathForm(resolveTarget(router, router.currentRoute.value.fullPath, historyMode), target);
@@ -111,6 +122,7 @@ export const attachGlyphnav = (
     push,
     replace,
     navigate(to, navOptions) {
+      controller.cancel();
       const original = navOptions?.replace ? originalReplace : originalPush;
       return controller.run(resolveTarget(router, to, historyMode), async () => {
         await original.call(router, to);
@@ -126,6 +138,8 @@ export interface NuxtAppLike {
   $router: Router;
   /** Nuxt's helper for exposing values as `$name` on `useNuxtApp()`. */
   provide: (name: string, value: unknown) => void;
+  /** Application lifetime cleanup, available on Nuxt's underlying Vue app. */
+  vueApp?: { onUnmount?: (cleanup: () => void) => void };
 }
 
 /**
@@ -150,6 +164,7 @@ export const installGlyphnav = (
 ): NuxtGlyphnavInstance => {
   const instance = attachGlyphnav(nuxtApp.$router, options);
   nuxtApp.provide('glyphnav', instance);
+  nuxtApp.vueApp?.onUnmount?.(instance.detach);
 
   return instance;
 };

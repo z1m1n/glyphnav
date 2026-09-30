@@ -69,4 +69,16 @@ describe('generateFrames', () => {
     expect(frames.at(-1)?.path).toBe('/about?q=1#x');
     expect(frames.every((f) => f.path.startsWith('/'))).toBe(true);
   });
+
+  it.each(['decode', 'scramble'] as const)(
+    'honors a one-frame budget for %s, including with duration',
+    (effect) => {
+      for (const duration of [null, 0, 120]) {
+        const frames = generateFrames('/', '/destination', { effect, duration, maxFrames: 1 });
+        expect(frames).toEqual([
+          { path: '/destination', text: 'destination', index: 0, total: 1, phase: 'resolve' },
+        ]);
+      }
+    },
+  );
 });

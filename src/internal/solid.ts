@@ -14,8 +14,8 @@ import {
 } from 'solid-js';
 import type { JSX } from 'solid-js';
 import { GlyphnavController } from '../core';
-import type { GlyphnavOptions } from '../core';
-import { isModifiedClick } from './links';
+import type { CommitFn, GlyphnavOptions } from '../core';
+import { eligibleAnchor, reportNavigationError } from './links';
 
 export interface GlyphnavProviderProps extends GlyphnavOptions {
   children?: JSX.Element;
@@ -53,9 +53,10 @@ export const createSolidControllerContext = (): SolidControllerContext => {
     const [, options] = splitProps(props, ['children', 'animatePopState']);
     // Keep the base options in sync as the (reactive) provider props change.
     createRenderEffect(() => controller.update({ ...options }));
-    // The flag is treated as static; wire the listener once and tear it down
-    // with the provider.
-    if (props.animatePopState) onCleanup(controller.enableHistoryAnimation());
+    onCleanup(() => controller.destroy());
+    createRenderEffect(() => {
+      if (props.animatePopState) onCleanup(controller.enableHistoryAnimation());
+    });
 
     return createComponent(GlyphnavContext.Provider, {
       value: controller,
@@ -80,28 +81,29 @@ type SolidAnchorClick = Parameters<JSX.EventHandler<HTMLAnchorElement, MouseEven
  * Shared click-handler body for the Solid adapter `<GlyphnavLink>`s: forward to
  * the caller's `onClick` first (Solid's plain-function or bound-tuple form), let
  * modified clicks (new tab, etc.) pass through to the browser, otherwise prevent
- * the default navigation and play the animation before committing via `commit`.
+ * the default navigation and animate around the navigation via `commit`.
  *
  * @param event - The Solid mouse event being handled.
  * @param onClick - The caller's own click handler (function or bound tuple), run first.
  * @param controller - Controller that plays the animation and commits.
  * @param href - The resolved destination shown in the address bar.
- * @param commit - Performs the real navigation once the animation finishes.
+ * @param commit - Performs the real navigation at the configured commit timing.
  */
 export const runSolidLinkClick = (
   event: SolidAnchorClick,
   onClick: JSX.AnchorHTMLAttributes<HTMLAnchorElement>['onClick'],
   controller: GlyphnavController,
   href: string,
-  commit: () => void | Promise<void>,
+  commit: CommitFn,
+  perCall?: GlyphnavOptions,
 ): void => {
   if (Array.isArray(onClick)) onClick[0](onClick[1], event);
   else if (typeof onClick === 'function') onClick(event);
 
-  if (isModifiedClick(event)) return; // let the browser handle modified clicks
+  if (!eligibleAnchor(event, event.currentTarget)) return;
 
   // `preventDefault` also stops Solid Router's delegated click handler, which
   // bails on an already-prevented event — so the navigation happens once.
   event.preventDefault();
-  void controller.run(href, commit);
+  void controller.run(href, commit, perCall).catch(reportNavigationError);
 };

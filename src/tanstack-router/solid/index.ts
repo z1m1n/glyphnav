@@ -2,7 +2,7 @@
  * Adapter for TanStack Router on **Solid** (`@tanstack/solid-router`).
  *
  *  - `<GlyphnavProvider>` shares a single controller across the tree (optional).
- *  - `useGlyphnavNavigate()` mirrors `useNavigate()` but animates first.
+ *  - `useGlyphnavNavigate()` mirrors `useNavigate()` with address-bar animation.
  *  - `<GlyphnavLink>` renders an `<a>` that animates on click.
  *
  * The router half is identical to the React adapter — TanStack's `buildLocation`
@@ -43,8 +43,8 @@ export const GlyphnavProvider = context.GlyphnavProvider;
 export const useGlyphnavController = context.useGlyphnavController;
 
 /**
- * A `useNavigate()` replacement that plays the glyph animation before handing
- * the navigation to TanStack Router.
+ * A `useNavigate()` replacement that animates around the navigation to
+ * TanStack Router, according to the configured commit timing.
  *
  * @param options - Base animation options for navigations made through the
  * returned function.
@@ -58,7 +58,7 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
     // `buildLocation` yields the basepath-aware href that will really end up in
     // the address bar.
     const target = router.buildLocation(opts).href;
-    return controller.run(target, () => router.navigate(opts) as Promise<void>);
+    return controller.run(target, () => router.navigate(opts) as Promise<void>, options);
   };
 }
 
@@ -112,6 +112,7 @@ export function GlyphnavLink(props: GlyphnavLinkProps): JSX.Element {
       controller,
       href(),
       () => router.navigate(navOpts()) as Promise<void>,
+      local.glyphOptions,
     );
 
   return createComponent(

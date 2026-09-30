@@ -24,8 +24,8 @@ const config = {
   trailingSlash: true,
   basePath,
   images: { unoptimized: true },
-  // The shared demo helpers ship as TypeScript source, so Next must transpile them.
-  transpilePackages: ['@glyphnav-demo/shared'],
+  // Transpile/watch the workspace library's rebuilt dist and shared TS helpers.
+  transpilePackages: ['glyphnav', '@glyphnav-demo/shared'],
   // Exposed to the client so the glyphnav adapter can prefix the base path for
   // `commit: 'after'` (the default `commit: 'before'` reads it back from the URL).
   env: {

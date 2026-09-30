@@ -52,9 +52,10 @@ jobs:
         # renames working. For a custom domain or user/org page, set this to "/".
         #
         # `demo:build` orchestrates every demo build: the Vite playground (vanilla,
-        # Vue, React, TanStack, Angular) plus the standalone Next.js and Nuxt
+        # Vue, React, Solid, TanStack, Angular, Preact) plus standalone Next.js,
+        # Nuxt and SvelteKit
         # workspace projects, which are statically exported and copied into
-        # demo/dist/{next,nuxt}. DEMO_BASE is threaded through all of them.
+        # demo/dist/{next,nuxt,sveltekit}. DEMO_BASE is threaded through all of them.
         env:
           DEMO_BASE: /${{ github.event.repository.name }}/
         run: pnpm demo:build

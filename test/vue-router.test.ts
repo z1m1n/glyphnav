@@ -88,4 +88,40 @@ describe('vue adapter', () => {
     // @ts-expect-error intentionally missing router
     expect(() => app.use(glyphnav, {})).toThrow(/router/);
   });
+
+  it('restores the router and stops active work when the application unmounts', async () => {
+    window.history.replaceState(null, '', '/start');
+    const router = await makeRouter();
+    const onFrame = vi.fn();
+    const app = createApp({ render: () => null });
+    app.use(glyphnav, {
+      router,
+      commit: 'after',
+      stepDuration: 20,
+      hooks: { onFrame },
+      animatePopState: true,
+    });
+    const wrappedPush = router.push;
+    const host = document.createElement('div');
+    app.mount(host);
+    vi.useFakeTimers();
+    try {
+      const navigation = router.push('/test');
+      await vi.advanceTimersByTimeAsync(16);
+      expect(onFrame).toHaveBeenCalled();
+      app.unmount();
+      onFrame.mockClear();
+      await vi.advanceTimersByTimeAsync(500);
+      await navigation;
+      expect(onFrame).not.toHaveBeenCalled();
+      expect(window.location.pathname).toBe('/start');
+      expect(router.push).not.toBe(wrappedPush);
+      await router.push('/other');
+      expect(router.currentRoute.value.fullPath).toBe('/other');
+      expect(onFrame).not.toHaveBeenCalled();
+    } finally {
+      app.unmount();
+      window.history.replaceState(null, '', '/');
+    }
+  });
 });

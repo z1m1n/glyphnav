@@ -20,7 +20,7 @@ export interface WrapOptions {
 }
 
 /**
- * Wrap a Vue Router `push`/`replace` so it plays the glyph animation first,
+ * Wrap a Vue Router `push`/`replace` so it animates at the configured commit timing,
  * preserving the method's original return value so `await router.push(...)`
  * still resolves to Vue Router's own result.
  *

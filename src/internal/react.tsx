@@ -8,7 +8,7 @@ import { createContext, createElement, useContext, useEffect, useState } from 'r
 import type { ReactNode } from 'react';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions } from '../core';
-import { isModifiedClick } from './links';
+import { eligibleAnchor, reportNavigationError } from './links';
 import type { ClickModifiers } from './links';
 
 export interface GlyphnavProviderProps extends GlyphnavOptions {
@@ -75,6 +75,7 @@ export const createControllerContext = (): ReactControllerContext => {
 export const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
   const [controller] = useState(() => new GlyphnavController(options));
   controller.update(options);
+  useEffect(() => () => controller.destroy(), [controller]);
 
   return controller;
 };
@@ -87,6 +88,8 @@ export const useSharedController = (options: GlyphnavOptions): GlyphnavControlle
  * @param enabled - Build a fallback controller only when `true`.
  * @param options - Base options for the fallback controller.
  * @returns The fallback controller, or `null` when `enabled` is `false`.
+ * A fallback owns no global listeners and may finish a navigation after its
+ * source component unmounts. Providers own and destroy their shared controller.
  */
 export const useFallbackController = (
   enabled: boolean,
@@ -98,6 +101,8 @@ export const useFallbackController = (
     setController(fallback);
     return fallback;
   }
+
+  if (enabled) controller?.update(options ?? {});
 
   return controller;
 };
@@ -120,25 +125,32 @@ export const useHistoryAnimation = (controller: GlyphnavController, enabled: boo
 /**
  * Shared click-handler body for the adapter `<GlyphnavLink>`s: run the caller's
  * `onClick`, let modified clicks (new tab, etc.) pass through to the browser,
- * otherwise prevent the default navigation and play the animation before
- * committing the real navigation via `commit`.
+ * otherwise prevent the default navigation and follow the controller's
+ * configured commit timing. By default navigation precedes the animation.
  *
  * @param event - The (React-synthetic) mouse event being handled.
  * @param onClick - The caller's own click handler, run first.
  * @param controller - Controller that plays the animation and commits.
  * @param href - The resolved destination shown in the address bar.
- * @param commit - Performs the real navigation once the animation finishes.
+ * @param commit - Performs the real navigation at the configured point.
  */
-export const runLinkClick = <E extends ClickModifiers & { preventDefault: () => void }>(
+export const runLinkClick = <
+  E extends ClickModifiers & {
+    preventDefault: () => void;
+    target: EventTarget | null;
+    currentTarget: HTMLAnchorElement;
+  },
+>(
   event: E,
   onClick: ((event: E) => void) | undefined,
   controller: GlyphnavController,
   href: string,
-  commit: () => void | Promise<void>,
+  commit: (signal: AbortSignal) => void | Promise<void>,
+  glyphOptions?: GlyphnavOptions,
 ): void => {
   onClick?.(event);
-  if (isModifiedClick(event)) return; // let the browser handle modified clicks
+  if (!eligibleAnchor(event, event.currentTarget)) return;
 
   event.preventDefault();
-  void controller.run(href, commit);
+  void controller.run(href, commit, glyphOptions).catch(reportNavigationError);
 };
