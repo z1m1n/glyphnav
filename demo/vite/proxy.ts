@@ -1,9 +1,10 @@
 import type { ProxyOptions } from 'vite';
 import { ports } from '../ports';
+import { base } from './paths';
 
 /**
  * A dev-server proxy for a demo that runs on its own server (Next, Nuxt,
- * SvelteKit). Forwards the picker link to that server; if it isn't running,
+ * SvelteKit, Astro). Forwards the picker link to that server; if it isn't running,
  * replies with a hint page rather than an opaque error or the silently-wrong
  * SPA-fallback picker.
  *
@@ -40,17 +41,28 @@ export function devProxy(target: string, name: string, command: string): ProxyOp
   };
 }
 
+const proxyBase = base.replace(/\/$/, '');
+
 /**
  * Cross-server proxy map for the dev server. `pnpm demo` starts every demo at
- * once; this Vite server hosts the Vite-based demos, while Next, Nuxt and
- * SvelteKit run on their own servers and are proxied here so the combined picker
- * works at one origin. Their `/next`, `/nuxt` and `/sveltekit` prefixes (and the
+ * once; this Vite server hosts the Vite-based demos, while Next, Nuxt,
+ * SvelteKit and Astro run on their own servers and are proxied here so the combined picker
+ * works at one origin. Their `/next`, `/nuxt`, `/sveltekit` and `/astro` prefixes (and the
  * `_next`/`_nuxt` assets) are unique, so nothing else is caught.
  */
 export const crossServerProxy: Record<string, ProxyOptions> = {
-  '/next': devProxy(`http://localhost:${ports.next}`, 'next', 'pnpm demo:next'),
-  '/nuxt': devProxy(`http://localhost:${ports.nuxt}`, 'nuxt', 'pnpm demo:nuxt'),
-  '/sveltekit': devProxy(`http://localhost:${ports.sveltekit}`, 'sveltekit', 'pnpm demo:sveltekit'),
+  [`${proxyBase}/next`]: devProxy(`http://localhost:${ports.next}`, 'next', 'pnpm demo:next'),
+  [`${proxyBase}/nuxt`]: devProxy(`http://localhost:${ports.nuxt}`, 'nuxt', 'pnpm demo:nuxt'),
+  [`${proxyBase}/sveltekit`]: devProxy(
+    `http://localhost:${ports.sveltekit}`,
+    'sveltekit',
+    'pnpm demo:sveltekit',
+  ),
+  [`${proxyBase}/astro`]: {
+    ...devProxy(`http://localhost:${ports.astro}`, 'astro', 'pnpm demo:astro'),
+    // Astro uses the incoming host to keep its dev assets on the browser's site.
+    changeOrigin: false,
+  },
 };
 
 /**

@@ -1,7 +1,36 @@
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
-import { writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { dirname, relative, resolve } from 'node:path';
+
+const require = createRequire(import.meta.url);
+
+/** Emit with the native TypeScript CLI; compiler errors fail the library build. */
+async function emitDeclarations(): Promise<void> {
+  const compilerRoot = dirname(require.resolve('typescript/package.json'));
+  execFileSync(
+    process.execPath,
+    [
+      resolve(compilerRoot, 'bin/tsc'),
+      '--project',
+      'tsconfig.build.json',
+      '--emitDeclarationOnly',
+      '--noEmitOnError',
+    ],
+    { stdio: 'inherit' },
+  );
+  const output = resolve('dist');
+  const files = await Promise.all(
+    (await readdir(output, { recursive: true }))
+      .filter((path) => path.endsWith('.d.ts'))
+      .map(async (path) => {
+        const absolute = resolve(output, path);
+        return [absolute, await readFile(absolute, 'utf8')] as const;
+      }),
+  );
+  await writeNodeDeclarations(new Map(files));
+}
 
 /** Keep both declaration graphs resolvable by NodeNext, including directory imports. */
 async function writeNodeDeclarations(files: Map<string, string>): Promise<void> {
@@ -62,6 +91,7 @@ export default defineConfig({
         'next/index': 'src/next/index.tsx',
         'nuxt/index': 'src/nuxt/index.ts',
         'sveltekit/index': 'src/sveltekit/index.ts',
+        'astro/index': 'src/astro/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
@@ -84,15 +114,5 @@ export default defineConfig({
       ],
     },
   },
-  plugins: [
-    dts({
-      include: ['src'],
-      tsconfigPath: './tsconfig.build.json',
-      bundleTypes: false,
-      // Hoist inferred `import('react').ReactNode`-style references to
-      // top-of-file static imports instead of inline dynamic imports.
-      staticImport: true,
-      afterBuild: writeNodeDeclarations,
-    }),
-  ],
+  plugins: [{ name: 'glyphnav-native-declarations', closeBundle: emitDeclarations }],
 });

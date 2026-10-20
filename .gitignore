@@ -14,6 +14,7 @@ demo/nuxt/.output/
 demo/nuxt/.data/
 demo/sveltekit/.svelte-kit/
 demo/sveltekit/build/
+demo/astro/.astro/
 *.local
 *.log
 # TypeScript incremental-build cache (e.g. demo/next/tsconfig.tsbuildinfo from

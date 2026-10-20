@@ -6,6 +6,7 @@ import { stackTip } from '@glyphnav-demo/shared/internal/version';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { ports } from '../ports';
+import { kitConfig } from './kit.config';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 const nodeRequire = createRequire(import.meta.url);
@@ -33,7 +34,7 @@ const ver = (name: string): string => {
 const stack = `sveltekit ${ver('@sveltejs/kit')} · svelte ${ver('svelte')}`;
 
 export default defineConfig({
-  plugins: [sveltekit()],
+  plugins: [sveltekit(kitConfig)],
   // Surfaced to the client so the footer can show which stack this demo runs and
   // explain it in a tooltip — the versions above, each in a `<code>` chip
   // alongside the glyphnav version (see stackTip).

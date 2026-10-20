@@ -1,5 +1,5 @@
 <script lang="ts">
-  import DemoView from '$lib/DemoView.svelte';
+  import DemoView from '#lib/DemoView.svelte';
 </script>
 
 <DemoView

@@ -72,7 +72,7 @@ export function createGlyphText(el: HTMLElement): GlyphText {
       // duration spread over the frames, never below MIN_FRAME_MS.
       const step = Math.max(MIN_FRAME_MS, duration / Math.max(1, frames.length - 1));
       await player.play(frames.length, step, (i) => {
-        el.textContent = frames[i].text;
+        el.textContent = frames[i]!.text;
       });
     },
 

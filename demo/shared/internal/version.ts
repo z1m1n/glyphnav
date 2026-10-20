@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 /**
  * glyphnav's own version, read once from the repo root manifest. Every build
- * pipeline (the combined Vite playground, SvelteKit, Next.js, Nuxt) imports
+ * pipeline (the combined Vite playground, SvelteKit, Next.js, Nuxt, Astro) imports
  * this instead of re-reading `package.json` itself, so the footer tooltip's
  * "paired with glyphnav vX" text can't drift between demos.
  *
@@ -22,8 +22,8 @@ export const glyphnavVersion = (
  * like the inline-code chips in the demos' body text. The tip is rendered as
  * HTML (see demo/shared/tooltip.ts); `stack` is the footer's own ` · `-separated
  * label, so every segment becomes a chip and the glyphnav version its own. Kept
- * here, beside {@link glyphnavVersion}, so all four build pipelines (Vite, Next,
- * Nuxt, SvelteKit) format the tip identically and it can't drift between demos.
+ * here, beside {@link glyphnavVersion}, so all five build pipelines (Vite, Next,
+ * Nuxt, SvelteKit, Astro) format the tip identically and it can't drift between demos.
  *
  * @param stack - The footer label, e.g. `solid-js 1.9.13 · @solidjs/router 0.16.1`.
  * @returns The tooltip HTML.

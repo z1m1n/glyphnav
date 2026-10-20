@@ -5,6 +5,42 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Astro ClientRouter adapter (`glyphnav/astro`): `attachGlyphnav(navigate)`
+  animates eligible links and explicit navigation, preserves Astro's navigation
+  options and hard-reload links, and supports opt-in back/forward animation and
+  listener cleanup without importing Astro's virtual modules.
+- Astro demo with persisted controls, query/hash links, integration docs,
+  framework picker, standalone dev server and static GitHub Pages export.
+- Astro adapter unit tests, packaged ESM/CJS consumer checks, and real
+  ClientRouter browser regressions under a deployment prefix.
+
+### Changed
+
+- Refresh framework, router, demo and development dependencies, including
+  Astro 7.4.1, Next.js 16.4.2, Nuxt 4.6.2, SvelteKit 3.1.0, Solid Router 1,
+  Preact 11, Vitest 5, Playwright 1.64 and pnpm 12.14.
+- Use native TypeScript 7 for library declaration emission, the Next.js demo,
+  Astro TypeScript source and SvelteKit checks. Keep TypeScript 6's JavaScript
+  Compiler API for Vue, Nuxt, Astro and Svelte tooling that still requires it; remove the old
+  Compiler API-based declaration plugin and API Extractor dependency.
+- Require native Node ESM and CommonJS imports to pass for every packaged entry
+  point, removing the old TanStack Solid peer exception.
+- Migrate the SvelteKit 3 demo to Vite plugin configuration in `kit.config.ts`,
+  `$app/tsconfig` types and package `#lib/*` imports, retaining live glyphnav
+  source mappings and static export.
+
+### Fixed
+
+- Astro demo scripts load from its own dev server when opened through the
+  framework picker, preserving the browser's hostname for same-site requests;
+  development proxies also preserve the deployment prefix.
+- Update Preact 11 link types and dispose navigation listeners during layout
+  cleanup so unmounted links stop intercepting immediately.
+
 ## [2.4.0] - 2026-09-30
 
 ### Fixed

@@ -1,11 +1,12 @@
 {
   "name": "glyphnav",
   "version": "2.4.0",
-  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, Solid Router, TanStack Router (React & Solid), Angular Router, Preact (preact-iso), Next.js, Nuxt and SvelteKit adapters.",
+  "description": "Animate navigation: random glyphs resolve into the destination URL right in the address bar. Framework-agnostic core with Vue Router, React Router, Solid Router, TanStack Router (React & Solid), Angular Router, Preact (preact-iso), Next.js, Nuxt, SvelteKit and Astro adapters.",
   "keywords": [
     "address-bar",
     "angular-router",
     "animation",
+    "astro",
     "decode",
     "glitch",
     "history",
@@ -166,6 +167,16 @@
         "default": "./dist/sveltekit/index.cjs"
       }
     },
+    "./astro": {
+      "import": {
+        "types": "./dist/astro/index.d.ts",
+        "default": "./dist/astro/index.js"
+      },
+      "require": {
+        "types": "./dist/astro/index.d.cts",
+        "default": "./dist/astro/index.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -175,7 +186,8 @@
     "typecheck:next": "pnpm --filter @glyphnav-demo/next run typecheck",
     "typecheck:nuxt": "pnpm --filter @glyphnav-demo/nuxt run typecheck",
     "typecheck:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit run check",
-    "typecheck:apps": "run-s typecheck:next typecheck:nuxt typecheck:sveltekit",
+    "typecheck:astro": "pnpm --filter @glyphnav-demo/astro run check && tsc --noEmit -p demo/astro/tsconfig.json",
+    "typecheck:apps": "run-s typecheck:next typecheck:nuxt typecheck:sveltekit typecheck:astro",
     "lint": "oxlint --max-warnings=0",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
@@ -184,16 +196,18 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "demo": "run-p demo:vite demo:next demo:nuxt demo:sveltekit",
+    "demo": "run-p demo:vite demo:next demo:nuxt demo:sveltekit demo:astro",
     "demo:vite": "vite --config demo/vite.config.ts",
     "demo:next": "pnpm --filter @glyphnav-demo/next dev",
     "demo:nuxt": "pnpm --filter @glyphnav-demo/nuxt dev",
     "demo:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit dev",
-    "demo:build": "run-s build demo:build:vite demo:build:next demo:build:nuxt demo:build:sveltekit",
+    "demo:astro": "pnpm --filter @glyphnav-demo/astro dev",
+    "demo:build": "run-s build demo:build:vite demo:build:next demo:build:nuxt demo:build:sveltekit demo:build:astro",
     "demo:build:vite": "vite build --config demo/vite.config.ts",
     "demo:build:next": "pnpm --filter @glyphnav-demo/next build && cp -rT demo/next/out demo/dist/next",
     "demo:build:nuxt": "pnpm --filter @glyphnav-demo/nuxt generate && cp -rT demo/nuxt/.output/public demo/dist/nuxt",
     "demo:build:sveltekit": "pnpm --filter @glyphnav-demo/sveltekit build && cp -rT demo/sveltekit/build demo/dist/sveltekit",
+    "demo:build:astro": "pnpm --filter @glyphnav-demo/astro build && cp -rT demo/astro/dist demo/dist/astro",
     "demo:preview": "vite preview --config demo/vite.config.ts",
     "prepublishOnly": "pnpm run build",
     "test:package": "run-s build test:package:built",
@@ -203,50 +217,49 @@
     "validate:release": "node scripts/validate-release.mjs",
     "quality": "run-s build typecheck lint format:check coverage test:package:built test:browser:built",
     "test:browser:next": "run-s build test:browser:next:built",
-    "test:browser:next:built": "playwright test --config playwright.next.config.mjs"
+    "test:browser:next:built": "playwright test --config playwright.next.config.mjs",
+    "test:browser:astro": "playwright test --config playwright.astro.config.mjs"
   },
   "devDependencies": {
-    "@angular/common": "22.2.0",
-    "@angular/compiler": "22.2.0",
-    "@angular/core": "22.2.0",
-    "@angular/platform-browser": "22.2.0",
-    "@angular/router": "22.2.0",
-    "@microsoft/api-extractor": "7.59.2",
-    "@playwright/test": "1.58.1",
-    "@solidjs/router": "0.16.3",
-    "@tanstack/react-router": "1.170.39",
-    "@tanstack/solid-router": "1.170.36",
+    "@angular/common": "22.2.3",
+    "@angular/compiler": "22.2.3",
+    "@angular/core": "22.2.3",
+    "@angular/platform-browser": "22.2.3",
+    "@angular/router": "22.2.3",
+    "@playwright/test": "1.64.1",
+    "@solidjs/router": "1.0.0",
+    "@tanstack/react-router": "1.170.45",
+    "@tanstack/solid-router": "1.170.42",
     "@testing-library/dom": "10.4.2",
     "@testing-library/preact": "3.2.4",
     "@testing-library/react": "16.3.3",
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@typescript/typescript6": "6.0.2",
-    "@vitejs/plugin-react": "6.1.1",
-    "@vitejs/plugin-vue": "6.0.9",
-    "@vitest/coverage-v8": "4.1.11",
-    "jsdom": "29.1.1",
-    "marked": "18.0.14",
-    "next": "16.3.6",
+    "@vitejs/plugin-react": "6.1.2",
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vitest/coverage-v8": "5.0.5",
+    "jsdom": "30.1.3",
+    "marked": "18.1.1",
+    "next": "16.4.2",
     "npm-run-all2": "9.0.3",
-    "oxfmt": "0.70.0",
-    "oxlint": "1.85.0",
-    "preact": "10.29.8",
+    "oxfmt": "0.74.0",
+    "oxlint": "1.89.0",
+    "preact": "11.0.1",
     "preact-iso": "2.12.2",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "react-router": "8.4.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router": "8.5.0",
     "rxjs": "7.8.2",
-    "solid-js": "1.9.15",
+    "solid-js": "1.9.17",
     "typescript": "7.0.2",
-    "vite": "8.3.1",
-    "vite-plugin-dts": "5.1.1",
+    "vite": "8.3.4",
     "vite-plugin-solid": "2.11.14",
-    "vitest": "4.1.11",
-    "vue": "3.5.43",
-    "vue-router": "5.3.1",
-    "vue-tsc": "3.3.11"
+    "vitest": "5.0.5",
+    "vue": "3.5.44",
+    "vue-router": "5.4.0",
+    "vue-tsc": "3.3.13"
   },
   "peerDependencies": {
     "@angular/core": ">=16",
@@ -255,6 +268,7 @@
     "@sveltejs/kit": ">=2",
     "@tanstack/react-router": ">=1",
     "@tanstack/solid-router": ">=1",
+    "astro": ">=5",
     "next": ">=14",
     "nuxt": ">=3",
     "preact": ">=10",
@@ -284,6 +298,9 @@
       "optional": true
     },
     "@tanstack/solid-router": {
+      "optional": true
+    },
+    "astro": {
       "optional": true
     },
     "next": {
@@ -324,5 +341,5 @@
     "node": ">=20.19",
     "pnpm": ">=12"
   },
-  "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec"
+  "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6"
 }

@@ -27,13 +27,13 @@ interface PackageManager {
 }
 
 /** Package managers offered by the install tabs, in display order. */
-const PACKAGE_MANAGERS: readonly PackageManager[] = [
+const PACKAGE_MANAGERS = [
   { id: 'npm', cmd: (pkg) => `npm install ${pkg}` },
   { id: 'pnpm', cmd: (pkg) => `pnpm add ${pkg}` },
   { id: 'yarn', cmd: (pkg) => `yarn add ${pkg}` },
   { id: 'bun', cmd: (pkg) => `bun add ${pkg}` },
   { id: 'deno', cmd: (pkg) => `deno add npm:${pkg}` },
-];
+] as const satisfies readonly PackageManager[];
 
 /**
  * The package to install — the last token of the shared install command

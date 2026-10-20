@@ -2,7 +2,7 @@
   import '@glyphnav-demo/shared/styles.css';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { base, resolve } from '$app/paths';
+  import { resolve } from '$app/paths';
   import { attachGlyphnav } from 'glyphnav/sveltekit';
   import type { SvelteKitGlyphnavInstance } from 'glyphnav/sveltekit';
   import type { AnimateScope, CommitTiming, GlyphEffect } from 'glyphnav/core';
@@ -35,13 +35,13 @@
 
   // Derive links outside this app from the absolute configured base. resolve()
   // can emit relative paths during prerender, which cannot identify the parent.
-  const rootHref = base.replace(/\/sveltekit$/, '') + '/';
+  const rootHref = resolve('/').replace(/\/sveltekit\/?$/, '/');
 
   // Base-prefixed nav targets, resolved once.
   const homeHref = resolve('/');
-  const aboutHref = resolve('/about/');
-  const docsHref = resolve('/docs/');
-  const featuresHref = resolve('/features/');
+  const aboutHref = resolve('about/');
+  const docsHref = resolve('docs/');
+  const featuresHref = resolve('features/');
 
   // State starts at the defaults so the prerendered markup is stable; the saved
   // toolbar is restored on the client after mount.
@@ -176,9 +176,9 @@
 
     <nav class="deep" aria-label="deep links">
       <span class="deep-label">deep links:</span>
-      <a href={resolve('/about/?ref=deep&page=2')}>?query</a>
-      <a href={resolve('/docs/#options')}>#hash</a>
-      <a href={resolve('/about/?q=glyph#results')}>?query+#hash</a>
+      <a href={resolve('about/?ref=deep&page=2')}>?query</a>
+      <a href={resolve('docs/#options')}>#hash</a>
+      <a href={resolve('about/?q=glyph#results')}>?query+#hash</a>
     </nav>
 
     <div class="controls">

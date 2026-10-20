@@ -114,7 +114,7 @@ function render(): void {
 
 /** Advance to the next preference, persist, repaint and relabel. */
 function cycle(): void {
-  pref = ORDER[(ORDER.indexOf(pref) + 1) % ORDER.length];
+  pref = ORDER[(ORDER.indexOf(pref) + 1) % ORDER.length]!;
   savePref(pref);
   apply(pref);
   render();
