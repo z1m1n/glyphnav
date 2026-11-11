@@ -8,10 +8,10 @@
  * framework without a round-trip through the picker. The menu itself is a
  * data-driven top-layer overlay (a native popover: light dismiss and Escape
  * handled by the browser), so — like the tooltip and theme-toggle helpers — it
- * is built in script rather than hand-authored 12× per demo. It's themed like
+ * is built in script rather than hand-authored for each demo. It's themed like
  * the controls toolbar; every item is a plain cross-demo anchor (a full page
  * load into a different app), marked `data-glyphnav="off"` so the
- * link-intercepting demos (vanilla, preact-iso, sveltekit) leave it to the
+ * link-intercepting demos (vanilla, preact-iso, sveltekit, astro) leave it to the
  * browser.
  *
  * Framework-agnostic by design (like demo/shared/tooltip.ts, whose popover
@@ -77,6 +77,7 @@ function buildMenu(root: string, current: string): HTMLSpanElement {
     item.dataset.fw = fw;
     // Cross-demo link: the intercepting demos must let the browser load it.
     item.dataset.glyphnav = 'off';
+    item.dataset.astroReload = '';
     if (name === current) item.setAttribute('aria-current', 'page');
     menu.append(item);
   }

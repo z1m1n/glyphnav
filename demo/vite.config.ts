@@ -15,7 +15,7 @@ import { crossServerProxy, previewProxy } from './vite/proxy';
 /**
  * Playground for the vanilla, Vue Router, React Router, Solid Router, TanStack
  * Router and Angular Router integrations. `glyphnav` is aliased to the live
- * `src/` so the demos always reflect the working tree; Next, Nuxt and SvelteKit
+ * `src/` so the demos always reflect the working tree; Next, Nuxt, SvelteKit and Astro
  * have their own dev servers and are proxied in (see {@link crossServerProxy}).
  * The dev server is strict-port, so a stale instance fails loudly rather than
  * silently moving the picker to another port.

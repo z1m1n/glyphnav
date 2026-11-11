@@ -106,7 +106,7 @@ export const shuffledIndices = (n: number, rng: Rng): number[] => {
   const order = Array.from({ length: n }, (_, i) => i);
   for (let i = n - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
+    [order[i], order[j]] = [order[j]!, order[i]!];
   }
 
   return order;
@@ -148,7 +148,7 @@ export const scrambleBurst = (target: string, config: ScrambleConfig): ScrambleF
   const frames: ScrambleFrame[] = [{ text: flicker(), phase: 'grow' }];
 
   for (let k = resolveStep; k < n; k += resolveStep) {
-    for (let j = k - resolveStep; j < k; j++) locked[order[j]] = true;
+    for (let j = k - resolveStep; j < k; j++) locked[order[j]!] = true;
     frames.push({ text: flicker(), phase: 'resolve' });
   }
   frames.push({ text: target, phase: 'resolve' });

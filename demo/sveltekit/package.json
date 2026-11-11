@@ -4,24 +4,28 @@
   "private": true,
   "description": "SvelteKit demo for glyphnav, part of the combined demo deploy.",
   "type": "module",
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --tsgo"
   },
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*"
   },
   "devDependencies": {
-    "@sveltejs/adapter-static": "3.0.10",
-    "@sveltejs/kit": "2.70.3",
+    "@sveltejs/adapter-static": "4.0.0",
+    "@sveltejs/kit": "3.1.0",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
-    "svelte": "5.57.1",
-    "svelte-check": "4.7.6",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "svelte": "5.57.2",
+    "svelte-check": "4.7.7",
     "typescript": "6.0.3",
-    "vite": "8.3.1"
+    "vite": "8.3.4"
   },
-  "//typescript": "Checked 2026-09-27: svelte-check 4.7.6 supports TypeScript 7 under @typescript/native@npm:typescript@7 with --tsgo (GA alias support was added in 4.7.4). A reversible hybrid probe passed with 0 errors/warnings while retaining TypeScript 6 for the JS API. The standard check and SvelteKit peer support still use TypeScript 6; native checks are an opt-in follow-up."
+  "//typescript": "svelte-check 4.7.7 uses native TypeScript 7 via --tsgo and @typescript/native; TypeScript 6 remains installed for SvelteKit and the checker JavaScript Compiler API."
 }

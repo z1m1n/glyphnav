@@ -26,6 +26,7 @@ export const clamp = (value: number, min: number, max: number): number =>
  * widgets that live for the whole page (e.g. the tooltips) can omit it.
  */
 export function onViewportShift(handler: () => void, signal?: AbortSignal): void {
-  window.addEventListener('scroll', handler, { capture: true, signal });
-  window.addEventListener('resize', handler, { signal });
+  const options = signal ? { signal } : undefined;
+  window.addEventListener('scroll', handler, { capture: true, ...options });
+  window.addEventListener('resize', handler, options);
 }

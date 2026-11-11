@@ -33,4 +33,6 @@ export const ports = {
   nuxt: port('GLYPHNAV_PORT_NUXT', 5176),
   /** SvelteKit demo's own dev server. */
   sveltekit: port('GLYPHNAV_PORT_SVELTEKIT', 5177),
+  /** Astro ClientRouter demo's own dev server. */
+  astro: port('GLYPHNAV_PORT_ASTRO', 5178),
 } as const;

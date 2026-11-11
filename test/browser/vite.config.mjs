@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   root: fileURLToPath(new URL('./fixture', import.meta.url)),
+  cacheDir: fileURLToPath(new URL('./fixture/node_modules/.vite/', import.meta.url)),
   plugins: [react()],
-  server: { host: '127.0.0.1', port: 4179, strictPort: true },
+  server: { host: 'localhost', port: 4179, strictPort: true },
 });

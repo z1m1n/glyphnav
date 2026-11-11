@@ -38,13 +38,14 @@ jobs:
       # Fully check every demo before building/deploying. `pnpm run check` runs
       # the library gate — typecheck (the library, its tooling configs and the
       # Vite-bundled demos, including the Vue SFC via vue-tsc), lint with a
-      # zero-warning budget, format check and tests. The Nuxt and SvelteKit apps
+      # zero-warning budget, format check and tests. The Nuxt, SvelteKit and Astro apps
       # have their own generated-type checks (nuxi prepare + vue-tsc,
-      # svelte-kit sync + svelte-check). The Next.js app is type-checked by
+      # svelte-kit sync + svelte-check, astro check). The Next.js app is type-checked by
       # `next build` in the step below, so it needs no separate check here.
       - run: pnpm run check
       - run: pnpm run typecheck:nuxt
       - run: pnpm run typecheck:sveltekit
+      - run: pnpm run typecheck:astro
 
       - name: Build demo
         # A GitHub project page is served under /<repo>/, so the demo must be
@@ -53,9 +54,9 @@ jobs:
         #
         # `demo:build` orchestrates every demo build: the Vite playground (vanilla,
         # Vue, React, Solid, TanStack, Angular, Preact) plus standalone Next.js,
-        # Nuxt and SvelteKit
+        # Nuxt, SvelteKit and Astro
         # workspace projects, which are statically exported and copied into
-        # demo/dist/{next,nuxt,sveltekit}. DEMO_BASE is threaded through all of them.
+        # demo/dist/{next,nuxt,sveltekit,astro}. DEMO_BASE is threaded through all of them.
         env:
           DEMO_BASE: /${{ github.event.repository.name }}/
         run: pnpm demo:build

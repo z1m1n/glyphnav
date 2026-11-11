@@ -13,11 +13,11 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "nuxt": "4.5.2"
+    "nuxt": "4.6.2"
   },
   "devDependencies": {
     "typescript": "6.0.3",
-    "vue-tsc": "3.3.11"
+    "vue-tsc": "3.3.13"
   },
-  "//typescript": "Checked 2026-09-27: vue-tsc 3.3.11 still needs the JS Compiler API, which typescript 7.0.2 does not export. The Nuxt demo retains TypeScript 6.0.3. Vue native support is tracked in vuejs/language-tools#5381."
+  "//typescript": "vue-tsc 3.3.13 requires the TypeScript 6 JavaScript Compiler API; native TypeScript 7 is used for the library and standalone TypeScript checks."
 }

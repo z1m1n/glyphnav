@@ -1,0 +1,16 @@
+---
+import DemoLayout from '../layouts/DemoLayout.astro';
+---
+
+<DemoLayout>
+  <div class="view">
+    <article>
+      <header class="lead">
+        <h2>Features</h2>
+        Try both commit orders, decode or scramble, and full or tail scope.
+        The toolbar remembers your choices; back/forward animation is opt-in.
+      </header>
+      <p><a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/about/`} data-astro-history="replace">Replace this history entry</a></p>
+    </article>
+  </div>
+</DemoLayout>

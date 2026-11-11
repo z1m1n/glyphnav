@@ -1,4 +1,4 @@
-# The library is the root package; the Next.js, Nuxt and SvelteKit demos are
+# The library is the root package; the Next.js, Nuxt, SvelteKit and Astro demos are
 # separate projects (their own build systems) wired in as workspace members so a
 # single `pnpm install` covers everything and the demos consume the lib via
 # `glyphnav: workspace:*`. The Vite-based demos (vanilla, Vue, React, TanStack,
@@ -8,6 +8,7 @@ packages:
   - 'demo/next'
   - 'demo/nuxt'
   - 'demo/sveltekit'
+  - 'demo/astro'
 autoInstallPeers: true
 strictPeerDependencies: false
 # Pin dependencies to exact versions on `pnpm add` (ranges are reserved for
@@ -37,7 +38,3 @@ minimumReleaseAgeExclude:
   - preact-iso
   - react-router
   - vue-tsc
-
-# SvelteKit still requests cookie ^0.6.0; 0.7.2 fixes GHSA-pxg6-pf52-xh8x.
-overrides:
-  '@sveltejs/kit>cookie': '0.7.2'

@@ -33,7 +33,8 @@ Jump straight to an integration:
 [Preact (preact-iso)](https://z1m1n.github.io/glyphnav/preact-iso/) ·
 [Next.js](https://z1m1n.github.io/glyphnav/next/) ·
 [Nuxt](https://z1m1n.github.io/glyphnav/nuxt/) ·
-[SvelteKit](https://z1m1n.github.io/glyphnav/sveltekit/)
+[SvelteKit](https://z1m1n.github.io/glyphnav/sveltekit/) ·
+[Astro](https://z1m1n.github.io/glyphnav/astro/)
 
 `glyphnav` rewrites `history.replaceState` frame by frame: it fills the destination
 path with random glyphs (the **grow** phase), then resolves the real characters
@@ -46,7 +47,8 @@ because unloading the document would end the animation.
 - 🔌 **Adapters named after the router they wrap**: `glyphnav/vue-router`,
   `glyphnav/react-router`, `glyphnav/solid-router`, `glyphnav/tanstack-router/react`,
   `glyphnav/tanstack-router/solid`, `glyphnav/angular-router`, `glyphnav/preact-iso`,
-  `glyphnav/next` (App **and** Pages Router), `glyphnav/nuxt` and `glyphnav/sveltekit`.
+  `glyphnav/next` (App **and** Pages Router), `glyphnav/nuxt`, `glyphnav/sveltekit`
+  and `glyphnav/astro`.
 - ⚡ **Navigate‑first by default** (`commit: 'before'`) — navigation starts
   immediately and the animation plays after it lands; switch to `commit: 'after'` for the
   classic animate‑then‑commit order.
@@ -179,6 +181,7 @@ browser already did that).
   - Vue / Nuxt: `attachGlyphnav(router, { animatePopState: true })` /
     `installGlyphnav(app, { animatePopState: true })` — `detach()` removes the listener.
   - SvelteKit: `attachGlyphnav(goto, { animatePopState: true })` — `detach()` removes the listener.
+  - Astro: `attachGlyphnav(navigate, { animatePopState: true })` — `detach()` removes the listener.
   - Angular: `provideGlyphnav({ animatePopState: true })`.
 
 Under the hood the core controller exposes `enableHistoryAnimation()` (wire up the
@@ -221,7 +224,7 @@ import { URL_SAFE, ALPHANUMERIC, LOWER_ALPHA, HEX, SYMBOLS, MATRIX, BINARY } fro
 ## Router adapters
 
 Each subpath is named after the router it wraps. The Vue and Nuxt plugins, the
-SvelteKit adapter, and vanilla `install()` intercept globally — and all can be told
+SvelteKit and Astro adapters, and vanilla `install()` intercept globally — and all can be told
 not to. The React, Solid, TanStack, Angular and Next adapters are opt‑in by design:
 only navigations made through their links/hooks animate. The Preact adapter is opt‑in
 too, but adds `interceptLinks` to animate the plain `<a>` clicks preact-iso already
@@ -561,6 +564,66 @@ live URL, so the animated path always matches the address bar.
 
 ---
 
+### Astro ClientRouter — `glyphnav/astro`
+
+▶ **[Live demo](https://z1m1n.github.io/glyphnav/astro/)**
+
+Add Astro's `ClientRouter` to your shared layout and attach glyphnav in a bundled
+client script. Every eligible same-origin anchor then animates, and Astro performs
+the navigation. This adapter supports Astro 5+ with ClientRouter; the workspace
+demo runs Astro 7.4.1:
+
+```astro
+---
+import { ClientRouter } from 'astro:transitions';
+---
+<html lang="en">
+  <head><ClientRouter /></head>
+  <body>
+    <a href="/about/">About</a>
+    <slot />
+    <script>
+      import { navigate } from 'astro:transitions/client';
+      import { attachGlyphnav } from 'glyphnav/astro';
+
+      const glyph = attachGlyphnav(navigate, { duration: 250 });
+      // Animated imperative navigation:
+      // await glyph.navigate('/about/', { history: 'replace' });
+      if (import.meta.hot) import.meta.hot.dispose(() => glyph.detach());
+    </script>
+  </body>
+</html>
+```
+
+Bundled Astro scripts execute once across ClientRouter swaps; attach once to
+`document`, rather than reinstalling on each `astro:page-load`. Pass Astro's
+`navigate` into the adapter because `astro:transitions/client` is a virtual module
+resolved by Astro. The adapter itself stays importable in ESM, CommonJS and SSR.
+
+The default `commit: 'before'` awaits Astro's navigation promise and decodes the
+landed URL, including redirects. `commit: 'after'` animates before navigating.
+Imperative failures reject `glyph.navigate()`; click failures go to `reportError`
+or the console. Astro's `history`, `info`, `state`, `formData` and `sourceElement`
+options pass through unchanged:
+
+```ts
+const glyph = attachGlyphnav(navigate, { intercept: 'none' });
+await glyph.navigate('/about/', { history: 'replace', state: { from: 'home' } });
+const unlink = glyph.link(document.querySelector<HTMLAnchorElement>('#about')!);
+unlink(); // remove this anchor's listener
+glyph.detach(); // remove owned listeners and cancel pending work
+```
+
+Use `data-glyphnav="off"` to skip animation, or `data-astro-reload` for a native
+full-page load. New-tab, download, external and modified clicks pass through.
+Intercepted anchors preserve `data-astro-history="replace"` and are forwarded as
+Astro's `sourceElement`. Base-prefixed hrefs, query strings and hashes need no extra
+configuration. Direct calls to Astro's original `navigate` and form submissions
+retain Astro's behavior; use the instance's `navigate` to animate imperative calls.
+Back/forward animation is opt-in with `animatePopState: true`.
+
+---
+
 ## Core API — `glyphnav/core`
 
 ```ts
@@ -597,37 +660,47 @@ and Preact (preact-iso), plus a core API playground:
 
 ```bash
 pnpm install
-pnpm demo                  # → http://localhost:5173  (picker + all eleven, live)
+pnpm demo                  # → http://localhost:5173  (picker + all twelve integrations, live)
 # …or run one server individually:
 pnpm demo:vite             # → http://localhost:5173  (the eight Vite integrations + core)
 pnpm demo:next             # → http://localhost:5174/next   (Next.js, own dev server)
 pnpm demo:nuxt             # → http://localhost:5176/nuxt   (Nuxt, own dev server)
 pnpm demo:sveltekit        # → http://localhost:5177/sveltekit   (SvelteKit, own dev server)
+pnpm demo:astro            # → http://localhost:5178/astro   (Astro ClientRouter, own dev server)
 ```
 
 The ports above are defined in [`demo/.env`](demo/.env) (`GLYPHNAV_PORT_VITE`,
-`GLYPHNAV_PORT_NEXT`, `GLYPHNAV_PORT_NUXT`, `GLYPHNAV_PORT_SVELTEKIT`) as the
+`GLYPHNAV_PORT_NEXT`, `GLYPHNAV_PORT_NUXT`, `GLYPHNAV_PORT_SVELTEKIT`, `GLYPHNAV_PORT_ASTRO`) as the
 single source of truth — each demo's own dev server **and** the picker proxy that
 forwards to it read the same value via `demo/ports.ts`, so changing one there
 moves both together.
 
-Next.js, Nuxt and SvelteKit have their own build systems, so they're separate
-workspace projects under `demo/next`, `demo/nuxt` and `demo/sveltekit` rather than
+Use `localhost` for local demo URLs. Server bindings, proxy targets and browser
+tests use that hostname consistently, including Astro's development modules.
+
+Next.js, Nuxt, SvelteKit and Astro have their own build systems, so they're separate
+workspace projects under `demo/next`, `demo/nuxt`, `demo/sveltekit` and `demo/astro` rather than
 Vite entries — each runs on its own dev server. `pnpm demo` (`run-p` via
-`npm-run-all2`) starts all four together, and the Vite dev server proxies `/next`,
-`/nuxt` and `/sveltekit` to them, so the picker
-at `:5173` reaches every demo from one origin (run just `pnpm demo:vite` and those three
+`npm-run-all2`) starts all five together, and the Vite dev server proxies `/next`,
+`/nuxt`, `/sveltekit` and `/astro` to them, so the picker
+at `:5173` reaches every demo from one origin (run just `pnpm demo:vite` and those four
 links show a hint pointing at their own server). Run a **single** `pnpm demo` — a
 second Nuxt instance sharing `demo/nuxt/.nuxt` breaks dev; kill any stale `:5176`
 server first. For the deployed artifact,
 `pnpm demo:build` (`run-s`) builds the Vite playground, statically exports Next
-(`output: 'export'`), Nuxt (`nuxi generate`) and SvelteKit (`adapter-static`), and
-copies their output into `demo/dist/{next,nuxt,sveltekit}` so a single `demo/dist`
-deploys all eleven. Nuxt and SvelteKit fail on unexpected prerender errors;
+(`output: 'export'`), Nuxt (`nuxi generate`), SvelteKit (`adapter-static`) and Astro
+(`output: 'static'`), and copies their output into `demo/dist/{next,nuxt,sveltekit,astro}`
+so a single `demo/dist` deploys all twelve integrations. Nuxt and SvelteKit fail on unexpected prerender errors;
 only known links to the surrounding picker/changelog and the intentional
-SvelteKit `about#results` demo link are exempt. All demos — Vite, Next, Nuxt and SvelteKit — share one
+SvelteKit `about#results` demo link are exempt. All demos — Vite, Next, Nuxt, SvelteKit and Astro — share one
 `@glyphnav-demo/shared` workspace package for the charsets,
 address‑bar helpers, syntax highlighter and styles.
+
+The SvelteKit 3 demo keeps its configuration in
+[`demo/sveltekit/kit.config.ts`](demo/sveltekit/kit.config.ts), passed to the Vite
+plugin as `sveltekit(kitConfig)`. Its TypeScript configuration extends
+`$app/tsconfig` and maps glyphnav imports to the live source. Internal `#lib/*`
+imports are defined in the demo's `package.json` imports map.
 
 The Angular demo runs in **JIT mode** inside the same dev server: it imports
 `@angular/compiler` in the browser, so no ngtsc build step (and no second app)
@@ -642,7 +715,7 @@ with copy‑paste integration snippets, **deep links with `?query` and `#hash`**
 (they animate like any path), and controls for charset, speed (whole‑animation
 duration 20–1000 ms, slider inverted so full right is fastest), effect
 (`decode`/`scramble`), commit order (`navigate first`/`animate first`) and scope.
-The Vite, Nuxt and SvelteKit demos alias `glyphnav` to `src/`. The Next demo consumes
+The Vite, Nuxt, SvelteKit and Astro demos alias `glyphnav` to `src/`. The Next demo consumes
 `dist/`; `pnpm demo:next` builds the library before starting Next and keeps a
 library build watcher running, so a fresh checkout starts correctly and source
 edits update the demo live.
@@ -651,34 +724,48 @@ edits update the demo live.
 
 ## Development
 
-The repo is a [pnpm](https://pnpm.io) **12.6** workspace: the library is the root
-package, with the Next.js, Nuxt and SvelteKit demos as members under `demo/` (the other demos
-are plain files in the root package).
+Use **Node.js 24**, the version used by CI; the current Astro demo requires at
+least Node.js 22.22. The repo is a [pnpm](https://pnpm.io) workspace, with the
+package-manager version pinned in [`package.json`](package.json). The library is
+the root package, and the shared helpers plus Next.js, Nuxt, SvelteKit and Astro
+demos are workspace members under `demo/`. The other demos are plain files in
+the root package.
 
 ```bash
 pnpm test            # Vitest (jsdom) — core, controller, vanilla + all adapters
 pnpm run typecheck   # tsc --noEmit
+pnpm run typecheck:apps # Next.js, Nuxt, SvelteKit and Astro demo checks
 pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
 pnpm test:package    # pack tarball; NodeNext ESM/CJS declarations + runtime imports
 pnpm exec playwright install chromium  # browser setup (once)
 pnpm test:browser    # build + Chromium address-bar integration regressions
 pnpm test:browser:next # build + native Next Link regression in the Next demo
+pnpm test:browser:astro # real Astro ClientRouter regressions under /glyphnav/
+pnpm typecheck:astro   # Astro templates + native TS7 source checks
 pnpm run quality    # PR gate: build, types, lint, format, coverage, package + browser
 ```
 
-The package is built with **Vite 8** in library mode with twelve entry points
+The library and Next.js demo use the native **TypeScript 7.0.2** compiler. The
+Astro check combines its template checker with a native TypeScript 7 check of
+the demo's TypeScript source. SvelteKit uses native checks through
+`svelte-check --tsgo`,
+while retaining TypeScript 6.0.3 for framework tools that use the JavaScript
+Compiler API. Vue SFC, Nuxt and Astro template checks still use that TypeScript 6
+API; the root Vue check selects it through `@typescript/typescript6`. These separate
+toolchains let the native compiler check the library without breaking framework
+checkers that need the older API.
+
+The package is built with **Vite 8** in library mode with thirteen entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./solid-router`,
 `./tanstack-router/react`, `./tanstack-router/solid`, `./angular-router`, `./preact-iso`, `./next`,
-`./nuxt`, `./sveltekit`); router/framework deps are always externalized. Declarations are
-generated against `tsconfig.build.json`, with explicit relative extensions and
-separate `.d.ts` / `.d.cts` graphs selected by the package's import/require exports.
-The installed `@tanstack/solid-router@1.170.36` peer has a native Node `require()`
-limitation: its CJS build requires `@solid-primitives/refs`, whose exports are
-import-only. The packaged checks verify both declaration formats and ESM runtime
-for this adapter, and recognize only that specific upstream CJS failure; the
-adapter remains available to bundler consumers.
-Release publishing validates that its tag matches `package.json` before running
+`./nuxt`, `./sveltekit`, `./astro`); router/framework deps are always externalized.
+Declarations are generated by the native TypeScript CLI against
+`tsconfig.build.json`, with explicit relative extensions and separate `.d.ts` /
+`.d.cts` graphs selected by the package's import/require exports.
+Packed consumer checks verify both declaration formats and native Node ESM/CJS
+runtime imports for every entry point. Release publishing validates that its tag
+matches `package.json` before running
 checks and packed consumer tests.
 
 ---

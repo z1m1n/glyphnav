@@ -1,0 +1,26 @@
+{
+  "name": "@glyphnav-demo/astro",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Astro ClientRouter demo for glyphnav, part of the combined demo deploy.",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --ignore-lock",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@glyphnav-demo/shared": "workspace:*",
+    "astro": "7.4.1",
+    "glyphnav": "workspace:*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.11",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "//typescript": "astro check 0.9.11 requires the TypeScript 6 JavaScript Compiler API; the library and plain TypeScript use native TypeScript 7."
+}

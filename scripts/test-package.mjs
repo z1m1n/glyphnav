@@ -60,7 +60,7 @@ try {
           ? 'createGlyphnav'
           : entry === './angular-router'
             ? 'createGlyphnavNavigator'
-            : entry === './sveltekit' || entry === './vue-router' || entry === './nuxt'
+            : ['./astro', './sveltekit', './vue-router', './nuxt'].includes(entry)
               ? 'attachGlyphnav'
               : 'GlyphnavLink';
       await writeFile(
@@ -111,35 +111,17 @@ try {
       cjs,
       `${solid ? "const { JSDOM } = require('jsdom');\nconst dom = new JSDOM('<!doctype html>', { url: 'http://localhost/' });\nglobalThis.window = dom.window;\nglobalThis.document = dom.window.document;\n" : ''}${entry === './angular-router' ? "require('@angular/compiler');\n" : ''}const api = require('${specifier}');\nif (!Object.keys(api).length) throw new Error('Empty CJS entry');\n${browserCleanup}\n`,
     );
-    let nativeCjsPeerLimited = false;
     for (const fixture of [esm, cjs]) {
       try {
         run(process.execPath, [...(solid ? ['--conditions=browser'] : []), fixture]);
       } catch (error) {
-        // This installed peer's CJS build requires an import-only dependency.
-        // Keep the exception exact: package errors and all other peers fail.
-        if (
-          entry === './tanstack-router/solid' &&
-          fixture === cjs &&
-          error.stderr?.includes('ERR_PACKAGE_PATH_NOT_EXPORTED') &&
-          error.stderr.includes('@solid-primitives/refs/package.json')
-        ) {
-          nativeCjsPeerLimited = true;
-          continue;
-        }
         throw new Error(
           `${specifier} runtime failed:\n${error.stdout ?? ''}${error.stderr ?? ''}`,
           { cause: error },
         );
       }
     }
-    console.log(
-      `✓ ${specifier}: NodeNext ESM/CJS types, ESM runtime${
-        nativeCjsPeerLimited
-          ? '; native CJS limited by @tanstack/solid-router peer (@solid-primitives/refs exports)'
-          : ', CJS runtime'
-      }`,
-    );
+    console.log(`✓ ${specifier}: NodeNext ESM/CJS types, ESM runtime, CJS runtime`);
   }
 } finally {
   await rm(temporary, { recursive: true, force: true });

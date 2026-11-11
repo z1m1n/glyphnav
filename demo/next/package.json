@@ -14,15 +14,15 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "next": "16.3.6",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
-  "//typescript": "Checked 2026-09-27: Next 16.3.6 supports TypeScript 7 via experimental.useTypeScriptCli (enabled by default). A reversible build probe with typescript 7.0.2 passed, including static export. The demo keeps TypeScript 6.0.3; a separate TS7 migration can now use the supported CLI path."
+  "//typescript": "Next 16.4 uses the TypeScript CLI and supports native TypeScript 7 for type checks and production builds."
 }

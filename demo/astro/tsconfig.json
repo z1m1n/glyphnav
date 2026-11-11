@@ -1,0 +1,12 @@
+{
+  "extends": "astro/tsconfigs/strictest",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "paths": {
+      "glyphnav/astro": ["../../src/astro/index.ts"],
+      "glyphnav/core": ["../../src/core/index.ts"]
+    }
+  },
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}

@@ -1,0 +1,32 @@
+---
+import DemoLayout from '../layouts/DemoLayout.astro';
+import { DOCS_INSTALL, highlight } from '@glyphnav-demo/shared';
+import { setup, variants, options } from '../docs';
+---
+
+<DemoLayout>
+  <div class="view docs">
+    <article>
+      <header class="lead"><h2>Docs</h2>Install the package — Astro stays a peer dependency:</header>
+      <figure><pre><code set:html={highlight(DOCS_INSTALL)} /></pre></figure>
+      <figure>
+        <figcaption>Attach once in a shared layout's bundled client script:</figcaption>
+        <pre><code set:html={highlight(setup)} /></pre>
+      </figure>
+      <figure>
+        <figcaption>Or animate only explicit navigation and selected links:</figcaption>
+        <pre><code set:html={highlight(variants)} /></pre>
+      </figure>
+      <figure>
+        <figcaption id="options">Animation and interception options:</figcaption>
+        <pre><code set:html={highlight(options)} /></pre>
+      </figure>
+      <aside class="note">
+        Use <code>data-glyphnav="off"</code> to skip animation and <code>data-astro-reload</code>
+        for a native page load. Link interception preserves <code>data-astro-history="replace"</code>
+        and passes the anchor as Astro's <code>sourceElement</code>.
+        Every frame uses <code>history.replaceState</code>; browser URL autocomplete and extensions can record those writes.
+      </aside>
+    </article>
+  </div>
+</DemoLayout>

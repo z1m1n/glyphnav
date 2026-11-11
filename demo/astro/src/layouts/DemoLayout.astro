@@ -1,0 +1,111 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@glyphnav-demo/shared/styles.css';
+import logo from '@glyphnav-demo/shared/logo.svg';
+import {
+  CONTROL_TOOLTIPS,
+  DEFAULT_TOOLBAR,
+  durationToSlider,
+  SPEED_SLIDER,
+  THEME_INIT_SCRIPT,
+  TOOLBAR_SELECTS,
+} from '@glyphnav-demo/shared';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const rootHref = base.replace(/\/astro$/, '') + '/';
+const href = (path = ''): string => `${base}/${path}`;
+const state = DEFAULT_TOOLBAR;
+const selects = ['charset', 'effect', 'commit', 'scope'] as const;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={THEME_INIT_SCRIPT} />
+    <title>glyphnav — astro</title>
+    <meta name="description" content="glyphnav for Astro's ClientRouter: animate internal links and programmatic navigation in the address bar. Live, interactive demo." />
+    <link rel="canonical" href="https://z1m1n.github.io/glyphnav/astro/" />
+    <link rel="icon" type="image/svg+xml" href={`${rootHref}favicon.svg`} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="glyphnav" />
+    <meta property="og:title" content="glyphnav — Astro demo" />
+    <meta property="og:description" content="attachGlyphnav(navigate) animates Astro ClientRouter navigation in the address bar." />
+    <meta property="og:url" content="https://z1m1n.github.io/glyphnav/astro/" />
+    <meta property="og:image" content="https://z1m1n.github.io/glyphnav/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://z1m1n.github.io/glyphnav/og.png" />
+    <ClientRouter />
+  </head>
+  <body data-fw="astro">
+    <div class="app-shell">
+      <main>
+        <!-- Keep the controls and shared helper nodes alive across page swaps. -->
+        <div transition:persist="astro-chrome">
+          <h1>
+            <img class="glyph-mark" src={logo.src} alt="" />
+            <a href={rootHref} class="wordmark" data-glyphnav="off" data-astro-reload>glyphnav</a>
+            <span class="sep">/</span>
+            <span class="crumb">astro</span>
+            <button type="button" class="fw-switch" aria-label="Switch demo" aria-expanded="false" aria-controls="fw-menu"></button>
+          </h1>
+          <p class="bar">Watch the address bar. Current path: <span class="path">{Astro.url.pathname}</span></p>
+          <nav class="tabs" aria-label="demo pages">
+            <a href={href()}>Home</a>
+            <a href={href('about/')}>About</a>
+            <a href={href('docs/')}>Docs</a>
+            <a href={href('features/')}>Features</a>
+          </nav>
+          <nav class="deep" aria-label="deep links">
+            <span class="deep-label">deep links:</span>
+            <a href={href('about/?ref=deep&page=2')}>?query</a>
+            <a href={href('docs/#options')}>#hash</a>
+            <a href={href('about/?q=glyph#results')}>?query+#hash</a>
+          </nav>
+          <div class="controls">
+            <label data-tip={CONTROL_TOOLTIPS.charset}>
+              charset
+              <select id="charset">
+                {TOOLBAR_SELECTS.charset.map((o) => <option value={o.value} selected={o.value === state.charset}>{o.label}</option>)}
+              </select>
+            </label>
+            <label data-tip={CONTROL_TOOLTIPS.speed}>
+              speed
+              <input id="duration" type="range" min={SPEED_SLIDER.min} max={SPEED_SLIDER.max} step={SPEED_SLIDER.step} value={durationToSlider(state.duration)} aria-valuetext={`${state.duration}ms`} />
+              <span class="ms">{state.duration}ms</span>
+            </label>
+            {selects.filter((key) => key !== 'charset').map((key) => (
+              <label data-tip={CONTROL_TOOLTIPS[key]}>
+                {key}
+                <select id={key}>
+                  {TOOLBAR_SELECTS[key].map((o) => <option value={o.value} selected={o.value === state[key]}>{o.label}</option>)}
+                </select>
+              </label>
+            ))}
+            <label class="toggle" data-tip={CONTROL_TOOLTIPS.backForward}>
+              <input id="back-forward" type="checkbox" /> back/forward
+            </label>
+          </div>
+        </div>
+        <slot />
+        <p class="foot">
+          Served under the <code>/astro</code> base with Astro's <code>ClientRouter</code>.{' '}
+          <code>attachGlyphnav(navigate)</code> animates eligible links and awaits Astro's real navigation.
+          The title link returns to the picker with a full page load.
+        </p>
+      </main>
+      <footer class="site-footer" transition:persist="astro-footer">
+        <a href="https://github.com/z1m1n/glyphnav" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.npmjs.com/package/glyphnav" target="_blank" rel="noopener">NPM</a>
+        <a href={`${rootHref}changelog/`} data-glyphnav="off" data-astro-reload>Changelog</a>
+        <span class="stack" data-tip={GLYPHNAV_STACK_TIP}>{GLYPHNAV_STACK}</span>
+      </footer>
+    </div>
+    <div data-overlays transition:persist="astro-overlays"></div>
+    <script>
+      import '../client';
+    </script>
+  </body>
+</html>

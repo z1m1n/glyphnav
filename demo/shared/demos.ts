@@ -30,4 +30,5 @@ export const DEMOS: readonly DemoEntry[] = [
   { name: 'next', fw: 'next' },
   { name: 'nuxt', fw: 'nuxt' },
   { name: 'sveltekit', fw: 'sveltekit' },
+  { name: 'astro', fw: 'astro' },
 ];

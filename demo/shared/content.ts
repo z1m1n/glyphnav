@@ -90,7 +90,7 @@ export function glyphnavOptions(
   showPath: (path: string, resolving: boolean) => void,
 ): GlyphnavOptions {
   return {
-    charset: charsets[state.charset],
+    charset: charsets[state.charset] ?? URL_SAFE,
     duration: state.duration,
     effect: state.effect,
     commit: state.commit,

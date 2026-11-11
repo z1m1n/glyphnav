@@ -19,7 +19,7 @@
  */
 import { createContext, createElement } from 'preact';
 import type { ComponentChildren, JSX } from 'preact';
-import { useCallback, useContext, useEffect, useState } from 'preact/hooks';
+import { useCallback, useContext, useLayoutEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
 import { GlyphnavController } from '../core';
 import type { GlyphnavOptions, RunResult } from '../core';
@@ -41,7 +41,8 @@ const GlyphnavContext = createContext<GlyphnavController | null>(null);
 const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
   const [controller] = useState(() => new GlyphnavController(options));
   controller.update(options);
-  useEffect(() => () => controller.destroy(), [controller]);
+  // Preact 11 defers passive cleanup; address-bar writes must stop at unmount.
+  useLayoutEffect(() => () => controller.destroy(), [controller]);
 
   return controller;
 };
@@ -141,11 +142,11 @@ export const GlyphnavProvider = ({
   const controller = useSharedController(options);
   const { route } = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (animatePopState) return controller.enableHistoryAnimation();
   }, [controller, animatePopState]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (interceptLinks) return attachLinkInterceptor(controller, route);
   }, [controller, interceptLinks, route]);
 
@@ -200,10 +201,13 @@ export const useGlyphnavLinks = (options?: GlyphnavOptions): void => {
   const controller = useGlyphnavController(options);
   const { route } = useLocation();
 
-  useEffect(() => attachLinkInterceptor(controller, route, options), [controller, route, options]);
+  useLayoutEffect(
+    () => attachLinkInterceptor(controller, route, options),
+    [controller, route, options],
+  );
 };
 
-export interface GlyphnavLinkProps extends Omit<JSX.HTMLAttributes<HTMLAnchorElement>, 'href'> {
+export interface GlyphnavLinkProps extends Omit<JSX.IntrinsicElements['a'], 'href'> {
   /** Destination path, like `preact-iso`'s plain `<a href>`. */
   href: string;
   /** Replace the current history entry instead of pushing a new one. */
@@ -232,7 +236,7 @@ export const GlyphnavLink = ({
   const { route } = useLocation();
 
   const handleClick = useCallback(
-    (event: JSX.TargetedMouseEvent<HTMLAnchorElement>): void => {
+    (event: Parameters<NonNullable<GlyphnavLinkProps['onClick']>>[0]): void => {
       onClick?.(event);
       if (!eligibleAnchor(event, event.currentTarget)) {
         if (!eligibleAnchor(event, event.currentTarget, false)) event.stopPropagation();

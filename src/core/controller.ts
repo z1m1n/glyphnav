@@ -358,7 +358,7 @@ export class GlyphnavController {
             this.cancel();
             return;
           }
-          const frame = frames[index];
+          const frame = frames[index]!;
           this.writePath(frame.path);
           state.observedPath = this.deps.getCurrentPath();
           state.opts.hooks.onFrame?.(frame, state.ctx);

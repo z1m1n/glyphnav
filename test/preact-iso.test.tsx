@@ -266,4 +266,20 @@ describe('preact-iso adapter', () => {
     expect(onFrame).not.toHaveBeenCalled();
     expect(window.location.pathname).toBe('/');
   });
+
+  it('does not animate newly added links after its provider unmounts', () => {
+    const run = vi.spyOn(GlyphnavController.prototype, 'run');
+    const view = render(<InterceptApp />);
+    view.unmount();
+
+    const anchor = document.createElement('a');
+    anchor.href = '/other';
+    document.body.append(anchor);
+    // Cancel only the browser default, after document-level interceptors ran.
+    window.addEventListener('click', (event) => event.preventDefault(), { once: true });
+    anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+    anchor.remove();
+
+    expect(run).not.toHaveBeenCalled();
+  });
 });
