@@ -534,8 +534,9 @@ prerender):
 </script>
 ```
 
-`goto` is passed in because `$app/navigation` is a virtual module only resolvable
-inside a SvelteKit app — the adapter never imports SvelteKit and stays compiler‑free.
+`attachGlyphnav(goto)` works with SvelteKit 2 and 3. Pass the app's own `goto`
+because `$app/navigation` is a virtual module. For imperative calls with options,
+glyphnav reads the installed Kit version and translates the options automatically.
 With the default `commit: 'before'` the navigation goes out first and the bar decodes
 on top of the path that actually landed (redirects included). The adapter awaits
 the actual `goto` promise; rejected navigation rejects imperative `navigate()`
@@ -557,8 +558,22 @@ action:
 <a href="/about" use:link>About</a>
 ```
 
-Links opt out with `data-glyphnav="off"` (new‑tab, `download`, `rel="external"` and
-cross‑origin links are skipped automatically). Apps served under a `base` need no
+`navigate('/dashboard', { replace: true, reset: false, refreshAll: true })`
+replaces the history entry, preserves scroll and focus, and reruns loaders on
+both majors. Existing `noScroll`, `keepFocus` and `invalidateAll` calls still work.
+Kit 2 controls scroll and focus independently. Kit 3 preserves both when either
+legacy flag is true. Explicit `reset` and `refreshAll` take precedence.
+
+On Kit 3, `navigate('/items?modal=1', { shallow: true, state: { modal: 1 } })`
+updates the URL and page state while keeping the current page. Add
+`persistState: true` to restore that state after a reload. Kit 2 rejects requests
+for these Kit 3 features. Other `state` and `invalidate` options are forwarded
+to the installed router wherever its `goto` supports them.
+
+Links opt out with `data-glyphnav="off"`. Links marked `data-sveltekit-reload`
+keep native document navigation. Kit's inherited link attributes for history
+replacement, scroll and focus also apply to animated clicks. New-tab, download,
+external and cross-origin links are skipped automatically. Apps served under a `base` need no
 extra config: SvelteKit's hrefs already include it and `goto` resolves against the
 live URL, so the animated path always matches the address bar.
 
@@ -746,15 +761,16 @@ pnpm typecheck:astro   # Astro templates + native TS7 source checks
 pnpm run quality    # PR gate: build, types, lint, format, coverage, package + browser
 ```
 
-The library and Next.js demo use the native **TypeScript 7.0.2** compiler. The
-Astro check combines its template checker with a native TypeScript 7 check of
-the demo's TypeScript source. SvelteKit uses native checks through
-`svelte-check --tsgo`,
-while retaining TypeScript 6.0.3 for framework tools that use the JavaScript
-Compiler API. Vue SFC, Nuxt and Astro template checks still use that TypeScript 6
-API; the root Vue check selects it through `@typescript/typescript6`. These separate
-toolchains let the native compiler check the library without breaking framework
-checkers that need the older API.
+The library, declaration build, Next.js demo and standalone TypeScript checks
+use native **TypeScript 7.0.2**. Svelte component diagnostics also use it through
+`svelte-check --tsgo`. Three framework tools still need **TypeScript 6.0.3**:
+
+- Vue Router and Nuxt share the Nuxt workspace's `vue-tsc` installation.
+  Version 3.3.14 loads `typescript/lib/tsc`, which TypeScript 7.0 does not export.
+- `svelte-kit sync` in SvelteKit 3.2.0 reads the tsconfig through the JavaScript
+  Compiler API. The SvelteKit demo installs both compilers.
+- Astro's template checker rejects TypeScript 7.0. `pnpm typecheck:astro`
+  runs the template check on 6 and checks the demo's TypeScript source on 7.
 
 The package is built with **Vite 8** in library mode with thirteen entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./solid-router`,

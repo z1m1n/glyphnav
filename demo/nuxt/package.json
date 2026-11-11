@@ -13,11 +13,11 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "nuxt": "4.6.2"
+    "nuxt": "4.6.4"
   },
   "devDependencies": {
     "typescript": "6.0.3",
-    "vue-tsc": "3.3.13"
+    "vue-tsc": "3.3.14"
   },
-  "//typescript": "vue-tsc 3.3.13 requires the TypeScript 6 JavaScript Compiler API; native TypeScript 7 is used for the library and standalone TypeScript checks."
+  "//typescript": "vue-tsc needs the JavaScript compiler entry point provided by TypeScript 6."
 }

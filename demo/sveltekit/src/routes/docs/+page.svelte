@@ -7,13 +7,16 @@
   import { goto } from '$app/navigation';
   import { attachGlyphnav } from 'glyphnav/sveltekit';
 
-  // Every <a> click and goto() now animates first.
+  // Eligible links navigate first, then animate the landed URL.
   onMount(() => attachGlyphnav(goto, { duration: 250, commit: 'before' }).detach);
 ${'<'}/script>`;
 
   const DOCS_VARIANTS = `// Leave clicks to SvelteKit, animate only explicit calls:
 const { navigate, link } = attachGlyphnav(goto, { intercept: 'none' });
-await navigate('/dashboard', { replace: true });
+await navigate('/dashboard', { replace: true, reset: false });
+
+// SvelteKit 3: update the URL and page state without loading a new page.
+await navigate('/dashboard?panel=help', { shallow: true, state: { panel: 'help' } });
 
 // …or opt a single link in with the action:
 //   <a href="/about" use:link>About</a>`;

@@ -42,6 +42,7 @@ describe('sveltekit adapter', () => {
     while (live.length) live.pop()!.detach();
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    vi.doUnmock('@sveltejs/kit');
   });
 
   it('navigate animates the bar, then hands off to goto', async () => {
@@ -131,6 +132,33 @@ describe('sveltekit adapter', () => {
     // exercises exactly that under intercept: 'none'.
   });
 
+  it('honors inherited Kit link options and leaves hard reloads to the browser', async () => {
+    const goto = vi.fn<Goto>().mockResolvedValue(undefined);
+    attach(goto);
+    const ancestor = document.createElement('nav');
+    ancestor.setAttribute('data-sveltekit-reload', '');
+    ancestor.setAttribute('data-sveltekit-replacestate', 'true');
+    ancestor.setAttribute('data-sveltekit-reset', 'false');
+    document.body.appendChild(ancestor);
+    const anchor = makeAnchor({ href: '#target' });
+    ancestor.appendChild(anchor);
+
+    const reload = plainClick();
+    anchor.dispatchEvent(reload);
+    expect(reload.defaultPrevented).toBe(false);
+    expect(goto).not.toHaveBeenCalled();
+
+    anchor.setAttribute('data-sveltekit-reload', 'false');
+    const navigation = plainClick();
+    anchor.dispatchEvent(navigation);
+    expect(navigation.defaultPrevented).toBe(true);
+    await vi.dynamicImportSettled();
+    expect(goto).toHaveBeenCalledWith(
+      '/#target',
+      expect.objectContaining({ replace: true, reset: false }),
+    );
+  });
+
   it('stops intercepting after detach', async () => {
     const goto = fakeGoto();
     const onFrame = vi.fn();
@@ -178,7 +206,8 @@ describe('sveltekit adapter', () => {
     expect(goto).not.toHaveBeenCalled();
   });
 
-  it('forwards replace and the other goto options', async () => {
+  it('preserves independent SvelteKit 2 scroll and focus options', async () => {
+    vi.doMock('@sveltejs/kit', () => ({ VERSION: '2.0.0' }));
     const goto = fakeGoto();
     const instance = attach(goto, {
       intercept: 'none',
@@ -191,7 +220,7 @@ describe('sveltekit adapter', () => {
     const nav = instance.navigate('/x', {
       replace: true,
       noScroll: true,
-      keepFocus: true,
+      keepFocus: false,
       invalidateAll: true,
       state: { a: 1 },
     });
@@ -201,10 +230,61 @@ describe('sveltekit adapter', () => {
     expect(goto).toHaveBeenCalledWith('/x', {
       replaceState: true,
       noScroll: true,
-      keepFocus: true,
+      keepFocus: false,
       invalidateAll: true,
       state: { a: 1 },
     });
+  });
+
+  it('translates legacy options without sending removed keys to SvelteKit 3', async () => {
+    const goto = vi.fn<Goto>().mockResolvedValue(undefined);
+    const { navigate } = attach(goto);
+    await navigate('/x', { replace: true, keepFocus: true, invalidateAll: true });
+    const options = goto.mock.calls[0][1];
+    expect(options).toMatchObject({ replace: true, reset: false, refreshAll: true });
+    for (const key of ['replaceState', 'noScroll', 'keepFocus', 'invalidateAll']) {
+      expect(options).not.toHaveProperty(key);
+    }
+  });
+
+  it('passes native SvelteKit 3 options and gives them precedence over legacy flags', async () => {
+    const goto = vi.fn<Goto>().mockResolvedValue(undefined);
+    const { navigate } = attach(goto);
+    const options = {
+      replace: false,
+      reset: true,
+      refreshAll: false,
+      shallow: true,
+      persistState: true,
+      invalidate: ['app:items'],
+      state: { modal: 1 },
+    };
+    await navigate('/x', { ...options, noScroll: true, invalidateAll: true });
+    expect(goto).toHaveBeenCalledWith('/x', options);
+  });
+
+  it('maps reset and refreshAll on Kit 2 and rejects a shallow change before navigating', async () => {
+    vi.doMock('@sveltejs/kit', () => ({ VERSION: '2.70.4' }));
+    const goto = vi.fn<Goto>().mockResolvedValue(undefined);
+    const { navigate } = attach(goto);
+    await navigate('/x', { reset: false, refreshAll: true });
+    expect(goto.mock.calls[0][1]).toMatchObject({
+      noScroll: true,
+      keepFocus: true,
+      invalidateAll: true,
+    });
+    await expect(navigate('/modal', { shallow: true })).rejects.toThrow('requires SvelteKit 3');
+    expect(goto).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels before a pending option lookup can commit navigation', async () => {
+    const goto = vi.fn<Goto>().mockResolvedValue(undefined);
+    const instance = attach(goto);
+    const pending = instance.navigate('/x', { replace: true });
+    instance.controller.cancel();
+    expect(await pending).toBe('cancelled');
+    await vi.dynamicImportSettled();
+    expect(goto).not.toHaveBeenCalled();
   });
 
   it('opts into animating browser back/forward with animatePopState', async () => {

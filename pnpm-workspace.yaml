@@ -14,8 +14,15 @@ strictPeerDependencies: false
 # Pin dependencies to exact versions on `pnpm add` (ranges are reserved for
 # peerDependencies, which are edited by hand).
 saveExact: true
+# The Nuxt Vite builder also loads vue-tsc via vite-plugin-checker when pnpm
+# installs Nuxt as a root peer. Resolve that checker against the JS compiler.
+packageExtensions:
+  '@nuxt/vite-builder@4.6.4':
+    dependencies:
+      typescript: '6.0.3'
+      vue-tsc: '3.3.14'
 # @sveltejs/kit is auto-installed at the root only to satisfy the lib's own
-# optional peer (adapter types); its typescript peer range tops out at ^6 while
+# optional peer (adapter version lookup); its typescript peer range tops out at ^6 while
 # the root runs the Go-native typescript@7 for `tsc`. The actual SvelteKit demo
 # workspace supplies typescript 6.x. Drop when kit allows TS 7.
 peerDependencyRules:
@@ -38,3 +45,13 @@ minimumReleaseAgeExclude:
   - preact-iso
   - react-router
   - vue-tsc
+  - '@astrojs/internal-helpers@0.13.2'
+  - '@astrojs/markdown-satteri@0.4.8'
+  - '@astrojs/runtime@0.1.0'
+  - '@astrojs/vite-plugin-astro@0.1.1'
+  - '@solidjs/router@1.0.3'
+  - astro@7.4.10
+  - solid-js@1.9.19
+  - vite-plugin-solid@2.11.16
+  - vite@8.3.8
+  - vue-router@5.5.0

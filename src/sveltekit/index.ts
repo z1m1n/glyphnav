@@ -13,7 +13,7 @@
  * With `intercept: 'none'` nothing global is installed and only the instance's
  * own `navigate()` (or the `use:link` action) animates. `goto` is passed in by
  * the caller because `$app/navigation` is a virtual module only resolvable
- * inside a SvelteKit app — the adapter never imports SvelteKit itself.
+ * inside a SvelteKit app. Only the installed Kit version is needed here.
  *
  * Call it once on the client (e.g. in the root `+layout.svelte`'s `onMount`):
  * glyphnav rewrites the address bar via `history.replaceState`, so it must not
@@ -24,42 +24,41 @@ import type { GlyphnavOptions, RunResult } from '../core';
 import { eligibleAnchor, reportNavigationError } from '../internal/links';
 
 /**
- * SvelteKit's `goto` from `$app/navigation`, typed structurally so the adapter
- * needs no `@sveltejs/kit` import.
+ * Structural type shared by both versions of `$app/navigation.goto`.
  */
-export type Goto = (url: string | URL, opts?: GotoOptions) => Promise<void>;
+export type Goto<State extends object = object> = (
+  url: string | URL,
+  opts?: GotoOptions<State>,
+) => Promise<void>;
 
 /** The subset of SvelteKit `goto` options {@link SvelteKitGlyphnavInstance.navigate} forwards. */
-export interface GotoOptions {
-  /** Replace the current history entry instead of pushing a new one. */
+export interface GotoOptions<State extends object = object> extends SvelteKitNavigateExtras<State> {
+  /** Replace the current history entry (SvelteKit 2). */
   replaceState?: boolean;
+}
+
+/** Per-navigation overrides for {@link SvelteKitGlyphnavInstance.navigate}. */
+export interface SvelteKitNavigateExtras<State extends object = object> {
+  /** Replace the current history entry. */
+  replace?: boolean;
+  /** Reset scroll and focus together (SvelteKit 3). */
+  reset?: boolean;
   /** Keep the current scroll position after navigating. */
   noScroll?: boolean;
   /** Keep focus on the currently focused element after navigating. */
   keepFocus?: boolean;
   /** Re-run all `load` functions for the new page. */
   invalidateAll?: boolean;
-  /**
-   * State to associate with the new history entry (`page.state`). Typed `object`
-   * — assignable to SvelteKit's app-augmented `App.PageState` — so the real
-   * `goto` stays assignable to {@link Goto} without the adapter importing
-   * `@sveltejs/kit`.
-   */
-  state?: object;
-}
-
-/** Per-navigation overrides forwarded to SvelteKit's `goto`. */
-export interface SvelteKitNavigateExtras {
-  /** Use `replaceState` (no new history entry). */
-  replace?: boolean;
-  /** Forwarded to `goto` as `noScroll`. */
-  noScroll?: boolean;
-  /** Forwarded to `goto` as `keepFocus`. */
-  keepFocus?: boolean;
-  /** Forwarded to `goto` as `invalidateAll`. */
-  invalidateAll?: boolean;
-  /** Forwarded to `goto` as `state` (SvelteKit's `App.PageState`). */
-  state?: object;
+  /** Rerun load functions and queries (SvelteKit 3). */
+  refreshAll?: boolean;
+  /** Dependencies to invalidate during navigation. */
+  invalidate?: Array<string | URL | ((url: URL) => boolean)>;
+  /** Update the URL and page state without loading the route (SvelteKit 3). */
+  shallow?: boolean;
+  /** Restore the shallow entry's state after reloading (SvelteKit 3). */
+  persistState?: boolean;
+  /** State to associate with the new history entry (`page.state`). */
+  state?: State;
 }
 
 export interface SvelteKitGlyphnavOptions extends GlyphnavOptions {
@@ -95,14 +94,14 @@ export interface SvelteKitGlyphnavOptions extends GlyphnavOptions {
  */
 export type GlyphnavLinkAction = (node: HTMLAnchorElement) => { destroy(): void };
 
-export interface SvelteKitGlyphnavInstance {
+export interface SvelteKitGlyphnavInstance<State extends object = object> {
   /** The controller driving the animation. */
   controller: GlyphnavController;
   /**
    * Animated, `goto`-style navigation. Animates even when `intercept: 'none'`
    * installed no global listener. Pass `{ replace: true }` for `replaceState`.
    */
-  navigate: (to: string | URL, extras?: SvelteKitNavigateExtras) => Promise<RunResult>;
+  navigate: (to: string | URL, extras?: SvelteKitNavigateExtras<State>) => Promise<RunResult>;
   /**
    * Svelte action for opt-in per-link animation (`<a href use:link>`), for use
    * with `intercept: 'none'`. Under `intercept: 'links'` the global listener
@@ -115,17 +114,53 @@ export interface SvelteKitGlyphnavInstance {
 }
 
 /** Map the adapter's per-call extras onto SvelteKit `goto` options. */
-const gotoOptions = (extras?: SvelteKitNavigateExtras): GotoOptions => ({
-  replaceState: extras?.replace,
-  noScroll: extras?.noScroll,
-  keepFocus: extras?.keepFocus,
-  invalidateAll: extras?.invalidateAll,
-  state: extras?.state,
-});
+function gotoOptions<State extends object>(
+  version: string,
+  extras: SvelteKitNavigateExtras<State>,
+): GotoOptions<State> {
+  const {
+    replace,
+    reset,
+    refreshAll,
+    noScroll,
+    keepFocus,
+    invalidateAll,
+    shallow,
+    persistState,
+    ...shared
+  } = extras;
+  if (version.startsWith('2.')) {
+    if (shallow || persistState) throw new Error('Shallow goto navigation requires SvelteKit 3.');
+    return {
+      ...shared,
+      replaceState: replace,
+      noScroll: reset === undefined ? noScroll : !reset,
+      keepFocus: reset === undefined ? keepFocus : !reset,
+      invalidateAll: refreshAll ?? invalidateAll,
+    };
+  }
+  return {
+    ...shared,
+    replace,
+    shallow,
+    persistState,
+    reset: reset ?? (noScroll || keepFocus ? false : undefined),
+    refreshAll: refreshAll ?? invalidateAll,
+  };
+}
 
 /** The address-bar path (`pathname + search + hash`) for a `goto` target. */
 const targetPath = (to: string | URL): string =>
   typeof to === 'string' ? to : to.pathname + to.search + to.hash;
+
+/** Kit link options are inherited. A nearer explicit false overrides an ancestor. */
+function linkOption(anchor: HTMLAnchorElement, name: string): boolean | undefined {
+  const attribute = `data-sveltekit-${name}`;
+  const value = anchor.closest(`[${attribute}]`)?.getAttribute(attribute);
+  if (value === '' || value === 'true') return true;
+  if (value === 'false') return false;
+  return undefined;
+}
 
 /**
  * Attach glyphnav to a SvelteKit app.
@@ -147,10 +182,10 @@ const targetPath = (to: string | URL): string =>
  * </script>
  * ```
  */
-export const attachGlyphnav = (
-  goto: Goto,
+export const attachGlyphnav = <State extends object = object>(
+  goto: Goto<State>,
   options: SvelteKitGlyphnavOptions = {},
-): SvelteKitGlyphnavInstance => {
+): SvelteKitGlyphnavInstance<State> => {
   const {
     intercept = 'links',
     animatePopState = false,
@@ -159,15 +194,20 @@ export const attachGlyphnav = (
   } = options;
   const controller = new GlyphnavController(glyph);
 
-  // SvelteKit's promise settles after navigation, including redirects and
-  // blocked/rejected routes. Let the controller await it and propagate errors.
-  const commitGoto = (to: string | URL, opts?: GotoOptions): Promise<void> => goto(to, opts);
-
   // The target shown in the bar is exactly the path handed to `goto`: SvelteKit
   // resolves `goto` against the live URL and never auto-prefixes `paths.base`
   // (root-relative hrefs already include it), so no base bookkeeping is needed.
-  const navigate = (to: string | URL, extras?: SvelteKitNavigateExtras): Promise<RunResult> =>
-    controller.run(targetPath(to), () => commitGoto(to, gotoOptions(extras)));
+  const navigate = (
+    to: string | URL,
+    extras?: SvelteKitNavigateExtras<State>,
+  ): Promise<RunResult> =>
+    controller.run(targetPath(to), async (signal) => {
+      if (!extras) return goto(to);
+      // Kit exports VERSION in both majors. Load it only for imperative options,
+      // so SSR, ordinary clicks and package imports don't load the framework.
+      const { VERSION } = await import('@sveltejs/kit');
+      if (!signal.aborted) await goto(to, gotoOptions(VERSION, extras));
+    });
 
   // Turn an eligible anchor click into an animated `goto`. Shared by the global
   // interceptor and the per-link action; both run through `eligibleAnchor`,
@@ -176,11 +216,23 @@ export const attachGlyphnav = (
   // click — so the navigation fires exactly once either way.
   const handleClick = (event: MouseEvent): void => {
     const anchor = eligibleAnchor(event);
-    if (!anchor) return;
+    if (!anchor || linkOption(anchor, 'reload')) return;
+    controller.cancel();
     const url = new URL(anchor.href, window.location.href);
     const to = url.pathname + url.search + url.hash;
+    const replace = linkOption(anchor, 'replacestate');
+    const reset = linkOption(anchor, 'reset');
+    const noScroll = linkOption(anchor, 'noscroll');
+    const keepFocus = linkOption(anchor, 'keepfocus');
+    const hasOptions =
+      replace !== undefined ||
+      reset !== undefined ||
+      noScroll !== undefined ||
+      keepFocus !== undefined;
     event.preventDefault();
-    void controller.run(to, () => commitGoto(to)).catch(reportNavigationError);
+    void navigate(to, hasOptions ? { replace, reset, noScroll, keepFocus } : undefined).catch(
+      reportNavigationError,
+    );
   };
   const onClick = handleClick as EventListener;
 

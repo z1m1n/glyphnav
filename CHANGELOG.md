@@ -17,12 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   framework picker, standalone dev server and static GitHub Pages export.
 - Astro adapter unit tests, packaged ESM/CJS consumer checks, and real
   ClientRouter browser regressions under a deployment prefix.
+- SvelteKit 3 imperative navigation supports `reset`, `refreshAll`, shallow
+  routing and persisted page state. Both Kit 2 and 3 infer the app's page-state
+  type from the supplied `goto`.
 
 ### Changed
 
 - Refresh framework, router, demo and development dependencies, including
-  Astro 7.4.1, Next.js 16.4.2, Nuxt 4.6.2, SvelteKit 3.1.0, Solid Router 1,
-  Preact 11, Vitest 5, Playwright 1.64 and pnpm 12.14.
+  Astro 7.4.10, Next.js 16.4.6, Nuxt 4.6.4, SvelteKit 3.2.0, Vite 8.3.8,
+  Preact 11.2, Vitest 5.1, Playwright 1.65 and pnpm 12.18.0.
 - Use native TypeScript 7 for library declaration emission, the Next.js demo,
   Astro TypeScript source and SvelteKit checks. Keep TypeScript 6's JavaScript
   Compiler API for Vue, Nuxt, Astro and Svelte tooling that still requires it; remove the old
@@ -32,9 +35,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrate the SvelteKit 3 demo to Vite plugin configuration in `kit.config.ts`,
   `$app/tsconfig` types and package `#lib/*` imports, retaining live glyphnav
   source mappings and static export.
+- Share the TypeScript 6 Vue checker between the Vue Router and Nuxt demos,
+  removing the root compatibility package and custom `vue-tsc` wrapper.
 
 ### Fixed
 
+- Translate `goto` options for the installed SvelteKit major. Kit 3 development
+  builds rejected imperative navigation when the old scroll or focus keys were
+  present, even with undefined values. Kit 2 retains independent scroll and
+  focus controls and its existing history-replacement behavior.
+- Respect inherited SvelteKit link options for reload, history replacement,
+  scroll and focus when intercepting anchor clicks.
 - Astro demo scripts load from its own dev server when opened through the
   framework picker, preserving the browser's hostname for same-site requests;
   development proxies also preserve the deployment prefix.
