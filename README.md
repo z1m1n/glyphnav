@@ -148,6 +148,9 @@ history stays clean. Safety rails:
   paths are animated (cross‑origin targets are committed without animation).
 - If the URL changes externally mid‑animation (back/forward button, another script),
   the run cancels itself and leaves the new URL alone.
+- Returning to an interrupted frame restores the route before the router handles
+  `popstate`. Browsers without the Navigation API commit immediately and skip
+  address-bar animation.
 
 **Caveat — URL history / autocomplete:** `replaceState` never adds a back/forward
 entry, but the browser still treats each frame as a same‑document navigation, so

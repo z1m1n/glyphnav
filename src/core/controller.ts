@@ -1,4 +1,5 @@
 import { generateFrames } from './frames';
+import { rememberFrame } from './history-entry';
 import { resolveOptions } from './options';
 import type { ResolvedOptions } from './options';
 import { createPlayer, defaultScheduler } from './player';
@@ -37,9 +38,12 @@ export interface ControllerDeps {
 }
 
 const resolveHistory = (provided: History | null | undefined): History | null => {
-  if (provided !== undefined) return provided;
-
-  return typeof window !== 'undefined' && window.history ? window.history : null;
+  const native = typeof window !== 'undefined' ? window.history : null;
+  const history = provided === undefined ? native : provided;
+  // Without entry identity and a pre-popstate signal, the router can read a
+  // stranded frame before we can repair it. Use ordinary navigation there.
+  if (native && history === native && !window.navigation?.currentEntry) return null;
+  return history;
 };
 
 const defaultGetCurrentPath = (): string => {
@@ -238,8 +242,7 @@ export class GlyphnavController {
 
     this.lastPath ??= this.deps.getCurrentPath();
     const onPopState = (): void => {
-      // Ignore the synthetic popstate our own navigation dispatches; a real
-      // traversal only happens while we are idle.
+      // Ignore the synthetic popstate dispatched during our own commit.
       if (this.activeRun?.navigating) return;
       const to = this.deps.getCurrentPath();
       const from = this.lastPath ?? to;
@@ -344,6 +347,19 @@ export class GlyphnavController {
     if (!this.isCurrent(state)) return 'cancelled';
     state.restoreTo = restoreTo;
     state.observedPath = this.deps.getCurrentPath();
+    const onTraverse = (event: NavigationCurrentEntryChangeEvent): void => {
+      if (event.navigationType !== 'traverse' || !this.isCurrent(state)) return;
+      // The outgoing entry is no longer writable, even if both URLs happen
+      // to match. Its saved frame will be repaired if it is visited again.
+      state.restoreTo = null;
+      this.cancel();
+      this.lastPath = restoreTo;
+    };
+    const navigation =
+      typeof window !== 'undefined' && this.deps.history === window.history
+        ? window.navigation
+        : undefined;
+    navigation?.addEventListener('currententrychange', onTraverse);
     try {
       state.opts.hooks.onStart?.(state.ctx);
       if (!this.isCurrent(state)) return 'cancelled';
@@ -359,13 +375,14 @@ export class GlyphnavController {
             return;
           }
           const frame = frames[index]!;
-          this.writePath(frame.path);
+          this.writePath(frame.path, restoreTo);
           state.observedPath = this.deps.getCurrentPath();
           state.opts.hooks.onFrame?.(frame, state.ctx);
         },
       );
       return this.isCurrent(state) ? outcome : 'cancelled';
     } finally {
+      navigation?.removeEventListener('currententrychange', onTraverse);
       if (this.activeRun === state) this.restoreRun(state);
     }
   }
@@ -385,12 +402,20 @@ export class GlyphnavController {
     this.activeRun = null;
   }
 
-  private writePath(path: string): void {
+  private writePath(path: string, restoreTo?: string): void {
     const history = this.deps.history;
     const replace = this.replaceState;
     if (!history || !replace || this.deps.getCurrentPath() === path) return;
     try {
       replace(history.state, '', path);
+      if (
+        restoreTo !== undefined &&
+        path !== restoreTo &&
+        typeof window !== 'undefined' &&
+        history === window.history
+      ) {
+        rememberFrame(window.navigation, restoreTo);
+      }
     } catch {
       /* cross-origin / unsupported environments */
     }

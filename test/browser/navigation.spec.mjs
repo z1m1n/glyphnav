@@ -41,6 +41,72 @@ test('React Router redirects animate to the landed path', async ({ page }) => {
   await hasIntermediatePath(page, '/', '/landed?via=redirect');
 });
 
+test('Back during a frame preserves the Forward route and router state', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#route')).toHaveText('/');
+  const initialHistory = await page.evaluate(() => history.length);
+  const result = await page.evaluate(async () => {
+    const start = location.pathname;
+    function interruptFrame() {
+      if (location.pathname !== start && location.pathname !== '/about') history.back();
+      else requestAnimationFrame(interruptFrame);
+    }
+    requestAnimationFrame(interruptFrame);
+    return window.navigateGlyph('/about?q=glyphnav#results', { state: { origin: 'test' } });
+  });
+  expect(result).toBe('cancelled');
+  await expect(page.locator('#route')).toHaveText('/');
+  await page.goForward();
+  await expect(page.locator('#route')).toHaveText('/about?q=glyphnav#results');
+  await expect(page).toHaveURL('/about?q=glyphnav#results');
+  expect(await page.evaluate(() => history.state.usr)).toEqual({ origin: 'test' });
+  expect(await page.evaluate(() => history.length)).toBe(initialHistory + 1);
+});
+
+test('browsers without entry tracking navigate without temporary history URLs', async ({
+  page,
+}) => {
+  await page.addInitScript(() => Object.defineProperty(window, 'navigation', { value: undefined }));
+  await page.goto('/');
+  await expect(page.locator('#route')).toHaveText('/');
+  const result = await page.evaluate(() => window.navigateGlyph('/about?q=1#results'));
+  expect(result).toBe('skipped');
+  await expect(page.locator('#route')).toHaveText('/about?q=1#results');
+  const writes = await page.evaluate(() => window.historyWrites);
+  expect(writes.every((path) => path === '/' || path === '/about?q=1#results')).toBe(true);
+  await page.goBack();
+  await expect(page.locator('#route')).toHaveText('/');
+  await page.goForward();
+  await expect(page.locator('#route')).toHaveText('/about?q=1#results');
+});
+
+test('Forward during a Back replay preserves the entry for a second Back', async ({ page }) => {
+  await page.goto('/vanilla.html');
+  await page.getByText('Destination', { exact: true }).click();
+  await completed(page);
+  const destination = '/destination?q=1#results';
+  await page.evaluate(() => {
+    const destinationPath = location.pathname;
+    function interruptReplay() {
+      if (location.pathname !== destinationPath && location.pathname !== '/vanilla.html')
+        history.forward();
+      else requestAnimationFrame(interruptReplay);
+    }
+    window.glyphResults = [];
+    requestAnimationFrame(interruptReplay);
+    history.back();
+  });
+  await expect.poll(() => page.evaluate(() => window.glyphResults)).toContain('cancelled');
+  await completed(page);
+  await expect(page).toHaveURL(destination);
+  await page.evaluate(() => {
+    window.glyphResults = [];
+  });
+  await page.goBack();
+  await completed(page);
+  await expect(page).toHaveURL('/vanilla.html');
+});
+
 test('rapid React Router navigation settles both runs at the newest route', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#route')).toHaveText('/');

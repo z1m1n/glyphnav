@@ -17,3 +17,12 @@ process.stderr.write = ((chunk: string | Uint8Array, ...rest: unknown[]): boolea
 // jsdom has no scrollTo; TanStack Router's scroll restoration calls it on
 // every navigation.
 window.scrollTo = (() => {}) as typeof window.scrollTo;
+
+// Core and adapter unit tests drive the frame clock in jsdom. Real entry
+// replacement, disposal and traversal ordering are exercised in Playwright.
+if (!window.navigation) {
+  Object.defineProperty(window, 'navigation', {
+    configurable: true,
+    value: Object.assign(new EventTarget(), { currentEntry: {} }),
+  });
+}
