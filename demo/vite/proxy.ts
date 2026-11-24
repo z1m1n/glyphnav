@@ -1,6 +1,6 @@
 import type { ProxyOptions } from 'vite';
-import { ports } from '../ports';
-import { base } from './paths';
+import { ports } from '../ports.ts';
+import { base } from './paths.ts';
 
 /**
  * A dev-server proxy for a demo that runs on its own server (Next, Nuxt,

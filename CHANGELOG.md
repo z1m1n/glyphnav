@@ -28,8 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Update Astro's template-checker transform and use explicit TypeScript import
-  extensions in SvelteKit's Vite config.
+- Update Astro's template-checker transform.
+- Use explicit TypeScript file imports so the demo configs work with Vite's
+  native config loader.
 - Update transitive dependencies used by the Nuxt and Astro demos to versions
   that resolve the reported dependency audit findings.
 

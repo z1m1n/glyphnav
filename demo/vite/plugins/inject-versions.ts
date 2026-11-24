@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { glyphnavVersion, stackForFile, stackTipForFile } from '../versions';
+import { glyphnavVersion, stackForFile, stackTipForFile } from '../versions.ts';
 
 /**
  * Fill the version placeholders in the demo HTML: the library version after the

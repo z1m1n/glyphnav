@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { glyphnavVersion, stackTip } from '../shared/internal/version';
+import { glyphnavVersion, stackTip } from '../shared/internal/version.ts';
 
 const nodeRequire = createRequire(import.meta.url);
 

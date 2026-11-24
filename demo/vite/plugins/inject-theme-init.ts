@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { THEME_INIT_SCRIPT } from '../../shared/theme';
+import { THEME_INIT_SCRIPT } from '../../shared/theme.ts';
 
 /**
  * Inline the pre-paint theme script at the very top of every demo's `<head>`, so

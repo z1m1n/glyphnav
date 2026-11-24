@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { base } from '../paths';
+import { base } from '../paths.ts';
 
 /**
  * Prefix the demo's root-absolute navigation links (`/vanilla/`, `/`) with the

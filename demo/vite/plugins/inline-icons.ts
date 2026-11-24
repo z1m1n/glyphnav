@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
-import { fromDemoRoot } from '../paths';
+import { fromDemoRoot } from '../paths.ts';
 
 /**
  * Inline the framework marks on the picker. Each icon lives as its own file in

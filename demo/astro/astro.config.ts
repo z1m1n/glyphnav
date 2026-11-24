@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { stackTip } from '@glyphnav-demo/shared/internal/version';
-import { ports } from '../ports';
+import { ports } from '../ports.ts';
 
 const nodeRequire = createRequire(import.meta.url);
 const stack = `astro ${nodeRequire('astro/package.json').version}`;
