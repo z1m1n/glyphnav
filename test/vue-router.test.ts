@@ -13,7 +13,9 @@ const routes = [
 /** A router with its initial route resolved (no app mount needed). */
 async function makeRouter(): Promise<Router> {
   const router = createRouter({ history: createMemoryHistory(), routes });
+
   await router.push('/'); // kick off the initial navigation
+
   return router;
 }
 
@@ -23,6 +25,7 @@ describe('vue adapter', () => {
   it('animates the address bar then performs the real router.push', async () => {
     const router = await makeRouter();
     const frames: string[] = [];
+
     attachGlyphnav(router, {
       charset: 'q',
       rng: () => 0,
@@ -34,7 +37,9 @@ describe('vue adapter', () => {
     });
 
     vi.useFakeTimers();
+
     const push = router.push('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await push;
 
@@ -47,6 +52,7 @@ describe('vue adapter', () => {
     const router = await makeRouter();
     const onFrame = vi.fn();
     const instance = attachGlyphnav(router, { stepDuration: 5, hooks: { onFrame } });
+
     instance.detach();
 
     await router.push('/other');
@@ -76,7 +82,9 @@ describe('vue adapter', () => {
 
     // The adapter's own push animates.
     vi.useFakeTimers();
+
     const push = instance.push('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await push;
     expect(onFrame).toHaveBeenCalled();
@@ -85,15 +93,18 @@ describe('vue adapter', () => {
 
   it('the plugin requires a router option', () => {
     const app = createApp({ render: () => null });
+
     // @ts-expect-error intentionally missing router
     expect(() => app.use(glyphnav, {})).toThrow(/router/);
   });
 
   it('restores the router and stops active work when the application unmounts', async () => {
     window.history.replaceState(null, '', '/start');
+
     const router = await makeRouter();
     const onFrame = vi.fn();
     const app = createApp({ render: () => null });
+
     app.use(glyphnav, {
       router,
       commit: 'after',
@@ -101,12 +112,16 @@ describe('vue adapter', () => {
       hooks: { onFrame },
       animatePopState: true,
     });
+
     const wrappedPush = router.push;
     const host = document.createElement('div');
+
     app.mount(host);
     vi.useFakeTimers();
+
     try {
       const navigation = router.push('/test');
+
       await vi.advanceTimersByTimeAsync(16);
       expect(onFrame).toHaveBeenCalled();
       app.unmount();

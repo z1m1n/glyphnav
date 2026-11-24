@@ -100,8 +100,10 @@ const GlyphnavContext = createContext<GlyphnavContextValue | null>(null);
 /** Prefix the base path onto a rooted href (matters only for `commit: 'after'`). */
 const withBasePath = (basePath: string, href: string): string => {
   if (!basePath || !href.startsWith('/') || href.startsWith('//')) return href;
+
   const base = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
   const pathname = href.split(/[?#]/, 1)[0];
+
   return pathname === base || pathname?.startsWith(base + '/') ? href : base + href;
 };
 
@@ -133,6 +135,7 @@ const settlePagesLink = (
       router.push = originalPush;
       router.replace = originalReplace;
     };
+
     const finish = (error?: unknown, failed = false): void => {
       if (settled) return;
       settled = true;
@@ -143,31 +146,40 @@ const settlePagesLink = (
       router.events.off('hashChangeComplete', complete);
       router.events.off('routeChangeError', failure);
       signal.removeEventListener('abort', abort);
+
       if (failed) reject(error);
       else resolve();
     };
+
     const start = (url: string): void => {
       started = url;
     };
+
     const complete = (): void => {
       if (started !== undefined) finish();
     };
+
     const failure = (error: unknown, url: string): void => {
       // Starting a new route first cancels the previous one. Ignore that older
       // route's error while awaiting this link's own start/completion events.
       if (started === url) finish(error, true);
     };
+
     const abort = (): void => finish(new DOMException('Navigation cancelled', 'AbortError'), true);
+
     if (signal.aborted) {
       abort();
+
       return;
     }
+
     router.events.on('routeChangeStart', start);
     router.events.on('hashChangeStart', start);
     router.events.on('routeChangeComplete', complete);
     router.events.on('hashChangeComplete', complete);
     router.events.on('routeChangeError', failure);
     signal.addEventListener('abort', abort, { once: true });
+
     let navigation: Promise<boolean> | undefined;
     const observe = (pending: Promise<unknown>): void => {
       pending.then(
@@ -175,6 +187,7 @@ const settlePagesLink = (
         (error: unknown) => finish(error, true),
       );
     };
+
     const capture =
       (method: typeof originalPush): typeof originalPush =>
       (...args) => {
@@ -182,18 +195,23 @@ const settlePagesLink = (
         // at its first router invocation, before the real method or ancestors
         // can initiate another navigation.
         restore();
+
         try {
           navigation = method.apply(router, args);
         } catch (error) {
           navigation = Promise.reject(error);
         }
+
         if (navigation) observe(navigation);
+
         return navigation;
       };
+
     try {
       // A detached source anchor has no React event listener. Its fallback
       // dispatch returns the router promise, which supplies completion directly.
       let pending: void | Promise<void>;
+
       try {
         // Next's native Pages Link calls these public methods synchronously.
         // Replays complete here; an initial click continues synchronously in
@@ -204,9 +222,11 @@ const settlePagesLink = (
       } finally {
         if (!initialDispatch) restore();
       }
+
       if (!navigation && pending) observe(pending);
       queueMicrotask(() => {
         restore();
+
         if (!settled && !navigation && !pending && started === undefined) {
           finish(new Error('Next Link did not start a Pages Router navigation.'), true);
         }
@@ -232,12 +252,12 @@ const APP_ROUTER_SETTLE_MS = 1200;
  * both) is deliberate.
  */
 const useNextNav = (mode: NextRouterMode): NextNav => {
-  // oxlint-disable-next-line react-hooks/rules-of-hooks -- `mode` is render-stable; see above.
   if (mode === 'pages') {
     // `next/compat/router`'s `useRouter` is safe to call in both `app/` and
     // `pages/`, returning null in the App Router (where this branch never runs).
-    // oxlint-disable-next-line react-hooks/rules-of-hooks
+    // oxlint-disable-next-line react/hooks -- mode stays fixed across renders.
     const router = usePagesRouter();
+
     return {
       push: async (href, extras, as) => {
         if (!router) throw new Error('Glyphnav requires a mounted Next Pages Router.');
@@ -250,17 +270,21 @@ const useNextNav = (mode: NextRouterMode): NextNav => {
       link: (dispatch, signal) => {
         if (!router)
           return Promise.reject(new Error('Glyphnav requires a mounted Next Pages Router.'));
+
         return settlePagesLink(router, dispatch, signal);
       },
       initialLink: (signal) => {
         if (!router)
           return Promise.reject(new Error('Glyphnav requires a mounted Next Pages Router.'));
+
         return settlePagesLink(router, () => {}, signal, true);
       },
     };
   }
-  // oxlint-disable-next-line react-hooks/rules-of-hooks
+
+  // oxlint-disable-next-line react/hooks -- mode stays fixed across renders.
   const router = useAppRouter();
+
   return {
     push: (href, extras, _as, signal) =>
       settleAfter(() => router.push(href as string, extras), APP_ROUTER_SETTLE_MS, signal),
@@ -275,6 +299,7 @@ const useNextNav = (mode: NextRouterMode): NextNav => {
 const useGlyphnavContext = (options?: NextGlyphnavOptions): GlyphnavContextValue => {
   const fromContext = useContext(GlyphnavContext);
   const fallback = useFallbackController(!fromContext, options);
+
   if (fromContext) return fromContext;
 
   return {
@@ -308,7 +333,9 @@ export const GlyphnavProvider = ({
   const controller = useSharedController(options);
   const mode = options.routerMode ?? 'app';
   const basePath = options.basePath ?? '';
+
   useHistoryAnimation(controller, animatePopState);
+
   const value = useMemo<GlyphnavContextValue>(
     () => ({ controller, mode, basePath }),
     [controller, mode, basePath],
@@ -343,10 +370,12 @@ export const useGlyphnavNavigate = (options?: NextGlyphnavOptions): GlyphnavNavi
   return useCallback<GlyphnavNavigateFn>(
     (href, extras) => {
       const target = withBasePath(ctx.basePath, href);
+
       return ctx.controller.run(
         target,
         (signal) => {
           if (extras?.replace) return nav.replace(href, extras, undefined, signal);
+
           return nav.push(href, extras, undefined, signal);
         },
         options,
@@ -402,9 +431,12 @@ export const GlyphnavLink = ({
     // instance, pending state and router-specific navigation contract.
     if (replaying.current) {
       event.stopPropagation();
+
       return;
     }
+
     callerClick?.(event);
+
     if (!eligibleAnchor(event, event.currentTarget)) return;
 
     // Let Next serialize URL objects and resolve dynamic routes, locale and
@@ -416,39 +448,51 @@ export const GlyphnavLink = ({
     // applying its configured basePath twice to the already-rendered href.
     const appHref = typeof (as ?? href) === 'string' ? (as ?? href) : anchor.href;
     let cancelled = false;
+
     onNavigate?.({
       preventDefault: () => {
         cancelled = true;
       },
     });
+
     if (cancelled) {
       event.preventDefault();
+
       return;
     }
+
     let handlingClick = true;
     let initialCommit = false;
+
     void ctx.controller
       .run(
         target,
         (signal) => {
           if (handlingClick) {
             initialCommit = true;
+
             return nav.initialLink(signal);
           }
+
           return nav.link(() => {
             if (anchor.isConnected) {
               replaying.current = true;
+
               try {
                 anchor.click();
               } finally {
                 replaying.current = false;
               }
+
               return;
             }
+
             const extras =
               ctx.mode === 'pages' ? { scroll, shallow, locale } : { scroll, transitionTypes };
             const navHref = ctx.mode === 'pages' ? href : (appHref as string);
+
             if (replace) return nav.replace(navHref, extras, as, signal);
+
             return nav.push(navHref, extras, as, signal);
           }, signal);
         },
@@ -456,6 +500,7 @@ export const GlyphnavLink = ({
       )
       .catch(reportNavigationError);
     handlingClick = false;
+
     if (initialCommit) {
       checkedNavigation.current = true;
       // Next 14 has no onNavigate callback; never leave its once-only marker
@@ -470,8 +515,10 @@ export const GlyphnavLink = ({
     (event) => {
       if (checkedNavigation.current) {
         checkedNavigation.current = false;
+
         return;
       }
+
       if (!replaying.current) onNavigate?.(event);
     },
     [onNavigate],

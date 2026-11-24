@@ -36,6 +36,7 @@ export const randomGlyph = (charset: string, rng: Rng): string =>
  */
 export const randomString = (length: number, charset: string, rng: Rng): string => {
   let out = '';
+
   for (let i = 0; i < length; i++) out += randomGlyph(charset, rng);
 
   return out;
@@ -70,7 +71,9 @@ const fitStep = (n: number, configuredStep: number, budget: number): number => {
  */
 export const scrambleFrames = (target: string, config: ScrambleConfig): ScrambleFrame[] => {
   const n = target.length;
+
   if (n === 0) return [];
+
   if (config.maxFrames <= 1) return [{ text: target, phase: 'resolve' }];
 
   const budget = Math.max(1, Math.floor(config.maxFrames / 2));
@@ -84,12 +87,14 @@ export const scrambleFrames = (target: string, config: ScrambleConfig): Scramble
   for (let len = growStep; len < n; len += growStep) {
     frames.push({ text: base.slice(0, len), phase: 'grow' });
   }
+
   frames.push({ text: base, phase: 'grow' });
 
   // resolve: lock target[0..k] while the tail keeps the base glyphs
   for (let k = resolveStep; k < n; k += resolveStep) {
     frames.push({ text: target.slice(0, k) + base.slice(k), phase: 'resolve' });
   }
+
   frames.push({ text: target, phase: 'resolve' });
 
   return frames;
@@ -104,8 +109,10 @@ export const scrambleFrames = (target: string, config: ScrambleConfig): Scramble
  */
 export const shuffledIndices = (n: number, rng: Rng): number[] => {
   const order = Array.from({ length: n }, (_, i) => i);
+
   for (let i = n - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
+
     [order[i], order[j]] = [order[j]!, order[i]!];
   }
 
@@ -129,7 +136,9 @@ export const shuffledIndices = (n: number, rng: Rng): number[] => {
  */
 export const scrambleBurst = (target: string, config: ScrambleConfig): ScrambleFrame[] => {
   const n = target.length;
+
   if (n === 0) return [];
+
   if (config.maxFrames <= 1) return [{ text: target, phase: 'resolve' }];
 
   const resolveStep = fitStep(n, config.resolveStep, Math.max(1, config.maxFrames - 1));
@@ -138,9 +147,11 @@ export const scrambleBurst = (target: string, config: ScrambleConfig): ScrambleF
 
   const flicker = (): string => {
     let out = '';
+
     for (let i = 0; i < n; i++) {
       out += locked[i] ? target[i] : randomGlyph(config.charset, config.rng);
     }
+
     return out;
   };
 
@@ -151,6 +162,7 @@ export const scrambleBurst = (target: string, config: ScrambleConfig): ScrambleF
     for (let j = k - resolveStep; j < k; j++) locked[order[j]!] = true;
     frames.push({ text: flicker(), phase: 'resolve' });
   }
+
   frames.push({ text: target, phase: 'resolve' });
 
   return frames;

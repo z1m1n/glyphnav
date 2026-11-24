@@ -16,13 +16,11 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/setup@v3.2.0
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: true
+          require-lockfile: true
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run quality
       - run: pnpm run test:browser:next:built
@@ -36,7 +34,7 @@ jobs:
         run: pnpm run demo:build
       - name: Save failed browser traces
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: browser-test-results
           path: test-results

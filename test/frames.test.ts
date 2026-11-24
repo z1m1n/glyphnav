@@ -23,6 +23,7 @@ describe('generateFrames', () => {
 
   it('tags each frame with index, total and phase', () => {
     const frames = generateFrames('/', '/ab', { charset: 'q', rng: () => 0 });
+
     expect(frames).toEqual([
       { path: '/q', text: 'q', index: 0, total: 4, phase: 'grow' },
       { path: '/qq', text: 'qq', index: 1, total: 4, phase: 'grow' },
@@ -33,6 +34,7 @@ describe('generateFrames', () => {
 
   it('ends exactly on the target path', () => {
     const frames = generateFrames('/home', '/settings/profile', { charset: 'abc' });
+
     expect(frames.at(-1)?.path).toBe('/settings/profile');
   });
 
@@ -42,6 +44,7 @@ describe('generateFrames', () => {
       charset: 'q',
       rng: () => 0,
     });
+
     expect(frames.map((f) => f.path)).toEqual(['/users/q', '/users/2']);
   });
 
@@ -52,6 +55,7 @@ describe('generateFrames', () => {
   it('plays the scramble effect when requested', () => {
     // zeroRng: resolution order for two characters is [1, 0]; noise is 'q'.
     const frames = generateFrames('/', '/ab', { effect: 'scramble', charset: 'q', rng: zeroRng });
+
     expect(frames.map((f) => f.path)).toEqual(['/qq', '/qb', '/ab']);
     expect(frames.map((f) => f.phase)).toEqual(['grow', 'resolve', 'resolve']);
   });
@@ -60,12 +64,14 @@ describe('generateFrames', () => {
     const target = '/abcdefghijklmnopqrstuvwxyz';
     // 60 ms at ≥15 ms per frame leaves room for at most 4 frames.
     const frames = generateFrames('/', target, { duration: 60, charset: 'q', rng: zeroRng });
+
     expect(frames.length).toBeLessThanOrEqual(4);
     expect(frames.at(-1)?.path).toBe(target);
   });
 
   it('animates search and hash as part of the path', () => {
     const frames = generateFrames('/', '/about?q=1#x', { charset: 'q', rng: zeroRng });
+
     expect(frames.at(-1)?.path).toBe('/about?q=1#x');
     expect(frames.every((f) => f.path.startsWith('/'))).toBe(true);
   });
@@ -75,6 +81,7 @@ describe('generateFrames', () => {
     (effect) => {
       for (const duration of [null, 0, 120]) {
         const frames = generateFrames('/', '/destination', { effect, duration, maxFrames: 1 });
+
         expect(frames).toEqual([
           { path: '/destination', text: 'destination', index: 0, total: 1, phase: 'resolve' },
         ]);

@@ -35,6 +35,7 @@ useHead({
   // ahead of other head tags so it runs as early as possible.
   script: [{ innerHTML: THEME_INIT_SCRIPT, tagPosition: 'head', tagPriority: 'critical' }],
 });
+
 useSeoMeta({
   title: 'glyphnav — nuxt',
   description:
@@ -80,6 +81,7 @@ const backForward = ref(true);
 const toggleHistory = createHistoryToggle(() =>
   useNuxtApp().$glyphnav!.controller.enableHistoryAnimation(),
 );
+
 function applyBackForward(): void {
   if (!useNuxtApp().$glyphnav) return; // absent during SSR/prerender
   toggleHistory(backForward.value);
@@ -98,6 +100,7 @@ function persist(): void {
 
 function apply(): void {
   const instance = useNuxtApp().$glyphnav;
+
   if (!instance) return; // absent during SSR/prerender
   instance.controller.update(
     glyphnavOptions(
@@ -119,8 +122,10 @@ function apply(): void {
 
 let disposeFwMenu: (() => void) | undefined;
 let disposeActiveNav: (() => void) | undefined;
+
 onMounted(() => {
   const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
+
   charset.value = saved.charset;
   duration.value = saved.duration;
   effect.value = saved.effect;
@@ -128,22 +133,28 @@ onMounted(() => {
   scope.value = saved.scope;
   backForward.value = saved.backForward;
   path.value = currentUrl();
+
   apply();
   applyBackForward();
   // Wire the theme switcher + framework menu + styled control tooltips +
   // code-block helpers + the nav's exact-match active pill. The menu and the
   // nav sync are the two with something to unhook.
   initTheme();
+
   disposeFwMenu = initFwMenu();
+
   initTooltips();
   initCodeBlocks();
   initWordmark();
+
   disposeActiveNav = initActiveNav();
 });
+
 onUnmounted(() => {
   disposeFwMenu?.();
   disposeActiveNav?.();
 });
+
 watch([charset, duration, effect, commit, scope], apply);
 watch(backForward, () => {
   applyBackForward();

@@ -36,6 +36,7 @@ const el = (tag: string, props: Record<string, unknown>): JSX.Element =>
 
 function LocationLabel(): JSX.Element {
   const location = useLocation();
+
   return el('div', {
     'data-testid': 'loc',
     get children() {
@@ -46,6 +47,7 @@ function LocationLabel(): JSX.Element {
 
 function NavButton(): JSX.Element {
   const navigate = useGlyphnavNavigate(fast);
+
   return el('button', {
     type: 'button',
     onClick: () => void navigate('/test'),
@@ -76,6 +78,7 @@ let dispose: (() => void) | undefined;
 
 async function renderApp(): Promise<void> {
   const host = document.createElement('div');
+
   document.body.appendChild(host);
   dispose = render(
     () =>
@@ -124,7 +127,9 @@ describe('solid router adapter', () => {
 
   it('GlyphnavLink renders a real href and animates then navigates on click', async () => {
     await renderApp();
+
     const link = screen.getByText('other') as HTMLAnchorElement;
+
     expect(link.getAttribute('href')).toBe('/other');
 
     fireEvent.click(link);
@@ -155,7 +160,9 @@ describe('solid router adapter', () => {
     { href: 'https://external.example/path' },
   ])('lets browser-owned links through: %j', async (attributes) => {
     linkOptions = attributes;
+
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
+
     await renderApp();
     fireEvent.click(screen.getByText('other'));
     expect(run).not.toHaveBeenCalled();
@@ -164,7 +171,9 @@ describe('solid router adapter', () => {
 
   it('honors the caller onClick cancellation', async () => {
     linkOptions = { onClick: (event) => event.preventDefault() };
+
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
+
     await renderApp();
     fireEvent.click(screen.getByText('other'));
     expect(run).not.toHaveBeenCalled();
@@ -173,8 +182,11 @@ describe('solid router adapter', () => {
 
   it('animates the landed browser URL with the default navigate-first timing', async () => {
     const host = document.createElement('div');
+
     document.body.appendChild(host);
+
     const browserOptions = { ...fast, commit: 'before' } as const;
+
     dispose = render(
       () =>
         createComponent(GlyphnavProvider, {
@@ -221,8 +233,10 @@ describe('solid router adapter', () => {
     },
   ])('resolves imperative animation targets with $name', async ({ to, resolve, expected }) => {
     window.history.replaceState(null, '', '/app/parent/child/grandchild?old=1');
+
     let navigate!: GlyphnavNavigateFn;
     const host = document.createElement('div');
+
     document.body.appendChild(host);
     dispose = render(
       () =>
@@ -238,6 +252,7 @@ describe('solid router adapter', () => {
                 path: '/parent',
                 component: (props: { children?: JSX.Element }) => {
                   navigate = useGlyphnavNavigate({ ...fast, maxFrames: 2 });
+
                   return props.children;
                 },
                 get children() {
@@ -253,9 +268,11 @@ describe('solid router adapter', () => {
     // The root must render its outlet so useGlyphnavNavigate captures the
     // parent route's context, rather than the router's base route.
     await waitFor(() => expect(navigate).toBeTypeOf('function'));
+
     const options: Partial<NavigateOptions> | undefined =
       resolve === undefined ? undefined : { resolve };
     const done = navigate(to, options);
+
     await waitFor(() => expect(frames.at(-1)).toBe(expected));
     await expect(done).resolves.toBe('completed');
     expect(window.location.pathname + window.location.search).toBe(expected);
@@ -263,8 +280,10 @@ describe('solid router adapter', () => {
 
   it('renders imperative HashRouter targets on the current document path and query', async () => {
     window.history.replaceState(null, '', '/document/?v=1#/app/parent');
+
     let navigate!: GlyphnavNavigateFn;
     const host = document.createElement('div');
+
     document.body.appendChild(host);
     dispose = render(
       () =>
@@ -280,6 +299,7 @@ describe('solid router adapter', () => {
                 path: '/parent',
                 component: () => {
                   navigate = useGlyphnavNavigate({ ...fast, maxFrames: 2 });
+
                   return 'parent';
                 },
               }),
@@ -290,8 +310,10 @@ describe('solid router adapter', () => {
       host,
     );
     await waitFor(() => expect(navigate).toBeTypeOf('function'));
+
     const done = navigate('/other?q=2#top');
     const expected = '/document/?v=1#/app/other?q=2#top';
+
     await waitFor(() => expect(frames.at(-1)).toBe(expected));
     await expect(done).resolves.toBe('completed');
     expect(window.location.pathname + window.location.search + window.location.hash).toBe(expected);

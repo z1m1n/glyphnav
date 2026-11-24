@@ -41,6 +41,7 @@ const STORE_KEY = 'vanilla';
 const figure = (code: string, caption = '', captionId = ''): string => {
   const idAttr = captionId ? ` id="${captionId}"` : '';
   const cap = caption ? `<figcaption${idAttr}>${caption}</figcaption>` : '';
+
   return `<figure>${cap}<pre><code>${highlight(code)}</code></pre></figure>`;
 };
 
@@ -101,12 +102,14 @@ const view = document.getElementById('view')!;
 
 function currentSub(): string {
   const sub = location.pathname.replace(BASE, '').replace(/\/$/, '');
+
   return sub === '' ? '/' : sub;
 }
 
 function render(): void {
   const sub = currentSub();
   const page = pages[sub] ?? { title: '404', lead: `No page at ${sub}` };
+
   view.className = `view${page.html ? ' docs' : ''}`;
   view.innerHTML =
     '<article>' +
@@ -135,6 +138,7 @@ const glyphOptions = () =>
 // live: install with it off, then attach/detach the popstate listener on demand.
 const handle = install({ reload: false, animatePopState: false, ...glyphOptions() });
 const toggleHistory = createHistoryToggle(() => handle.controller.enableHistoryAnimation());
+
 toggleHistory(state.backForward);
 
 window.addEventListener('popstate', render);

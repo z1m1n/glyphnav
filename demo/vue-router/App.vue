@@ -72,12 +72,14 @@ function apply(): void {
   );
   persist();
 }
+
 apply();
 watch([charset, duration, effect, commit, scope], apply);
 
 // Back/forward animation: attach/detach the popstate listener as the checkbox
 // (restored from storage) toggles.
 const toggleHistory = createHistoryToggle(() => controller.enableHistoryAnimation());
+
 toggleHistory(backForward.value);
 watch(backForward, (on) => {
   toggleHistory(on);
@@ -89,6 +91,7 @@ watch(backForward, (on) => {
 // sync are the two with something to unhook.
 let disposeFwMenu: (() => void) | undefined;
 let disposeActiveNav: (() => void) | undefined;
+
 onMounted(() => {
   initTheme();
   disposeFwMenu = initFwMenu();

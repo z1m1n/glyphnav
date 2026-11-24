@@ -9,7 +9,9 @@ const realWrite = process.stderr.write.bind(process.stderr);
 
 process.stderr.write = ((chunk: string | Uint8Array, ...rest: unknown[]): boolean => {
   const text = typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8');
+
   if (text.includes('Not implemented: navigation')) return true;
+
   // @ts-expect-error pass through the original (overloaded) signature
   return realWrite(chunk, ...rest);
 }) as typeof process.stderr.write;

@@ -27,11 +27,14 @@ import { highlight } from './highlight';
 function enhance(): void {
   for (const code of document.querySelectorAll<HTMLElement>('code')) {
     if (code.closest('pre')) continue; // a code block, highlighted where rendered
+
     // Skip chips already highlighted whose markup is intact. If a host reused the
     // element across a route change and reset its text, the token spans are gone
     // (childElementCount 0) even though `.hl` lingers — re-highlight those.
     if (code.classList.contains('hl') && code.childElementCount > 0) continue;
+
     const text = code.textContent ?? '';
+
     if (!text.trim()) continue; // nothing to tokenize
 
     code.innerHTML = highlight(text);
@@ -50,6 +53,7 @@ function hasCode(node: Node): boolean {
 /** Whether `node` is an inline `<code>` (or lives in one) — a chip reset in place. */
 function isInlineCode(node: Node): boolean {
   const code = node.nodeType === 1 ? (node as Element).closest('code') : null;
+
   return !!code && !code.closest('pre');
 }
 
@@ -91,20 +95,24 @@ export function initInlineCode(): void {
       enhance();
     });
   };
+
   new MutationObserver((records) => {
     for (const r of records) {
       // A fresh subtree mounted carrying a chip (route add / full remount).
       for (const node of r.addedNodes) {
         if (hasCode(node)) {
           schedule();
+
           return;
         }
       }
+
       // An existing chip's text was reset in place (host reused the element) —
       // the chip is the mutation target, its new text an added text node hasCode
       // can't see.
       if (isInlineCode(r.target)) {
         schedule();
+
         return;
       }
     }

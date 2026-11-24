@@ -52,6 +52,7 @@ export const generateFrames = (
     opts.effect === 'scramble' ? scrambleBurst(text, config) : scrambleFrames(text, config);
 
   const total = scrambled.length;
+
   return scrambled.map((frame, index) => ({
     path: prefix + frame.text,
     text: frame.text,

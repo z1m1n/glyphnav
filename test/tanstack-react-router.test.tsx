@@ -16,11 +16,13 @@ const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
 
 function LocationLabel() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
   return <div data-testid="loc">{pathname}</div>;
 }
 
 function NavButton() {
   const navigate = useGlyphnavNavigate(fast);
+
   return (
     <button type="button" onClick={() => void navigate({ to: '/test' })}>
       go
@@ -64,11 +66,13 @@ async function renderApp() {
     routeTree,
     history: createMemoryHistory({ initialEntries: ['/'] }),
   });
+
   render(<RouterProvider router={router} />);
   // Let the router finish its initial load.
   await act(async () => {
     await vi.advanceTimersByTimeAsync(50);
   });
+
   return router;
 }
 
@@ -94,7 +98,9 @@ describe('tanstack react router adapter', () => {
 
   it('GlyphnavLink renders a real href and animates then navigates on click', async () => {
     await renderApp();
+
     const link = screen.getByText('other') as HTMLAnchorElement;
+
     expect(link.getAttribute('href')).toBe('/other');
 
     fireEvent.click(link);
@@ -144,11 +150,14 @@ describe('tanstack react router adapter', () => {
         routeTree: testTree,
         history: createMemoryHistory({ initialEntries: ['/'] }),
       });
+
       render(<RouterProvider router={router} />);
       await act(async () => {
         await vi.advanceTimersByTimeAsync(50);
       });
+
       const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+
       fireEvent(screen.getByText('link'), event);
       expect(event.defaultPrevented).toBe(false);
       expect(click).toHaveBeenCalledOnce();
@@ -161,6 +170,7 @@ describe('tanstack react router adapter', () => {
 
   it('applies per-link options under a provider and actually writes animation frames', async () => {
     window.history.replaceState(null, '', '/');
+
     const frames: string[] = [];
     const testRoot = createRootRoute({
       component: () => (
@@ -181,6 +191,7 @@ describe('tanstack react router adapter', () => {
       createRoute({ getParentRoute: () => testRoot, path: '/other' }),
     ]);
     const router = createRouter({ routeTree: testTree, history: createBrowserHistory() });
+
     render(<RouterProvider router={router} />);
     await act(async () => {
       await vi.advanceTimersByTimeAsync(50);

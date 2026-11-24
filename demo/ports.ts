@@ -20,6 +20,7 @@ try {
 
 const port = (name: string, fallback: number): number => {
   const value = Number(process.env[name]);
+
   return Number.isInteger(value) && value > 0 ? value : fallback;
 };
 

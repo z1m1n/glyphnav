@@ -12,7 +12,9 @@ const routes = [
 /** A router with its initial route resolved (no app mount needed). */
 async function makeRouter(): Promise<Router> {
   const router = createRouter({ history: createMemoryHistory(), routes });
+
   await router.push('/');
+
   return router;
 }
 
@@ -22,6 +24,7 @@ describe('nuxt adapter', () => {
   it('wraps router.push so navigations animate then commit', async () => {
     const router = await makeRouter();
     const frames: string[] = [];
+
     attachGlyphnav(router, {
       charset: 'q',
       rng: () => 0,
@@ -33,7 +36,9 @@ describe('nuxt adapter', () => {
     });
 
     vi.useFakeTimers();
+
     const push = router.push('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await push;
 
@@ -48,6 +53,7 @@ describe('nuxt adapter', () => {
     // the current route in its canonical (unslashed) form through router.replace.
     // That is not a user navigation — it must not animate the address bar.
     const router = createRouter({ history: createMemoryHistory(), routes });
+
     await router.push('/test/');
     // Premise: Vue Router keeps the slashed form as the current path but resolves
     // the canonical route without the slash.
@@ -55,10 +61,13 @@ describe('nuxt adapter', () => {
     expect(router.resolve('/test').href).toBe('/test');
 
     const onFrame = vi.fn();
+
     attachGlyphnav(router, { stepDuration: 5, commit: 'after', hooks: { onFrame } });
 
     vi.useFakeTimers();
+
     const nav = router.replace('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await nav;
 
@@ -72,6 +81,7 @@ describe('nuxt adapter', () => {
     const router = await makeRouter();
     const onFrame = vi.fn();
     const instance = attachGlyphnav(router, { stepDuration: 5, hooks: { onFrame } });
+
     instance.detach();
 
     await router.push('/other');
@@ -100,7 +110,9 @@ describe('nuxt adapter', () => {
 
     // The adapter's own navigate animates.
     vi.useFakeTimers();
+
     const navigation = instance.navigate('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await navigation;
     expect(onFrame).toHaveBeenCalled();
@@ -121,9 +133,12 @@ describe('nuxt adapter', () => {
 
   it('keeps the deployment prefix in hash-mode animate-first targets', async () => {
     window.history.replaceState(null, '', '/app/?version=1#/');
+
     const history = createWebHashHistory('/app/');
     const router = createRouter({ history, routes });
+
     await router.push('/');
+
     const frames: string[] = [];
     const instance = attachGlyphnav(router, {
       historyMode: 'hash',
@@ -133,9 +148,12 @@ describe('nuxt adapter', () => {
       rng: () => 0,
       hooks: { onFrame: (frame) => frames.push(frame.path) },
     });
+
     vi.useFakeTimers();
+
     try {
       const result = instance.navigate('/test');
+
       await vi.advanceTimersByTimeAsync(500);
       expect(await result).toBe('completed');
       expect(frames.at(-1)).toBe('/app/?version=1#/test');
@@ -157,6 +175,7 @@ describe('nuxt adapter', () => {
       provide: () => {},
       vueApp: { onUnmount },
     });
+
     expect(onUnmount).toHaveBeenCalledWith(instance.detach);
     onUnmount.mock.calls[0][0]();
     expect(router.push).not.toBe(instance.push);

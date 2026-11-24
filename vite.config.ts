@@ -9,6 +9,7 @@ const require = createRequire(import.meta.url);
 /** Emit with the native TypeScript CLI; compiler errors fail the library build. */
 async function emitDeclarations(): Promise<void> {
   const compilerRoot = dirname(require.resolve('typescript/package.json'));
+
   execFileSync(
     process.execPath,
     [
@@ -20,15 +21,18 @@ async function emitDeclarations(): Promise<void> {
     ],
     { stdio: 'inherit' },
   );
+
   const output = resolve('dist');
   const files = await Promise.all(
     (await readdir(output, { recursive: true }))
       .filter((path) => path.endsWith('.d.ts'))
       .map(async (path) => {
         const absolute = resolve(output, path);
+
         return [absolute, await readFile(absolute, 'utf8')] as const;
       }),
   );
+
   await writeNodeDeclarations(new Map(files));
 }
 
@@ -39,6 +43,7 @@ async function writeNodeDeclarations(files: Map<string, string>): Promise<void> 
       .filter(([path]) => path.endsWith('.d.ts'))
       .map(([path, content]) => [resolve(path), content]),
   );
+
   for (const [path, content] of declarations) {
     const rewrite = (extension: 'js' | 'cjs'): string =>
       content.replace(
@@ -51,20 +56,26 @@ async function writeNodeDeclarations(files: Map<string, string>): Promise<void> 
               ? `${prefix}${quote}${specifier}.js${quote}`
               : match;
           }
+
           const target = resolve(dirname(path), specifier);
           const declaration = [
             target.replace(/\.js$/, '') + '.d.ts',
             resolve(target, 'index.d.ts'),
           ].find((candidate) => declarations.has(candidate));
+
           if (!declaration)
             throw new Error(`Unresolved declaration import ${specifier} in ${path}`);
+
           let resolved = relative(dirname(path), declaration)
             .replaceAll('\\', '/')
             .replace(/\.d\.ts$/, `.${extension}`);
+
           if (!resolved.startsWith('.')) resolved = `./${resolved}`;
+
           return `${prefix}${quote}${resolved}${quote}`;
         },
       );
+
     await writeFile(path, rewrite('js'));
     await writeFile(path.replace(/\.d\.ts$/, '.d.cts'), rewrite('cjs'));
   }

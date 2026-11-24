@@ -5,6 +5,34 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Run tsrs-backed TypeScript diagnostics on library and test files through
+  `pnpm lint:types`. Both the local and CI quality gates run this check.
+- Enforce statement padding with Oxlint's Stylistic plugin.
+
+### Changed
+
+- Update development and CI to Node.js 26.13.1 LTS and pnpm 12.23.0.
+  Pin both in `package.json` and use `pnpm/setup` in GitHub Actions.
+- Pin the quality, publishing, and Pages workflows to current stable action versions.
+- Use `pnpm pack` for the tarball smoke test to match the release workflow.
+- Refresh tested framework and development dependencies, including Angular
+  22.3, Astro 7.4.13, Nuxt 4.7, SvelteKit 3.4, Vue Router 5.5.1,
+  Playwright 1.65.1, Vitest 5.1.1, Oxlint 1.95 and Oxfmt 0.80.
+- Keep native TypeScript 7.0.2 for the standalone compiler checks and
+  declaration build. Vue, Nuxt, Astro and SvelteKit tooling that uses the
+  JavaScript Compiler API continues to use TypeScript 6.0.3.
+
+### Fixed
+
+- Update Astro's template-checker transform and use explicit TypeScript import
+  extensions in SvelteKit's Vite config.
+- Update transitive dependencies used by the Nuxt and Astro demos to versions
+  that resolve the reported dependency audit findings.
+
 ## [2.4.1] 2026-11-12
 
 ### Added

@@ -60,6 +60,7 @@
   // Back/forward animation is opt-in; the checkbox attaches/detaches the popstate
   // listener. The instance only exists client-side, so this runs after mount.
   const toggleHistory = createHistoryToggle(() => glyph!.controller.enableHistoryAnimation());
+
   function applyBackForward(): void {
     if (!glyph) return;
     toggleHistory(backForward);
@@ -83,7 +84,9 @@
   onMount(() => {
     // glyphnav rewrites the address bar, so it only attaches on the client.
     glyph = attachGlyphnav(goto, { duration: 250, commit: 'before' });
+
     const saved = loadToolbar(STORE_KEY, DEFAULT_TOOLBAR);
+
     charset = saved.charset;
     duration = saved.duration;
     effect = saved.effect;
@@ -95,14 +98,19 @@
     // code-block helpers + the nav's exact-match active pill. The menu and the
     // nav sync are the two unhooked in the teardown below.
     initTheme();
+
     const disposeFwMenu = initFwMenu();
+
     initTooltips();
     initCodeBlocks();
     initWordmark();
+
     const disposeActiveNav = initActiveNav();
+
     // Flip last so the reactive blocks below first run with the restored values
     // (and never clobber the saved state with the defaults on the first render).
     mounted = true;
+
     return () => {
       toggleHistory(false);
       glyph?.detach();
@@ -114,6 +122,7 @@
   // Re-apply to the controller whenever a control changes. The listed args drive
   // Svelte's dependency tracking; the work happens in apply()/applyBackForward().
   $: if (mounted) reapply(charset, duration, effect, commit, scope);
+
   $: if (mounted) retoggle(backForward);
 
   function reapply(
@@ -125,6 +134,7 @@
   ): void {
     apply();
   }
+
   function retoggle(_bf: boolean): void {
     applyBackForward();
     persist();

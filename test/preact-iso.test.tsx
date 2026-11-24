@@ -9,11 +9,13 @@ const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
 
 function LocationLabel() {
   const { path } = useLocation();
+
   return <div data-testid="loc">{path}</div>;
 }
 
 function NavButton() {
   const route = useGlyphnavRoute(fast);
+
   return (
     <button type="button" onClick={() => void route('/test')}>
       go
@@ -134,6 +136,7 @@ describe('preact-iso adapter', () => {
     { href: 'https://external.example/path' },
   ])('preserves native behavior for browser-owned GlyphnavLink: %j', (attributes) => {
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
+
     render(
       <LocationProvider>
         <GlyphnavProvider {...fast}>
@@ -143,8 +146,10 @@ describe('preact-iso adapter', () => {
         </GlyphnavProvider>
       </LocationProvider>,
     );
+
     const link = screen.getByText('native');
     const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+
     link.dispatchEvent(event);
     expect(run).not.toHaveBeenCalled();
     expect(event.defaultPrevented).toBe(false);
@@ -153,6 +158,7 @@ describe('preact-iso adapter', () => {
 
   it('honors onClick cancellation before starting a run', () => {
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
+
     render(
       <LocationProvider>
         <GlyphnavProvider {...fast}>
@@ -169,6 +175,7 @@ describe('preact-iso adapter', () => {
 
   it('lets opted-out internal links use native preact-iso navigation', () => {
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
+
     render(
       <LocationProvider>
         <GlyphnavProvider {...fast} interceptLinks>
@@ -185,6 +192,7 @@ describe('preact-iso adapter', () => {
 
   it('protects empty download and cancelled plain links from the preact-iso listener', () => {
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
+
     render(
       <LocationProvider>
         <GlyphnavProvider {...fast} interceptLinks>
@@ -207,6 +215,7 @@ describe('preact-iso adapter', () => {
   it('applies glyphOptions under a provider and keeps the shared base options', async () => {
     const localFrames: string[] = [];
     const sharedFrames: string[] = [];
+
     render(
       <LocationProvider>
         <GlyphnavProvider
@@ -253,6 +262,7 @@ describe('preact-iso adapter', () => {
         </GlyphnavProvider>
       </LocationProvider>,
     );
+
     fireEvent.click(screen.getByText('go-away'));
     await act(async () => {
       await vi.advanceTimersByTimeAsync(16);
@@ -270,9 +280,11 @@ describe('preact-iso adapter', () => {
   it('does not animate newly added links after its provider unmounts', () => {
     const run = vi.spyOn(GlyphnavController.prototype, 'run');
     const view = render(<InterceptApp />);
+
     view.unmount();
 
     const anchor = document.createElement('a');
+
     anchor.href = '/other';
     document.body.append(anchor);
     // Cancel only the browser default, after document-level interceptors ran.

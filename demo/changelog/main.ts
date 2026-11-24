@@ -15,6 +15,7 @@ initWordmark();
 // The CHANGELOG is authored by us (not user input), so rendering its parsed
 // markup is safe. `marked.parse` is synchronous with the default options.
 const el = document.getElementById('changelog')!;
+
 el.innerHTML = marked.parse(changelog, { async: false });
 
 // Open the reference links in the changelog (GitHub compare URLs, Keep a

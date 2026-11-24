@@ -18,6 +18,7 @@ export function baseAwareLinks(): Plugin {
       order: 'pre',
       handler(html) {
         if (base === '/') return html;
+
         return html.replace(/href="\/(?!\/)/g, `href="${base}`);
       },
     },

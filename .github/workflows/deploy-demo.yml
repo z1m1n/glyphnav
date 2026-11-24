@@ -23,23 +23,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
-      # pnpm version comes from the "packageManager" field in package.json.
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v6
+      - uses: pnpm/setup@v3.2.0
         with:
-          node-version: 24
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+          cache: true
+          require-lockfile: true
 
       # Fully check every demo before building/deploying. `pnpm run check` runs
       # the library gate — typecheck (the library, its tooling configs and the
-      # Vite-bundled demos, including the Vue SFC via vue-tsc), lint with a
-      # zero-warning budget, format check and tests. The Nuxt, SvelteKit and Astro apps
-      # have their own generated-type checks (nuxi prepare + vue-tsc,
+      # Vite-bundled demos, including the Vue SFC via vue-tsc), lint,
+      # tsrs-backed TypeScript diagnostics, format check and tests. The Nuxt,
+      # SvelteKit and Astro apps have their own generated-type checks (nuxi prepare + vue-tsc,
       # svelte-kit sync + svelte-check, astro check). The Next.js app is type-checked by
       # `next build` in the step below, so it needs no separate check here.
       - run: pnpm run check
@@ -61,9 +56,9 @@ jobs:
           DEMO_BASE: /${{ github.event.repository.name }}/
         run: pnpm demo:build
 
-      - uses: actions/configure-pages@v6
+      - uses: actions/configure-pages@v6.0.0
 
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: demo/dist
 
@@ -75,7 +70,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v5.0.1
         # The action's own dependencies trip Node 24's punycode DEP0040
         # warning; suppress deprecation noise we can't act on.
         env:

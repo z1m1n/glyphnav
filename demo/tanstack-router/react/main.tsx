@@ -151,11 +151,15 @@ function Layout() {
   // the effect's cleanup.
   useEffect(() => {
     initTheme();
+
     const disposeFwMenu = initFwMenu();
+
     initTooltips();
     initCodeBlocks();
     initWordmark();
+
     const disposeActiveNav = initActiveNav();
+
     return () => {
       disposeFwMenu();
       disposeActiveNav();

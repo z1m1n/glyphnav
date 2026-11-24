@@ -55,6 +55,7 @@ export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigate
       // `buildLocation` yields the basepath-aware href that will really end up
       // in the address bar.
       const target = router.buildLocation(opts).href;
+
       return controller.run(target, () => router.navigate(opts) as Promise<void>, options);
     },
     [router, controller, options],

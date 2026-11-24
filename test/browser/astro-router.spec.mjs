@@ -18,7 +18,9 @@ async function setup(page, commit, backForward = false) {
       );
       window.documentToken = Math.random();
       window.historyWrites = [];
+
       const replace = History.prototype.replaceState;
+
       History.prototype.replaceState = function (...args) {
         replace.apply(this, args);
         window.historyWrites.push(location.pathname + location.search + location.hash);
@@ -48,14 +50,19 @@ for (const commit of ['before', 'after']) {
     page,
   }) => {
     const errors = [];
+
     page.on('pageerror', (error) => errors.push(error.message));
     await setup(page, commit);
+
     const token = await page.evaluate(() => window.documentToken);
+
     await page.getByRole('link', { name: '?query', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'About', exact: true })).toBeVisible();
     await settled(page, `${base}about/?ref=deep&page=2`);
     expect(await page.evaluate(() => window.documentToken)).toBe(token);
+
     const writes = await page.evaluate(() => window.historyWrites);
+
     // A busy worker may coalesce overdue frames into one intermediate state.
     expect(
       writes.filter((path) => ![base, `${base}about/?ref=deep&page=2`].includes(path)).length,
@@ -81,9 +88,12 @@ for (const commit of ['before', 'after']) {
 
 test('ClientRouter preserves replace history and opt-in back/forward', async ({ page }) => {
   const errors = [];
+
   page.on('pageerror', (error) => errors.push(error.message));
   await setup(page, 'before', true);
+
   const initialLength = await page.evaluate(() => history.length);
+
   await page.getByRole('link', { name: 'Features', exact: true }).click();
   await settled(page, `${base}features/`);
   await page.getByRole('link', { name: 'Replace this history entry', exact: true }).click();
@@ -106,28 +116,35 @@ test('Astro starts from the picker with working controls and ClientRouter naviga
   page,
 }) => {
   const errors = [];
+
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('response', (response) => {
     if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
   });
 
   const pickerOrigin = 'http://localhost:5189';
+
   await page.goto(`${pickerOrigin}/glyphnav/`);
   await page.locator('a[href="/glyphnav/astro/"]').click();
   await expect(page.locator('.theme-toggle')).toHaveCount(1);
   await expect(page.locator('.tabs a[aria-current="page"]')).toHaveText('Home');
+
   const moduleUrls = await page
     .locator('script[type="module"][src]')
     .evaluateAll((scripts) => scripts.map((script) => script.src));
+
   expect(moduleUrls.length).toBeGreaterThan(0);
+
   for (const moduleUrl of moduleUrls) {
     expect(new URL(moduleUrl).origin).toBe('http://localhost:5188');
   }
+
   await page.locator('#commit').selectOption('after');
   await page.locator('#effect').selectOption('scramble');
   await page.evaluate(() => {
     window.documentToken = Math.random();
   });
+
   const token = await page.evaluate(() => window.documentToken);
 
   await page.getByRole('link', { name: '?query', exact: true }).click();

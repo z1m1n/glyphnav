@@ -8,8 +8,10 @@ function setLocation(path = '/'): void {
 
 function makeAnchor(attrs: Record<string, string>): HTMLAnchorElement {
   const a = document.createElement('a');
+
   for (const [key, value] of Object.entries(attrs)) a.setAttribute(key, value);
   document.body.appendChild(a);
+
   return a;
 }
 
@@ -26,9 +28,12 @@ function plainClick(): MouseEvent {
 
 /** Instances to tear down so a global listener never leaks into the next test. */
 const live: SvelteKitGlyphnavInstance[] = [];
+
 function attach(goto: Goto, options?: SvelteKitGlyphnavOptions): SvelteKitGlyphnavInstance {
   const instance = attachGlyphnav(goto, options);
+
   live.push(instance);
+
   return instance;
 }
 
@@ -58,6 +63,7 @@ describe('sveltekit adapter', () => {
     });
 
     const nav = instance.navigate('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await nav;
 
@@ -80,6 +86,7 @@ describe('sveltekit adapter', () => {
     });
 
     const nav = instance.navigate('/dashboard');
+
     await vi.advanceTimersByTimeAsync(200);
     await nav;
 
@@ -92,6 +99,7 @@ describe('sveltekit adapter', () => {
   it("intercept: 'links' animates an <a> click and lets goto navigate (once)", async () => {
     const goto = fakeGoto();
     const frames: string[] = [];
+
     attach(goto, {
       charset: 'q',
       rng: () => 0,
@@ -102,6 +110,7 @@ describe('sveltekit adapter', () => {
 
     const anchor = makeAnchor({ href: '/about' });
     const event = plainClick();
+
     anchor.dispatchEvent(event);
 
     // glyphnav claimed the click in the capture phase, so SvelteKit's own
@@ -117,11 +126,13 @@ describe('sveltekit adapter', () => {
   it("intercept: 'none' installs no global listener, so link clicks fall through to SvelteKit", async () => {
     const goto = fakeGoto();
     const onFrame = vi.fn();
+
     attach(goto, { intercept: 'none', stepDuration: 5, hooks: { onFrame } });
 
     // `#x` so jsdom treats the un-intercepted click as a hash change, not a warned navigation.
     const anchor = makeAnchor({ href: '#x' });
     const event = plainClick();
+
     anchor.dispatchEvent(event);
     await vi.advanceTimersByTimeAsync(200);
 
@@ -134,22 +145,30 @@ describe('sveltekit adapter', () => {
 
   it('honors inherited Kit link options and leaves hard reloads to the browser', async () => {
     const goto = vi.fn<Goto>().mockResolvedValue(undefined);
+
     attach(goto);
+
     const ancestor = document.createElement('nav');
+
     ancestor.setAttribute('data-sveltekit-reload', '');
     ancestor.setAttribute('data-sveltekit-replacestate', 'true');
     ancestor.setAttribute('data-sveltekit-reset', 'false');
     document.body.appendChild(ancestor);
+
     const anchor = makeAnchor({ href: '#target' });
+
     ancestor.appendChild(anchor);
 
     const reload = plainClick();
+
     anchor.dispatchEvent(reload);
     expect(reload.defaultPrevented).toBe(false);
     expect(goto).not.toHaveBeenCalled();
 
     anchor.setAttribute('data-sveltekit-reload', 'false');
+
     const navigation = plainClick();
+
     anchor.dispatchEvent(navigation);
     expect(navigation.defaultPrevented).toBe(true);
     await vi.dynamicImportSettled();
@@ -163,10 +182,12 @@ describe('sveltekit adapter', () => {
     const goto = fakeGoto();
     const onFrame = vi.fn();
     const instance = attachGlyphnav(goto, { stepDuration: 5, hooks: { onFrame } });
+
     instance.detach();
 
     const anchor = makeAnchor({ href: '#x' });
     const event = plainClick();
+
     anchor.dispatchEvent(event);
     await vi.advanceTimersByTimeAsync(200);
 
@@ -190,6 +211,7 @@ describe('sveltekit adapter', () => {
     const anchor = makeAnchor({ href: '/posts' });
     const action = instance.link(anchor);
     const event = plainClick();
+
     anchor.dispatchEvent(event);
 
     expect(event.defaultPrevented).toBe(true);
@@ -200,7 +222,9 @@ describe('sveltekit adapter', () => {
     action.destroy();
     (goto as ReturnType<typeof vi.fn>).mockClear();
     anchor.setAttribute('href', '#gone');
+
     const after = plainClick();
+
     anchor.dispatchEvent(after);
     expect(after.defaultPrevented).toBe(false);
     expect(goto).not.toHaveBeenCalled();
@@ -208,6 +232,7 @@ describe('sveltekit adapter', () => {
 
   it('preserves independent SvelteKit 2 scroll and focus options', async () => {
     vi.doMock('@sveltejs/kit', () => ({ VERSION: '2.0.0' }));
+
     const goto = fakeGoto();
     const instance = attach(goto, {
       intercept: 'none',
@@ -224,6 +249,7 @@ describe('sveltekit adapter', () => {
       invalidateAll: true,
       state: { a: 1 },
     });
+
     await vi.advanceTimersByTimeAsync(200);
     await nav;
 
@@ -239,9 +265,13 @@ describe('sveltekit adapter', () => {
   it('translates legacy options without sending removed keys to SvelteKit 3', async () => {
     const goto = vi.fn<Goto>().mockResolvedValue(undefined);
     const { navigate } = attach(goto);
+
     await navigate('/x', { replace: true, keepFocus: true, invalidateAll: true });
+
     const options = goto.mock.calls[0][1];
+
     expect(options).toMatchObject({ replace: true, reset: false, refreshAll: true });
+
     for (const key of ['replaceState', 'noScroll', 'keepFocus', 'invalidateAll']) {
       expect(options).not.toHaveProperty(key);
     }
@@ -259,14 +289,17 @@ describe('sveltekit adapter', () => {
       invalidate: ['app:items'],
       state: { modal: 1 },
     };
+
     await navigate('/x', { ...options, noScroll: true, invalidateAll: true });
     expect(goto).toHaveBeenCalledWith('/x', options);
   });
 
   it('maps reset and refreshAll on Kit 2 and rejects a shallow change before navigating', async () => {
     vi.doMock('@sveltejs/kit', () => ({ VERSION: '2.70.4' }));
+
     const goto = vi.fn<Goto>().mockResolvedValue(undefined);
     const { navigate } = attach(goto);
+
     await navigate('/x', { reset: false, refreshAll: true });
     expect(goto.mock.calls[0][1]).toMatchObject({
       noScroll: true,
@@ -281,6 +314,7 @@ describe('sveltekit adapter', () => {
     const goto = vi.fn<Goto>().mockResolvedValue(undefined);
     const instance = attach(goto);
     const pending = instance.navigate('/x', { replace: true });
+
     instance.controller.cancel();
     expect(await pending).toBe('cancelled');
     await vi.dynamicImportSettled();
@@ -289,6 +323,7 @@ describe('sveltekit adapter', () => {
 
   it('opts into animating browser back/forward with animatePopState', async () => {
     setLocation('/start');
+
     const goto = fakeGoto();
     const frames: string[] = [];
     const instance = attach(goto, {
@@ -303,6 +338,7 @@ describe('sveltekit adapter', () => {
 
     // A forward SPA navigation to /elsewhere updates the tracked path.
     const fwd = instance.navigate('/elsewhere');
+
     await vi.advanceTimersByTimeAsync(200);
     await fwd;
 
@@ -332,6 +368,7 @@ describe('sveltekit adapter', () => {
       hooks: { onFrame: (frame) => frames.push(frame.path) },
     });
     const result = instance.navigate('/slow');
+
     await vi.advanceTimersByTimeAsync(1500);
     expect(frames).toHaveLength(0);
     complete();
@@ -346,12 +383,14 @@ describe('sveltekit adapter', () => {
   it('propagates goto rejection immediately and skips a blocked route without polling', async () => {
     const error = new Error('load failed');
     const instance = attach(() => Promise.reject(error), { intercept: 'none' });
+
     await expect(instance.navigate('/failed')).rejects.toBe(error);
     expect(window.location.pathname).toBe('/');
     expect(vi.getTimerCount()).toBe(0);
 
     const onFrame = vi.fn();
     const blocked = attach(async () => {}, { intercept: 'none', hooks: { onFrame } });
+
     expect(await blocked.navigate('/blocked')).toBe('skipped');
     expect(onFrame).not.toHaveBeenCalled();
     expect(vi.getTimerCount()).toBe(0);
@@ -371,6 +410,7 @@ describe('sveltekit adapter', () => {
       },
     );
     const result = instance.navigate('/slow');
+
     instance.controller.cancel();
     expect(await result).toBe('cancelled');
     reject(new Error('superseded'));
@@ -382,9 +422,12 @@ describe('sveltekit adapter', () => {
   it('reports click navigation errors without an unhandled promise rejection', async () => {
     const error = new Error('click navigation failed');
     const reportError = vi.fn();
+
     vi.stubGlobal('reportError', reportError);
     attach(() => Promise.reject(error));
+
     const anchor = makeAnchor({ href: '/failed' });
+
     anchor.dispatchEvent(plainClick());
     await vi.advanceTimersByTimeAsync(0);
     expect(reportError).toHaveBeenCalledWith(error);

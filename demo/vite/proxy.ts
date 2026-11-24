@@ -22,8 +22,10 @@ export function devProxy(target: string, name: string, command: string): ProxyOp
       proxy.on('error', (_err, _req, res) => {
         if (!('writeHead' in res)) {
           res.destroy();
+
           return;
         }
+
         if (!res.headersSent) res.writeHead(502, { 'content-type': 'text/html' });
         res.end(
           `<!doctype html><meta charset="utf-8">` +

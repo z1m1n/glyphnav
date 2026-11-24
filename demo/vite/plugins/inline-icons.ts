@@ -25,7 +25,9 @@ export function inlineIcons(): Plugin {
 
     return svg;
   };
+
   let seq = 0;
+
   return {
     name: 'demo-inline-icons',
     transformIndexHtml: {

@@ -7,14 +7,17 @@ function setLocation(path = '/'): void {
 
 function makeAnchor(attrs: Record<string, string>): HTMLAnchorElement {
   const a = document.createElement('a');
+
   for (const [key, value] of Object.entries(attrs)) a.setAttribute(key, value);
   document.body.appendChild(a);
+
   return a;
 }
 
 /** Dispatch a click on `a` and capture what eligibleAnchor decides. */
 function clickResult(a: HTMLAnchorElement, init: MouseEventInit = {}): HTMLAnchorElement | null {
   let result: HTMLAnchorElement | null = null;
+
   const handler = (e: Event): void => {
     result = eligibleAnchor(e as MouseEvent);
     // Inspection is done; cancel the default so jsdom doesn't attempt (and warn
@@ -22,9 +25,11 @@ function clickResult(a: HTMLAnchorElement, init: MouseEventInit = {}): HTMLAncho
     // `defaultPrevented` check still sees the real value.
     e.preventDefault();
   };
+
   document.addEventListener('click', handler);
   a.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0, ...init }));
   document.removeEventListener('click', handler);
+
   return result;
 }
 
@@ -36,11 +41,13 @@ describe('eligibleAnchor', () => {
 
   it('accepts a plain same-origin link', () => {
     const a = makeAnchor({ href: '/page' });
+
     expect(clickResult(a)).toBe(a);
   });
 
   it('ignores modified clicks', () => {
     const a = makeAnchor({ href: '/page' });
+
     expect(clickResult(a, { metaKey: true })).toBeNull();
     expect(clickResult(a, { ctrlKey: true })).toBeNull();
     expect(clickResult(a, { shiftKey: true })).toBeNull();
@@ -149,6 +156,7 @@ describe('install', () => {
 
   it('animates and commits same-origin link clicks', async () => {
     const frames: string[] = [];
+
     install({
       reload: false,
       charset: 'q',
@@ -158,6 +166,7 @@ describe('install', () => {
     });
 
     const anchor = makeAnchor({ href: '/about' });
+
     anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
 
     await vi.advanceTimersByTimeAsync(200);
@@ -167,12 +176,14 @@ describe('install', () => {
 
   it('stops intercepting after uninstall', async () => {
     const onFrame = vi.fn();
+
     install({ reload: false, stepDuration: 5, hooks: { onFrame } });
     uninstall();
 
     // href="#" so jsdom treats the (now un-intercepted) click as a hash change
     // rather than logging an unimplemented full navigation.
     const anchor = makeAnchor({ href: '#' });
+
     anchor.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
     await vi.advanceTimersByTimeAsync(200);
 
@@ -181,7 +192,9 @@ describe('install', () => {
 
   it('animates browser back/forward by default when intercepting links', async () => {
     setLocation('/start');
+
     const frames: string[] = [];
+
     install({
       reload: false,
       charset: 'q',
@@ -192,6 +205,7 @@ describe('install', () => {
 
     // A forward SPA navigation pushes /about and updates the tracked path.
     const fwd = navigate('/about', { reload: false });
+
     await vi.advanceTimersByTimeAsync(200);
     await fwd;
 
@@ -208,7 +222,9 @@ describe('install', () => {
 
   it('leaves back/forward alone with intercept: none (and stops on uninstall)', async () => {
     setLocation('/start');
+
     const onFrame = vi.fn();
+
     install({
       intercept: 'none',
       reload: false,
@@ -219,6 +235,7 @@ describe('install', () => {
     });
 
     const fwd = navigate('/about', { reload: false });
+
     await vi.advanceTimersByTimeAsync(200);
     await fwd;
 

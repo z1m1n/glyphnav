@@ -78,10 +78,12 @@ const resolve = (p: ThemePref): 'light' | 'dark' =>
 function readPref(): ThemePref {
   try {
     const v = localStorage.getItem(STORE_KEY);
+
     if (v === 'light' || v === 'dark') return v;
   } catch {
     /* storage blocked (private mode, etc.) — fall back to system */
   }
+
   return 'system';
 }
 
@@ -97,10 +99,13 @@ function savePref(p: ThemePref): void {
 /** Reflect `p` onto the document: the data-theme attribute + theme-color meta. */
 function apply(p: ThemePref): void {
   const theme = resolve(p);
+
   document.documentElement.dataset.theme = theme;
+
   const meta =
     document.querySelector('meta[name="theme-color"]:not([media])') ??
     document.querySelector('meta[name="theme-color"]');
+
   meta?.setAttribute('content', META_COLOR[theme]);
 }
 

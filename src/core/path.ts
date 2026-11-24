@@ -18,6 +18,7 @@ export interface PathParts {
 export const commonPrefixLength = (a: string, b: string): number => {
   const max = Math.min(a.length, b.length);
   let i = 0;
+
   while (i < max && a.charCodeAt(i) === b.charCodeAt(i)) i++;
 
   return i;
@@ -49,6 +50,7 @@ export const resolvePath = (to: string, from = '/'): string => {
   try {
     const base = new URL(from, 'http://glyphnav.invalid');
     const url = new URL(to, base);
+
     if (url.origin !== base.origin) return to;
 
     return url.pathname + url.search + url.hash;
@@ -70,6 +72,7 @@ export const resolvePath = (to: string, from = '/'): string => {
 export const splitTarget = (to: string, opts: SplitOptions): PathParts => {
   if (opts.scope === 'tail' && opts.from != null) {
     const len = commonPrefixLength(opts.from, to);
+
     return { prefix: to.slice(0, len), text: to.slice(len) };
   }
 

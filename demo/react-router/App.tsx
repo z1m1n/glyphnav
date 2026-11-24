@@ -138,11 +138,15 @@ export default function App() {
   // the effect's cleanup.
   useEffect(() => {
     initTheme();
+
     const disposeFwMenu = initFwMenu();
+
     initTooltips();
     initCodeBlocks();
     initWordmark();
+
     const disposeActiveNav = initActiveNav();
+
     return () => {
       disposeFwMenu();
       disposeActiveNav();

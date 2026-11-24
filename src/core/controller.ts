@@ -46,6 +46,7 @@ const defaultGetCurrentPath = (): string => {
   if (typeof window === 'undefined' || !window.location) return '/';
 
   const { pathname, search, hash } = window.location;
+
   return pathname + search + hash;
 };
 
@@ -106,6 +107,7 @@ export class GlyphnavController {
     this.player = createPlayer(this.deps.scheduler);
 
     const history = this.deps.history;
+
     this.replaceState =
       history == null
         ? null
@@ -144,6 +146,7 @@ export class GlyphnavController {
    */
   async run(to: string, commit: CommitFn, perCall?: GlyphnavOptions): Promise<RunResult> {
     this.cancel();
+
     const opts = resolveOptions(perCall ? { ...this.options, ...perCall } : this.options);
     const from = this.deps.getCurrentPath();
     const target = resolvePath(to, from);
@@ -153,19 +156,23 @@ export class GlyphnavController {
       const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
       const animatable = !reduceMotion && this.deps.history != null && isRootedPath(target);
       let outcome: RunResult;
+
       if (animatable && opts.commit === 'before') {
         outcome = await this.runNavigateFirst(state, commit);
       } else {
         const frames = animatable ? generateFrames(from, target, opts) : [];
+
         if (frames.length === 0) {
           outcome = (await this.commitRun(state, commit)) ? 'skipped' : 'cancelled';
         } else {
           outcome = await this.playFrames(state, frames, from);
+
           if (outcome !== 'cancelled' && !(await this.commitRun(state, commit))) {
             outcome = 'cancelled';
           }
         }
       }
+
       return this.completeRun(state, outcome);
     } finally {
       this.finishRun(state);
@@ -175,6 +182,7 @@ export class GlyphnavController {
   /** Cancel the current animation or pending navigation and restore the address bar. */
   cancel(): void {
     const state = this.activeRun;
+
     if (!state) return;
     this.activeRun = null;
     this.player.cancel();
@@ -185,6 +193,7 @@ export class GlyphnavController {
   /** Cancel work and detach owned history listeners. The controller may be reused. */
   destroy(): void {
     this.cancel();
+
     for (const cleanup of this.historyCleanups) cleanup();
   }
 
@@ -204,15 +213,19 @@ export class GlyphnavController {
    */
   async replay(from: string, to: string, perCall?: GlyphnavOptions): Promise<RunResult> {
     this.cancel();
+
     const opts = resolveOptions(perCall ? { ...this.options, ...perCall } : this.options);
     const state = this.beginRun({ from, to }, opts, false);
+
     try {
       const reduceMotion = opts.respectReducedMotion && this.deps.prefersReducedMotion();
       const animatable =
         !reduceMotion && this.deps.history != null && isRootedPath(from) && isRootedPath(to);
       const frames = animatable && from !== to ? generateFrames(from, to, opts) : [];
       const outcome = frames.length > 0 ? await this.playFrames(state, frames, to) : 'skipped';
+
       if (outcome === 'skipped') this.lastPath = to;
+
       return this.completeRun(state, outcome);
     } finally {
       this.finishRun(state);
@@ -237,15 +250,19 @@ export class GlyphnavController {
     if (typeof window === 'undefined' || !window.addEventListener) return () => {};
 
     this.lastPath ??= this.deps.getCurrentPath();
+
     const onPopState = (): void => {
       // Ignore the synthetic popstate our own navigation dispatches; a real
       // traversal only happens while we are idle.
       if (this.activeRun?.navigating) return;
+
       const to = this.deps.getCurrentPath();
       const from = this.lastPath ?? to;
+
       // The browser is already at `to`; record it now so a rapid follow-up
       // traversal animates from here even if this run is superseded mid-flight.
       this.lastPath = to;
+
       if (from === to) return;
       // Event handlers have no caller to receive a rejection; restoration is
       // handled by replay even if a user hook fails.
@@ -253,11 +270,14 @@ export class GlyphnavController {
     };
 
     window.addEventListener('popstate', onPopState);
+
     const cleanup = (): void => {
       window.removeEventListener('popstate', onPopState);
       this.historyCleanups.delete(cleanup);
     };
+
     this.historyCleanups.add(cleanup);
+
     return cleanup;
   }
 
@@ -276,6 +296,7 @@ export class GlyphnavController {
       landed !== state.ctx.from && isRootedPath(landed)
         ? generateFrames(state.ctx.from, landed, state.opts)
         : [];
+
     return frames.length > 0 ? this.playFrames(state, frames, landed) : 'skipped';
   }
 
@@ -288,7 +309,9 @@ export class GlyphnavController {
       restoreTo: null,
       observedPath: null,
     };
+
     this.activeRun = state;
+
     return state;
   }
 
@@ -300,6 +323,7 @@ export class GlyphnavController {
   private async commitRun(state: ActiveRun, commit: CommitFn): Promise<boolean> {
     if (!this.isCurrent(state)) return false;
     state.opts.hooks.onCommit?.(state.ctx);
+
     if (!this.isCurrent(state)) return false;
 
     const signal = state.abort.signal;
@@ -308,11 +332,14 @@ export class GlyphnavController {
       onAbort = () => resolve(false);
       signal.addEventListener('abort', onAbort, { once: true });
     });
+
     try {
       const committed = Promise.resolve(commit(signal)).then(() => true);
       const completed = await Promise.race([committed, cancelled]);
+
       if (!completed || !this.isCurrent(state)) return false;
       this.lastPath = this.deps.getCurrentPath();
+
       return true;
     } finally {
       signal.removeEventListener('abort', onAbort);
@@ -321,6 +348,7 @@ export class GlyphnavController {
 
   private completeRun(state: ActiveRun, outcome: RunResult): RunResult {
     const hooks = state.opts.hooks;
+
     if (outcome === 'cancelled') {
       // onComplete still fires if a cancellation hook throws; finally cleanup
       // also protects against a throwing completion hook.
@@ -332,6 +360,7 @@ export class GlyphnavController {
     } else {
       hooks.onComplete?.(state.ctx, outcome);
     }
+
     return outcome;
   }
 
@@ -344,26 +373,34 @@ export class GlyphnavController {
     if (!this.isCurrent(state)) return 'cancelled';
     state.restoreTo = restoreTo;
     state.observedPath = this.deps.getCurrentPath();
+
     try {
       state.opts.hooks.onStart?.(state.ctx);
+
       if (!this.isCurrent(state)) return 'cancelled';
+
       const outcome = await this.player.play(
         frames.length,
         frameDelay(state.opts, frames.length),
         (index) => {
           if (!this.isCurrent(state)) return;
+
           if (this.deps.getCurrentPath() !== state.observedPath) {
             // The new location belongs to external navigation; do not restore.
             state.restoreTo = null;
             this.cancel();
+
             return;
           }
+
           const frame = frames[index]!;
+
           this.writePath(frame.path);
           state.observedPath = this.deps.getCurrentPath();
           state.opts.hooks.onFrame?.(frame, state.ctx);
         },
       );
+
       return this.isCurrent(state) ? outcome : 'cancelled';
     } finally {
       if (this.activeRun === state) this.restoreRun(state);
@@ -374,6 +411,7 @@ export class GlyphnavController {
     if (state.restoreTo != null && this.deps.getCurrentPath() === state.observedPath) {
       this.writePath(state.restoreTo);
     }
+
     state.restoreTo = null;
     state.observedPath = null;
     this.lastPath = this.deps.getCurrentPath();
@@ -388,7 +426,9 @@ export class GlyphnavController {
   private writePath(path: string): void {
     const history = this.deps.history;
     const replace = this.replaceState;
+
     if (!history || !replace || this.deps.getCurrentPath() === path) return;
+
     try {
       replace(history.state, '', path);
     } catch {

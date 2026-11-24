@@ -49,9 +49,11 @@ function place(anchor: HTMLElement, menu: HTMLElement): void {
   const vh = document.documentElement.clientHeight;
 
   let top = a.bottom + GAP;
+
   if (top + m.height > vh - VIEWPORT_MARGIN) {
     top = clamp(a.top - m.height - GAP, VIEWPORT_MARGIN, vh - m.height - VIEWPORT_MARGIN);
   }
+
   const left = clamp(a.left, VIEWPORT_MARGIN, vw - m.width - VIEWPORT_MARGIN);
 
   menu.style.top = `${top}px`;
@@ -65,12 +67,14 @@ function place(anchor: HTMLElement, menu: HTMLElement): void {
  */
 function buildMenu(root: string, current: string): HTMLSpanElement {
   const menu = document.createElement('span');
+
   menu.id = MENU_ID;
   menu.className = 'fw-menu';
   menu.setAttribute('popover', ''); // auto: light dismiss + Escape are native
 
   for (const { name, fw } of DEMOS) {
     const item = document.createElement('a');
+
     item.href = `${root}${name}/`;
     item.textContent = name;
     // Keys the item's framework icon (a stylesheet background per [data-fw]).
@@ -78,9 +82,11 @@ function buildMenu(root: string, current: string): HTMLSpanElement {
     // Cross-demo link: the intercepting demos must let the browser load it.
     item.dataset.glyphnav = 'off';
     item.dataset.astroReload = '';
+
     if (name === current) item.setAttribute('aria-current', 'page');
     menu.append(item);
   }
+
   return menu;
 }
 
@@ -101,6 +107,7 @@ export function initFwMenu(): () => void {
 
   const button = document.querySelector<HTMLButtonElement>('.fw-switch');
   const crumb = document.querySelector<HTMLElement>('h1 .crumb');
+
   // Pages that author no switcher button (the changelog) leave nothing to do.
   if (!button || !crumb) return noop;
   initialized = true;
@@ -109,6 +116,7 @@ export function initFwMenu(): () => void {
   // dev, '/glyphnav/' deployed, and the Next/Nuxt/SvelteKit equivalents).
   const root = document.querySelector('h1 a')?.getAttribute('href') ?? '/';
   const menu = buildMenu(root, crumb.textContent?.trim() ?? '');
+
   // The menu is the only node we add — right after the authored button, so
   // keyboard focus flows button → items.
   button.after(menu);
@@ -126,6 +134,7 @@ export function initFwMenu(): () => void {
   // immediately reopen it. `wasOpen` (sampled at pointerdown) breaks that loop;
   // keyboard activation fires no pointerdown and just toggles.
   let wasOpen = false;
+
   button.addEventListener(
     'pointerdown',
     () => {
@@ -138,8 +147,10 @@ export function initFwMenu(): () => void {
     () => {
       if (wasOpen) {
         wasOpen = false;
+
         return;
       }
+
       if (menu.matches(':popover-open')) {
         menu.hidePopover();
       } else {

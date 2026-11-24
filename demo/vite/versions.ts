@@ -23,13 +23,18 @@ export const pkgVersion = (name: string): string => {
     return (nodeRequire(`${name}/package.json`) as { version: string }).version;
   } catch {
     let dir = dirname(nodeRequire.resolve(name));
+
     for (;;) {
       const file = join(dir, 'package.json');
+
       if (existsSync(file)) {
         const { version } = JSON.parse(readFileSync(file, 'utf8')) as { version?: string };
+
         if (version) return version;
       }
+
       const parent = dirname(dir);
+
       if (parent === dir) throw new Error(`[demo] cannot read version for ${name}`);
       dir = parent;
     }
@@ -65,6 +70,7 @@ const STACK_BY_APP: Record<string, () => string> = {
 export const stackForFile = (filename: string): string => {
   const path = filename.replace(/\\/g, '/').replace(/\/?index\.html$/, '');
   const app = Object.keys(STACK_BY_APP).find((name) => path.endsWith(name));
+
   return app ? STACK_BY_APP[app]() : '';
 };
 
@@ -89,6 +95,8 @@ const NO_TIP_APPS = new Set(['vanilla', 'core', 'changelog']);
 export const stackTipForFile = (filename: string): string => {
   const path = filename.replace(/\\/g, '/').replace(/\/?index\.html$/, '');
   const app = Object.keys(STACK_BY_APP).find((name) => path.endsWith(name));
+
   if (!app || NO_TIP_APPS.has(app)) return '';
+
   return stackTip(STACK_BY_APP[app]());
 };

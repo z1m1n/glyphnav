@@ -39,12 +39,14 @@ let initialized = false;
 /** Build the popover once and append it to the body. */
 function build(): HTMLDivElement {
   const el = document.createElement('div');
+
   el.id = TIP_ID;
   el.className = 'glyph-tooltip';
   // `manual`: never light-dismisses — we own show/hide entirely.
   el.setAttribute('popover', 'manual');
   el.setAttribute('role', 'tooltip');
   document.body.append(el);
+
   return el;
 }
 
@@ -63,6 +65,7 @@ function place(target: HTMLElement, el: HTMLElement): void {
   // Prefer above the control; flip below when it would clip the top edge.
   let top = a.top - t.height - GAP;
   const below = top < VIEWPORT_MARGIN;
+
   if (below) top = a.bottom + GAP;
   top = clamp(top, VIEWPORT_MARGIN, vh - t.height - VIEWPORT_MARGIN);
 
@@ -82,6 +85,7 @@ function place(target: HTMLElement, el: HTMLElement): void {
 /** Show the tip for `target` (no delay): fades in cold, glides when already open. */
 function open(target: HTMLElement): void {
   const text = target.dataset.tip;
+
   if (!text) return;
 
   clearTimeout(showTimer);
@@ -91,6 +95,7 @@ function open(target: HTMLElement): void {
 
   const el = tip ?? (tip = build());
   const wasOpen = el.matches(':popover-open');
+
   // Rendered as HTML, not text: the tip copy carries `<code>` chips so versions
   // and option values highlight exactly like the demos' body text. Every source
   // is authored demo copy (CONTROL_TOOLTIPS, the build-injected version tip), the
@@ -119,10 +124,12 @@ function close(): void {
   clearTimeout(hideTimer);
   showTimer = hideTimer = 0;
   pending = null;
+
   if (anchor) {
     anchor.removeAttribute('aria-describedby');
     anchor = null;
   }
+
   if (tip?.matches(':popover-open')) tip.hidePopover();
 }
 
@@ -130,10 +137,13 @@ function close(): void {
 function scheduleShow(target: HTMLElement): void {
   clearTimeout(hideTimer);
   hideTimer = 0;
+
   if (tip?.matches(':popover-open')) {
     if (anchor !== target) open(target);
+
     return;
   }
+
   // Already counting down for this control — let the timer run (pointer moves
   // within a label fire `pointerover` repeatedly; don't keep resetting it).
   if (showTimer && pending === target) return;
@@ -161,18 +171,23 @@ const tipOf = (node: EventTarget | null): HTMLElement | null =>
  */
 export function initTooltips(): void {
   if (initialized || typeof document === 'undefined') return;
+
   if (!supportsPopover()) return;
   initialized = true;
 
   // Delegated on `document` so any framework re-render of the toolbar is fine.
   document.addEventListener('pointerover', (e) => {
     if (e.pointerType === 'touch') return; // hover tips don't apply to taps
+
     const target = tipOf(e.target);
+
     if (target) scheduleShow(target);
   });
   document.addEventListener('pointerout', (e) => {
     if (e.pointerType === 'touch') return;
+
     const from = tipOf(e.target);
+
     // Ignore moves that stay within the same control (label ↔ its select/input).
     if (from && tipOf(e.relatedTarget) !== from) scheduleHide();
   });
@@ -180,6 +195,7 @@ export function initTooltips(): void {
   // Keyboard parity: focusing a control shows its tip at once; blurring hides it.
   document.addEventListener('focusin', (e) => {
     const target = tipOf(e.target);
+
     if (target) open(target);
   });
   document.addEventListener('focusout', (e) => {

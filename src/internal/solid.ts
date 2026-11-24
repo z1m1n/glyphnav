@@ -51,6 +51,7 @@ export const createSolidControllerContext = (): SolidControllerContext => {
   const GlyphnavProvider = (props: GlyphnavProviderProps): JSX.Element => {
     const controller = new GlyphnavController();
     const [, options] = splitProps(props, ['children', 'animatePopState']);
+
     // Keep the base options in sync as the (reactive) provider props change.
     createRenderEffect(() => controller.update({ ...options }));
     onCleanup(() => controller.destroy());

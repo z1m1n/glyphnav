@@ -44,11 +44,15 @@ const context = createSolidControllerContext();
 /** `resolve: false` roots paths; query-only calls retain the live router pathname. */
 const unresolvedPath = (to: string, pathname: string): string | undefined => {
   if (/^(?:[a-z0-9]+:)?\/\//i.test(to)) return undefined;
+
   const normalized = to.replace(/^\/+|(\/)\/+$/g, '$1');
+
   if (!to || to.startsWith('?')) {
     const current = pathname.replace(/^\/+|(\/)\/+$/g, '$1');
+
     return '/' + current + normalized;
   }
+
   return '/' + normalized;
 };
 
@@ -84,21 +88,26 @@ export function useGlyphnavNavigate(options?: GlyphnavOptions): GlyphnavNavigate
   const resolved = useResolvedPath(() => destination().to);
   const href = useHref(() => {
     const request = destination();
+
     return request.resolve ? resolved() : unresolvedPath(request.to, location.pathname);
   });
 
   return (to, navOptions) => {
     if (typeof to === 'number') {
       navigate(to);
+
       return Promise.resolve<RunResult>('skipped');
     }
 
     const queryOnly = !to || to.startsWith('?');
     const resolve = navOptions && 'resolve' in navOptions ? !!navOptions.resolve : !queryOnly;
+
     setDestination({ to, resolve });
+
     // Read the router's route-relative/base-aware destination before animation
     // rewrites the bar. useHref also handles HashRouter's fragment URLs.
     const target = href() ?? to;
+
     return controller.run(
       target,
       (signal) => settleAfter(() => navigate(to, navOptions), SETTLE_TIMEOUT_MS, signal),

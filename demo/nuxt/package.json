@@ -13,7 +13,7 @@
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
     "glyphnav": "workspace:*",
-    "nuxt": "4.6.4"
+    "nuxt": "4.7.0"
   },
   "devDependencies": {
     "typescript": "6.0.3",

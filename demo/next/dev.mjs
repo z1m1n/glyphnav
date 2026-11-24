@@ -18,6 +18,7 @@ const vite = join(dirname(require.resolve('vite/package.json')), 'bin/vite.js');
 const run = (args) =>
   new Promise((resolve, reject) => {
     const build = spawn(process.execPath, [vite, ...args], { cwd: root, stdio: 'inherit' });
+
     build.on('error', reject);
     build.on('exit', (code, signal) =>
       code === 0 ? resolve() : reject(new Error(`Library build failed (${signal ?? code})`)),
@@ -25,6 +26,7 @@ const run = (args) =>
   });
 
 await run(['build']);
+
 const watcher = spawn(process.execPath, [vite, 'build', '--watch', '--emptyOutDir=false'], {
   cwd: root,
   stdio: 'inherit',
@@ -50,6 +52,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     child.kill(signal);
   });
 }
+
 watcher.on('error', (error) => {
   console.error(error);
   child.kill('SIGTERM');

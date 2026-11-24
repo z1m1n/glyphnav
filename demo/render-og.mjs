@@ -11,15 +11,18 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 let sharp;
+
 try {
   sharp = require('sharp');
 } catch {
   const store = fileURLToPath(new URL('../node_modules/.pnpm/', import.meta.url));
   const dir = readdirSync(store).find((d) => d.startsWith('sharp@'));
+
   sharp = require(`${store}${dir}/node_modules/sharp`);
 }
 
 const svg = readFileSync(new URL('./og.svg', import.meta.url));
 const out = fileURLToPath(new URL('./public/og.png', import.meta.url));
 const info = await sharp(svg).resize(1200, 630).png().toFile(out);
+
 console.log(`wrote ${out} — ${info.width}x${info.height}`);

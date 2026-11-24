@@ -83,11 +83,15 @@ function Inner({ children }: { children: ReactNode }) {
   // the effect's cleanup.
   useEffect(() => {
     initTheme();
+
     const disposeFwMenu = initFwMenu();
+
     initTooltips();
     initCodeBlocks();
     initWordmark();
+
     const disposeActiveNav = initActiveNav();
+
     return () => {
       disposeFwMenu();
       disposeActiveNav();
@@ -99,6 +103,7 @@ function Inner({ children }: { children: ReactNode }) {
   /* oxlint-disable react/set-state-in-effect -- Restore external localStorage values after hydration to match the prerendered markup. */
   useEffect(() => {
     const s = loadToolbar(STORE_KEY, { ...DEFAULT_TOOLBAR, commit: 'after' as CommitTiming });
+
     setCharset(s.charset);
     setDuration(s.duration);
     setEffect(s.effect);
@@ -111,11 +116,14 @@ function Inner({ children }: { children: ReactNode }) {
   // Persist on change, under this page's own key. Skip the initial mount so the
   // restore above wins instead of writing the defaults back over it.
   const firstSave = useRef(true);
+
   useEffect(() => {
     if (firstSave.current) {
       firstSave.current = false;
+
       return;
     }
+
     saveToolbar(STORE_KEY, { charset, duration, effect, commit, scope, backForward });
   }, [charset, duration, effect, commit, scope, backForward]);
 

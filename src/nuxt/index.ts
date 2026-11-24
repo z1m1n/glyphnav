@@ -68,11 +68,13 @@ export interface NuxtGlyphnavInstance {
  */
 const resolveTarget = (router: Router, to: RouteLocationRaw, mode: NuxtHistoryMode): string => {
   const href = router.resolve(to).href;
+
   if (mode === 'hash' && href.startsWith('#')) {
     const base = router.options.history.base.split('#')[0];
     const documentPath =
       typeof window === 'undefined' ? '/' : window.location.pathname + window.location.search;
     const usesBaseElement = typeof document !== 'undefined' && !!document.querySelector('base');
+
     return (usesBaseElement ? base || documentPath : documentPath) + href;
   }
 
@@ -106,8 +108,10 @@ export const attachGlyphnav = (
     // Superseding hash navigation must resolve against the restored document,
     // rather than a pathname/query still displaying an animation frame.
     controller.cancel();
+
     return resolveTarget(router, to, historyMode);
   };
+
   // Skip the animation when navigating to the path already on screen.
   const shouldSkip = (target: string): boolean =>
     samePathForm(resolveTarget(router, router.currentRoute.value.fullPath, historyMode), target);
@@ -123,7 +127,9 @@ export const attachGlyphnav = (
     replace,
     navigate(to, navOptions) {
       controller.cancel();
+
       const original = navOptions?.replace ? originalReplace : originalPush;
+
       return controller.run(resolveTarget(router, to, historyMode), async () => {
         await original.call(router, to);
       });
@@ -163,6 +169,7 @@ export const installGlyphnav = (
   options: NuxtGlyphnavOptions = {},
 ): NuxtGlyphnavInstance => {
   const instance = attachGlyphnav(nuxtApp.$router, options);
+
   nuxtApp.provide('glyphnav', instance);
   nuxtApp.vueApp?.onUnmount?.(instance.detach);
 

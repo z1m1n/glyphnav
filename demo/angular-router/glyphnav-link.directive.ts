@@ -21,6 +21,7 @@ export class GlyphnavLinkDirective {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
     }
+
     event.preventDefault();
     void this.navigator.navigateByUrl(this.link);
   }
