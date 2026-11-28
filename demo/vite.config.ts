@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
-import { ports } from './ports';
-import { frameworkPlugins, SOLID_OPTIMIZE_EXCLUDE } from './vite/framework';
-import { base, fromDemoRoot } from './vite/paths';
+import { ports } from './ports.ts';
+import { frameworkPlugins, SOLID_OPTIMIZE_EXCLUDE } from './vite/framework.ts';
+import { base, fromDemoRoot } from './vite/paths.ts';
 import {
   baseAwareLinks,
   demoFallback,
@@ -9,8 +9,8 @@ import {
   injectVersions,
   inlineIcons,
   staticRoutes,
-} from './vite/plugins';
-import { crossServerProxy, previewProxy } from './vite/proxy';
+} from './vite/plugins/index.ts';
+import { crossServerProxy, previewProxy } from './vite/proxy.ts';
 
 /**
  * Playground for the vanilla, Vue Router, React Router, Solid Router, TanStack

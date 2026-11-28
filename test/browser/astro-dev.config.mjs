@@ -1,4 +1,4 @@
-import astroConfig from '../../demo/astro/astro.config';
+import astroConfig from '../../demo/astro/astro.config.ts';
 
 // The browser suite can run alongside `pnpm demo` without replacing its cache.
 export default {

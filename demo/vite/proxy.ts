@@ -1,6 +1,6 @@
 import type { ProxyOptions } from 'vite';
-import { ports } from '../ports';
-import { base } from './paths';
+import { ports } from '../ports.ts';
+import { base } from './paths.ts';
 
 /**
  * A dev-server proxy for a demo that runs on its own server (Next, Nuxt,
@@ -22,8 +22,10 @@ export function devProxy(target: string, name: string, command: string): ProxyOp
       proxy.on('error', (_err, _req, res) => {
         if (!('writeHead' in res)) {
           res.destroy();
+
           return;
         }
+
         if (!res.headersSent) res.writeHead(502, { 'content-type': 'text/html' });
         res.end(
           `<!doctype html><meta charset="utf-8">` +

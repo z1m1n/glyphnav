@@ -35,7 +35,9 @@ describe('GlyphnavController', () => {
     });
 
     const run = controller.run('/test', commit);
+
     await vi.advanceTimersByTimeAsync(200);
+
     const result = await run;
 
     expect(result).toBe('completed');
@@ -66,6 +68,7 @@ describe('GlyphnavController', () => {
     const controller = new GlyphnavController({}, { history: null });
     const commit = vi.fn();
     const result = await controller.run('/x', commit);
+
     expect(result).toBe('skipped');
     expect(commit).toHaveBeenCalledTimes(1);
   });
@@ -74,6 +77,7 @@ describe('GlyphnavController', () => {
     const controller = createGlyphnav();
     const commit = vi.fn();
     const result = await controller.run('/', commit); // root => empty text
+
     expect(result).toBe('skipped');
     expect(commit).toHaveBeenCalledTimes(1);
   });
@@ -90,11 +94,15 @@ describe('GlyphnavController', () => {
     const commitB = vi.fn(() => window.history.pushState(null, '', '/bbbb'));
 
     const runA = controller.run('/aaaa', commitA);
+
     await vi.advanceTimersByTimeAsync(15); // a couple of A's frames
+
     const runB = controller.run('/bbbb', commitB);
+
     await vi.advanceTimersByTimeAsync(300);
 
     const [rA, rB] = await Promise.all([runA, runB]);
+
     expect(rA).toBe('cancelled');
     expect(rB).toBe('completed');
     expect(commitA).not.toHaveBeenCalled();
@@ -113,8 +121,10 @@ describe('GlyphnavController', () => {
     const commit = vi.fn();
 
     const run = controller.run('/abcdef', commit);
+
     await vi.advanceTimersByTimeAsync(15);
     controller.cancel();
+
     const result = await run;
 
     expect(result).toBe('cancelled');
@@ -125,6 +135,7 @@ describe('GlyphnavController', () => {
 
   it('normalizes relative targets so every frame is written as a rooted path', async () => {
     window.history.replaceState(null, '', '/vue/features');
+
     const frames: string[] = [];
     let ctxTo = '';
     const controller = new GlyphnavController({
@@ -141,7 +152,9 @@ describe('GlyphnavController', () => {
     const commit = vi.fn();
 
     const run = controller.run('pricing', commit);
+
     await vi.advanceTimersByTimeAsync(500);
+
     const result = await run;
 
     expect(result).toBe('completed');
@@ -155,12 +168,14 @@ describe('GlyphnavController', () => {
 
   it('repeated relative navigations never stack the written URL', async () => {
     window.history.replaceState(null, '', '/vue/features/');
+
     const controller = new GlyphnavController({ charset: 'q', rng: () => 0, stepDuration: 5 });
 
     for (let i = 0; i < 3; i++) {
       const run = controller.run('vue/features/', () => {
         window.history.pushState(null, '', '/vue/features/');
       });
+
       await vi.advanceTimersByTimeAsync(500);
       await run;
     }
@@ -173,8 +188,11 @@ describe('GlyphnavController', () => {
     const controller = new GlyphnavController({ stepDuration: 5, hooks: { onFrame } });
 
     const commitA = vi.fn();
+
     expect(await controller.run('https://other.example/x', commitA)).toBe('skipped');
+
     const commitB = vi.fn();
+
     expect(await controller.run('//other.example/x', commitB)).toBe('skipped');
 
     expect(onFrame).not.toHaveBeenCalled();
@@ -197,10 +215,12 @@ describe('GlyphnavController', () => {
     const commit = vi.fn();
 
     const run = controller.run('/abcdefgh', commit);
+
     await vi.advanceTimersByTimeAsync(25);
     // Simulate the user hitting the back button mid-animation.
     window.history.replaceState(null, '', '/somewhere-else');
     await vi.advanceTimersByTimeAsync(500);
+
     const result = await run;
 
     expect(result).toBe('cancelled');
@@ -221,6 +241,7 @@ describe('GlyphnavController', () => {
     });
 
     const run = controller.run('/test', vi.fn());
+
     await vi.advanceTimersByTimeAsync(16);
     expect(frames.length).toBe(1); // first frame lands on the next animation frame
     await vi.advanceTimersByTimeAsync(64); // ~80 ms elapsed — past the halfway point
@@ -242,6 +263,7 @@ describe('GlyphnavController', () => {
     });
 
     const run = controller.run('/abcdefghijklmnopqrstuvwxyz', vi.fn());
+
     await vi.advanceTimersByTimeAsync(200);
     await expect(run).resolves.toBe('completed');
 
@@ -268,6 +290,7 @@ describe('GlyphnavController', () => {
     });
 
     const run = controller.run('/test', commit);
+
     await vi.advanceTimersByTimeAsync(200);
     await expect(run).resolves.toBe('completed');
 
@@ -300,6 +323,7 @@ describe('GlyphnavController', () => {
     const commit = vi.fn(() => window.history.pushState(null, '', '/login'));
 
     const run = controller.run('/dashboard', commit);
+
     await vi.advanceTimersByTimeAsync(500);
     await expect(run).resolves.toBe('completed');
 
@@ -333,6 +357,7 @@ describe('GlyphnavController', () => {
     const commit = vi.fn(() => window.history.pushState(null, '', '/test'));
 
     const run = controller.run('/test', commit);
+
     await vi.advanceTimersByTimeAsync(15); // a couple of frames in
     controller.cancel();
     await expect(run).resolves.toBe('cancelled');
@@ -353,8 +378,11 @@ describe('GlyphnavController', () => {
     const commitB = vi.fn(() => window.history.pushState(null, '', '/bbbb'));
 
     const runA = controller.run('/aaaa', commitA);
+
     await vi.advanceTimersByTimeAsync(15);
+
     const runB = controller.run('/bbbb', commitB);
+
     await vi.advanceTimersByTimeAsync(300);
 
     expect(await runA).toBe('cancelled');
@@ -374,6 +402,7 @@ describe('GlyphnavController', () => {
     const commit = vi.fn(() => window.history.pushState(null, '', '/abcdefgh'));
 
     const run = controller.run('/abcdefgh', commit);
+
     await vi.advanceTimersByTimeAsync(25);
     // Simulate the user hitting the back button mid-animation.
     window.history.replaceState(null, '', '/somewhere-else');
@@ -389,6 +418,7 @@ describe('GlyphnavController', () => {
       { prefersReducedMotion: () => true },
     );
     const commit = vi.fn();
+
     await expect(controller.run('/anywhere', commit)).resolves.toBe('skipped');
     expect(commit).toHaveBeenCalledTimes(1);
   });
@@ -397,6 +427,7 @@ describe('GlyphnavController', () => {
     // The browser has already moved the bar to /test (popstate); replay only
     // decodes on top — no commit callback at all.
     window.history.replaceState(null, '', '/test');
+
     const frames: string[] = [];
     const controller = new GlyphnavController({
       charset: 'xyzw',
@@ -406,6 +437,7 @@ describe('GlyphnavController', () => {
     });
 
     const run = controller.replay('/', '/test');
+
     await vi.advanceTimersByTimeAsync(200);
 
     await expect(run).resolves.toBe('completed');
@@ -416,18 +448,21 @@ describe('GlyphnavController', () => {
   it('replay() skips a no-op (from === to) and under reduced motion', async () => {
     const onFrame = vi.fn();
     const a = new GlyphnavController({ stepDuration: 5, hooks: { onFrame } });
+
     await expect(a.replay('/x', '/x')).resolves.toBe('skipped');
 
     const b = new GlyphnavController(
       { stepDuration: 5, hooks: { onFrame } },
       { prefersReducedMotion: () => true },
     );
+
     await expect(b.replay('/', '/test')).resolves.toBe('skipped');
     expect(onFrame).not.toHaveBeenCalled();
   });
 
   it('enableHistoryAnimation animates a back/forward traversal, tracking the from-path', async () => {
     window.history.replaceState(null, '', '/users/1');
+
     const frames: string[] = [];
     const controller = new GlyphnavController({
       charset: 'q',
@@ -440,6 +475,7 @@ describe('GlyphnavController', () => {
 
     // Forward navigation updates the tracked path to /users/2.
     const fwd = controller.run('/users/2', () => window.history.pushState(null, '', '/users/2'));
+
     await vi.advanceTimersByTimeAsync(200);
     await fwd;
 
@@ -475,6 +511,7 @@ describe('GlyphnavController', () => {
     const run = controller.run('/ab', commit, {
       hooks: { onComplete: () => order.push('complete') },
     });
+
     await vi.advanceTimersByTimeAsync(100);
     await run;
 
@@ -490,6 +527,7 @@ describe('GlyphnavController', () => {
       hooks: { onStart: () => controller.cancel(), onFrame, onComplete },
     });
     const done = controller.run('/destination', commit);
+
     await vi.advanceTimersByTimeAsync(2000);
 
     await expect(done).resolves.toBe('cancelled');
@@ -515,14 +553,17 @@ describe('GlyphnavController', () => {
       { scheduler },
     );
     let outcome: unknown = 'pending';
+
     void controller.run('/destination', commit).catch((reason: unknown) => {
       outcome = reason;
     });
+
     try {
       scheduler.step(0);
     } catch {
       /* regression: a throwing hook escaped the scheduler */
     }
+
     await vi.advanceTimersByTimeAsync(0);
 
     expect(outcome).toBe(error);
@@ -533,6 +574,7 @@ describe('GlyphnavController', () => {
 
   it('keeps history animation enabled after a cancelled navigation', async () => {
     window.history.replaceState(null, '', '/users/1');
+
     const frames: string[] = [];
     const controller = new GlyphnavController({
       commit: 'after',
@@ -542,8 +584,10 @@ describe('GlyphnavController', () => {
       hooks: { onFrame: (frame) => frames.push(frame.path) },
     });
     const stop = controller.enableHistoryAnimation();
+
     try {
       const done = controller.run('/users/2', vi.fn());
+
       await vi.advanceTimersByTimeAsync(16);
       controller.cancel();
       await done;
@@ -559,6 +603,7 @@ describe('GlyphnavController', () => {
 
   it('records the landed path after commit-after for the next history traversal', async () => {
     window.history.replaceState(null, '', '/users/1');
+
     const frames: string[] = [];
     const controller = new GlyphnavController({
       commit: 'after',
@@ -568,8 +613,10 @@ describe('GlyphnavController', () => {
       hooks: { onFrame: (frame) => frames.push(frame.path) },
     });
     const stop = controller.enableHistoryAnimation();
+
     try {
       const done = controller.run('/users/2', () => window.history.pushState(null, '', '/users/2'));
+
       await vi.advanceTimersByTimeAsync(100);
       await done;
       frames.length = 0;
@@ -598,8 +645,10 @@ describe('GlyphnavController', () => {
         { prefersReducedMotion: () => reduceMotion },
       );
       let outcome: unknown = 'pending';
+
       void controller.run('/pending', commit).then((result) => {
         outcome = result;
+
         return result;
       });
       controller.cancel();
@@ -629,6 +678,7 @@ describe('GlyphnavController', () => {
     const done = controller.run('/destination', () => {
       path = '/destination';
     });
+
     await vi.advanceTimersByTimeAsync(0);
     scheduler.step(0);
     scheduler.step(10);
@@ -646,6 +696,7 @@ describe('GlyphnavController', () => {
       '/first',
       (signal) => {
         firstSignal = signal;
+
         return new Promise<void>((_resolve, reject) => {
           rejectFirst = reject;
         });
@@ -681,12 +732,14 @@ describe('GlyphnavController', () => {
           },
         })
         .catch((reason: unknown) => reason);
+
       await vi.advanceTimersByTimeAsync(100);
       await expect(failure).resolves.toBe(error);
       expect(controller.animating).toBe(false);
       expect(window.location.pathname).toBe('/');
 
       const next = controller.run('/good', () => window.history.pushState(null, '', '/good'));
+
       await vi.advanceTimersByTimeAsync(100);
       await expect(next).resolves.toBe('completed');
       expect(window.location.pathname).toBe('/good');
@@ -706,6 +759,7 @@ describe('GlyphnavController', () => {
       },
     });
     const failure = controller.run('/bad', vi.fn());
+
     controller.cancel();
     await expect(failure).rejects.toBe(error);
     expect(onComplete).toHaveBeenCalledOnce();
@@ -718,6 +772,7 @@ describe('GlyphnavController', () => {
     const error = new Error('router failed');
     const onFrame = vi.fn();
     const controller = new GlyphnavController({ hooks: { onFrame } });
+
     await expect(controller.run('/bad', () => Promise.reject(error))).rejects.toBe(error);
     expect(onFrame).not.toHaveBeenCalled();
     expect(controller.animating).toBe(false);
@@ -731,9 +786,12 @@ describe('GlyphnavController', () => {
       charset: 'q',
       hooks: { onFrame },
     });
+
     controller.enableHistoryAnimation();
     controller.enableHistoryAnimation();
+
     const active = controller.run('/active', () => window.history.pushState(null, '', '/active'));
+
     await vi.advanceTimersByTimeAsync(16);
     controller.destroy();
     await expect(active).resolves.toBe('cancelled');
@@ -744,6 +802,7 @@ describe('GlyphnavController', () => {
     expect(onFrame).not.toHaveBeenCalled();
 
     const stop = controller.enableHistoryAnimation();
+
     try {
       window.history.replaceState(null, '', '/next');
       window.dispatchEvent(new PopStateEvent('popstate'));

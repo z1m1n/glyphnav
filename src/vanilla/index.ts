@@ -91,6 +91,7 @@ const targetPath = (to: string): string | null => {
   if (typeof window === 'undefined') return to;
 
   const url = new URL(to, window.location.href);
+
   if (url.origin !== window.location.origin) return null;
 
   return url.pathname + url.search + url.hash;
@@ -109,6 +110,7 @@ const commit = (path: string, reload: boolean, replace: boolean): void => {
 
   if (reload) {
     window.location.assign(path);
+
     return;
   }
 
@@ -134,14 +136,17 @@ export const navigate = (to: string, options: NavigateOptions = {}): Promise<Run
   const { reload = true, replace = false, ...glyph } = options;
   const controller = getController(glyph);
   const path = targetPath(to);
+
   if (path == null) {
     if (typeof window !== 'undefined') window.location.assign(to);
+
     return Promise.resolve<RunResult>('skipped');
   }
 
   // A hard reload unloads the page, leaving nothing to animate on top of —
   // navigate-first silently falls back to the classic animate-then-commit.
   const perCall: GlyphnavOptions = reload ? { ...glyph, commit: 'after' } : glyph;
+
   return controller.run(path, () => commit(path, reload, replace), perCall);
 };
 
@@ -172,11 +177,14 @@ export const install = (options: InstallOptions = {}): GlyphnavHandle => {
   if (intercept === 'links' && root) {
     const handler = (event: Event): void => {
       const anchor = eligibleAnchor(event as MouseEvent);
+
       if (!anchor) return;
+
       if (shouldHandle && !shouldHandle(anchor, event as MouseEvent)) return;
 
       const url = new URL(anchor.href, window.location.href);
       const to = url.pathname + url.search + url.hash;
+
       event.preventDefault();
       // Reload mode unloads the page — force the classic order (see navigate()).
       void controller.run(
@@ -185,6 +193,7 @@ export const install = (options: InstallOptions = {}): GlyphnavHandle => {
         reload ? { commit: 'after' } : undefined,
       );
     };
+
     root.addEventListener('click', handler);
     installCleanups.push(() => root.removeEventListener('click', handler));
   }

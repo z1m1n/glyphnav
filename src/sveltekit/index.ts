@@ -129,8 +129,10 @@ function gotoOptions<State extends object>(
     persistState,
     ...shared
   } = extras;
+
   if (version.startsWith('2.')) {
     if (shallow || persistState) throw new Error('Shallow goto navigation requires SvelteKit 3.');
+
     return {
       ...shared,
       replaceState: replace,
@@ -139,6 +141,7 @@ function gotoOptions<State extends object>(
       invalidateAll: refreshAll ?? invalidateAll,
     };
   }
+
   return {
     ...shared,
     replace,
@@ -157,8 +160,11 @@ const targetPath = (to: string | URL): string =>
 function linkOption(anchor: HTMLAnchorElement, name: string): boolean | undefined {
   const attribute = `data-sveltekit-${name}`;
   const value = anchor.closest(`[${attribute}]`)?.getAttribute(attribute);
+
   if (value === '' || value === 'true') return true;
+
   if (value === 'false') return false;
+
   return undefined;
 }
 
@@ -203,9 +209,11 @@ export const attachGlyphnav = <State extends object = object>(
   ): Promise<RunResult> =>
     controller.run(targetPath(to), async (signal) => {
       if (!extras) return goto(to);
+
       // Kit exports VERSION in both majors. Load it only for imperative options,
       // so SSR, ordinary clicks and package imports don't load the framework.
       const { VERSION } = await import('@sveltejs/kit');
+
       if (!signal.aborted) await goto(to, gotoOptions(VERSION, extras));
     });
 
@@ -216,8 +224,10 @@ export const attachGlyphnav = <State extends object = object>(
   // click — so the navigation fires exactly once either way.
   const handleClick = (event: MouseEvent): void => {
     const anchor = eligibleAnchor(event);
+
     if (!anchor || linkOption(anchor, 'reload')) return;
     controller.cancel();
+
     const url = new URL(anchor.href, window.location.href);
     const to = url.pathname + url.search + url.hash;
     const replace = linkOption(anchor, 'replacestate');
@@ -229,11 +239,13 @@ export const attachGlyphnav = <State extends object = object>(
       reset !== undefined ||
       noScroll !== undefined ||
       keepFocus !== undefined;
+
     event.preventDefault();
     void navigate(to, hasOptions ? { replace, reset, noScroll, keepFocus } : undefined).catch(
       reportNavigationError,
     );
   };
+
   const onClick = handleClick as EventListener;
 
   // `true` = capture phase: glyphnav runs before SvelteKit's bubble-phase click
@@ -259,6 +271,7 @@ export const attachGlyphnav = <State extends object = object>(
       if (intercept === 'links' && root) {
         root.removeEventListener('click', onClick, true);
       }
+
       stopPopState();
       controller.cancel();
     },

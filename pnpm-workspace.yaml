@@ -14,10 +14,14 @@ strictPeerDependencies: false
 # Pin dependencies to exact versions on `pnpm add` (ranges are reserved for
 # peerDependencies, which are edited by hand).
 saveExact: true
-# The Nuxt Vite builder also loads vue-tsc via vite-plugin-checker when pnpm
-# installs Nuxt as a root peer. Resolve that checker against the JS compiler.
+overrides:
+  # Archiver 8 still requests readdir-glob 3. Version 4 keeps the same API
+  # and switches to the patched minimatch major.
+  'archiver@8.0.0>readdir-glob': '4.0.0'
+# The Nuxt Vite builder loads vue-tsc via vite-plugin-checker.
+# Resolve that checker against the JS compiler even when root tsc is native.
 packageExtensions:
-  '@nuxt/vite-builder@4.6.4':
+  '@nuxt/vite-builder@4.7.0':
     dependencies:
       typescript: '6.0.3'
       vue-tsc: '3.3.14'
@@ -55,3 +59,22 @@ minimumReleaseAgeExclude:
   - vite-plugin-solid@2.11.16
   - vite@8.3.8
   - vue-router@5.5.0
+  - '@nuxt/kit@4.7.0'
+  - '@nuxt/nitro-server@4.7.0'
+  - '@nuxt/nitro-v3-server@4.7.0'
+  - '@nuxt/schema@4.7.0'
+  - '@nuxt/vite-builder@4.7.0'
+  - '@nuxt/vite-server@4.7.0'
+  - '@tsrs/darwin-arm64@7.1.0-beta.tsrs5'
+  - '@tsrs/darwin-x64@7.1.0-beta.tsrs5'
+  - '@tsrs/linux-arm64-gnu@7.1.0-beta.tsrs5'
+  - '@tsrs/linux-arm64-musl@7.1.0-beta.tsrs5'
+  - '@tsrs/linux-x64-gnu@7.1.0-beta.tsrs5'
+  - '@tsrs/linux-x64-musl@7.1.0-beta.tsrs5'
+  - '@tsrs/win32-arm64@7.1.0-beta.tsrs5'
+  - '@tsrs/win32-x64@7.1.0-beta.tsrs5'
+  - '@types/react@19.3.1'
+  - marked@18.3.0
+  - nitropack@2.14.0
+  - nuxt@4.7.0
+  - tsrs@7.1.0-beta.tsrs5

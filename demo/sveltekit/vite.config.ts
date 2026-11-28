@@ -5,8 +5,8 @@ import { fileURLToPath, URL } from 'node:url';
 import { stackTip } from '@glyphnav-demo/shared/internal/version';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { ports } from '../ports';
-import { kitConfig } from './kit.config';
+import { ports } from '../ports.ts';
+import { kitConfig } from './kit.config.ts';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 const nodeRequire = createRequire(import.meta.url);
@@ -17,13 +17,18 @@ const ver = (name: string): string => {
     return (nodeRequire(`${name}/package.json`) as { version: string }).version;
   } catch {
     let dir = dirname(nodeRequire.resolve(name));
+
     for (;;) {
       const file = join(dir, 'package.json');
+
       if (existsSync(file)) {
         const { version } = JSON.parse(readFileSync(file, 'utf8')) as { version?: string };
+
         if (version) return version;
       }
+
       const parent = dirname(dir);
+
       if (parent === dir) return '';
       dir = parent;
     }

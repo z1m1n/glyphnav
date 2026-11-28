@@ -116,6 +116,7 @@ export const attachRouter = (
         router.push = originalPush;
         router.replace = originalReplace;
       }
+
       stopPopState();
       controller.cancel();
     },

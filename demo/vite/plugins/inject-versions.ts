@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { glyphnavVersion, stackForFile, stackTipForFile } from '../versions';
+import { glyphnavVersion, stackForFile, stackTipForFile } from '../versions.ts';
 
 /**
  * Fill the version placeholders in the demo HTML: the library version after the
@@ -24,6 +24,7 @@ export function injectVersions(): Plugin {
 
         if (html.includes('__STACK_TIP__')) {
           const tip = stackTipForFile(ctx.filename);
+
           // No tip for this page (vanilla/core/changelog): drop the whole
           // attribute rather than leave a tooltip with empty text.
           html = tip

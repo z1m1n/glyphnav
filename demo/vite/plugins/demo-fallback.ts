@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { APP_NAMES } from '../apps';
+import { APP_NAMES } from '../apps.ts';
 
 /**
  * Route each demo's sub-paths to that demo's `index.html` in dev. Vite's default

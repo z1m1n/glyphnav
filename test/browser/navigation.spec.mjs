@@ -3,7 +3,9 @@ import { expect, test } from '@playwright/test';
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.historyWrites = [];
+
     const replace = History.prototype.replaceState;
+
     History.prototype.replaceState = function (...args) {
       replace.apply(this, args);
       window.historyWrites.push(location.pathname + location.search + location.hash);
@@ -17,6 +19,7 @@ const completed = async (page) => {
 
 const hasIntermediatePath = async (page, from, to) => {
   const writes = await page.evaluate(() => window.historyWrites);
+
   expect(writes.some((path) => path !== from && path !== to)).toBe(true);
 };
 
@@ -24,7 +27,9 @@ test('a delayed React Router navigation animates the real address bar and preser
   page,
 }) => {
   await page.goto('/');
+
   const initialHistory = await page.evaluate(() => history.length);
+
   await page.getByText('Delayed route', { exact: true }).click();
   await completed(page);
   await expect(page.locator('#route')).toHaveText('/about?q=glyphnav#results');
@@ -44,12 +49,17 @@ test('React Router redirects animate to the landed path', async ({ page }) => {
 test('rapid React Router navigation settles both runs at the newest route', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#route')).toHaveText('/');
+
   const results = await page.evaluate(async () => {
     const first = window.navigateGlyph('/about');
+
     await new Promise((resolve) => setTimeout(resolve, 20));
+
     const second = window.navigateGlyph('/other');
+
     return Promise.all([first, second]);
   });
+
   expect(results).toEqual(['cancelled', 'completed']);
   await expect(page).toHaveURL('/other');
   await hasIntermediatePath(page, '/', '/other');
@@ -61,14 +71,22 @@ test('new-tab, download and cancelled clicks preserve browser behavior', async (
   await page.evaluate(() => {
     window.historyWrites = [];
   });
+
   const popupPromise = page.waitForEvent('popup');
+
   await page.getByText('New tab', { exact: true }).click();
+
   const popup = await popupPromise;
+
   await expect(popup).toHaveURL('/other');
   await popup.close();
+
   const downloadPromise = page.waitForEvent('download');
+
   await page.getByText('Download', { exact: true }).click();
+
   const download = await downloadPromise;
+
   expect(download.suggestedFilename()).toBe('download.txt');
   await page.getByText('Cancelled link', { exact: true }).click();
   await expect(page).toHaveURL('/');

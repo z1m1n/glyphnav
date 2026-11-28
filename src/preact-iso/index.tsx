@@ -40,6 +40,7 @@ const GlyphnavContext = createContext<GlyphnavController | null>(null);
  */
 const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
   const [controller] = useState(() => new GlyphnavController(options));
+
   controller.update(options);
   // Preact 11 defers passive cleanup; address-bar writes must stop at unmount.
   useLayoutEffect(() => () => controller.destroy(), [controller]);
@@ -57,9 +58,12 @@ const useFallbackController = (
   options?: GlyphnavOptions,
 ): GlyphnavController | null => {
   const [controller, setController] = useState<GlyphnavController | null>(null);
+
   if (enabled && controller === null) {
     const fallback = new GlyphnavController(options);
+
     setController(fallback);
+
     return fallback;
   }
 
@@ -85,10 +89,12 @@ const attachLinkInterceptor = (
 
   const handler = (event: Event): void => {
     const anchor = eligibleAnchor(event as MouseEvent);
+
     if (!anchor) {
       const target = event.target as Node | null;
       const element = target?.nodeType === 1 ? (target as Element) : target?.parentElement;
       const nativeAnchor = element?.closest('a') as HTMLAnchorElement | null;
+
       // preact-iso ignores defaultPrevented and some browser-owned link
       // attributes. Keep those clicks away from its window listener while
       // preserving the browser default. Opted-out internal links remain native
@@ -96,17 +102,20 @@ const attachLinkInterceptor = (
       if (nativeAnchor && !eligibleAnchor(event as MouseEvent, nativeAnchor, false)) {
         event.stopPropagation();
       }
+
       return;
     }
 
     const url = new URL(anchor.href, window.location.href);
     const to = url.pathname + url.search + url.hash;
+
     event.preventDefault();
     event.stopPropagation();
     void controller.run(to, () => route(to), options).catch(reportNavigationError);
   };
 
   document.addEventListener('click', handler);
+
   return () => document.removeEventListener('click', handler);
 };
 
@@ -238,8 +247,10 @@ export const GlyphnavLink = ({
   const handleClick = useCallback(
     (event: Parameters<NonNullable<GlyphnavLinkProps['onClick']>>[0]): void => {
       onClick?.(event);
+
       if (!eligibleAnchor(event, event.currentTarget)) {
         if (!eligibleAnchor(event, event.currentTarget, false)) event.stopPropagation();
+
         return;
       }
 

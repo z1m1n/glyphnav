@@ -39,6 +39,7 @@ const el = (tag: string, props: Record<string, unknown>): JSX.Element =>
 
 function LocationLabel(): JSX.Element {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
   return el('div', {
     'data-testid': 'loc',
     get children() {
@@ -49,6 +50,7 @@ function LocationLabel(): JSX.Element {
 
 function NavButton(): JSX.Element {
   const navigate = useGlyphnavNavigate(fast);
+
   return el('button', {
     type: 'button',
     onClick: () => void navigate({ to: '/test' }),
@@ -91,6 +93,7 @@ async function renderApp(): Promise<void> {
     history: createMemoryHistory({ initialEntries: ['/'] }),
   });
   const host = document.createElement('div');
+
   document.body.appendChild(host);
   dispose = render(
     () =>
@@ -136,7 +139,9 @@ describe('tanstack solid router adapter', () => {
 
   it('GlyphnavLink renders a real href and animates then navigates on click', async () => {
     await renderApp();
+
     const link = screen.getByText('other') as HTMLAnchorElement;
+
     expect(link.getAttribute('href')).toBe('/other');
 
     fireEvent.click(link);

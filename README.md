@@ -739,20 +739,24 @@ edits update the demo live.
 
 ## Development
 
-Use **Node.js 24**, the version used by CI; the current Astro demo requires at
-least Node.js 22.22. The repo is a [pnpm](https://pnpm.io) workspace, with the
-package-manager version pinned in [`package.json`](package.json). The library is
-the root package, and the shared helpers plus Next.js, Nuxt, SvelteKit and Astro
-demos are workspace members under `demo/`. The other demos are plain files in
+The workspace pins **pnpm 12.23.0** and **Node.js 26.13.1 LTS** in
+[`package.json`](package.json). Run `pnpm install` to download the pinned Node.js
+runtime for development. CI reads the same pins through `pnpm/setup`. Use
+`pnpm exec node --version` to check the workspace runtime.
+The library is the root package, and the shared helpers plus Next.js, Nuxt, SvelteKit
+and Astro demos are workspace members under `demo/`. The other demos live in
 the root package.
 
 ```bash
 pnpm test            # Vitest (jsdom) — core, controller, vanilla + all adapters
-pnpm run typecheck   # tsc --noEmit
+pnpm run typecheck   # Native tsc projects and the Vue Router SFC check
 pnpm run typecheck:apps # Next.js, Nuxt, SvelteKit and Astro demo checks
+pnpm run lint        # Oxlint and the Stylistic blank-line rules
+pnpm run lint:types  # Oxlint with tsrs compiler diagnostics for src/ and test/
+pnpm run lint:fix    # Apply safe lint fixes, including blank-line padding
 pnpm run build       # Vite library build → dist/ (ESM + CJS + .d.ts)
 pnpm run coverage    # V8 coverage
-pnpm test:package    # pack tarball; NodeNext ESM/CJS declarations + runtime imports
+pnpm test:package    # pnpm pack and verify NodeNext ESM/CJS declarations and runtime imports
 pnpm exec playwright install chromium  # browser setup (once)
 pnpm test:browser    # build + Chromium address-bar integration regressions
 pnpm test:browser:next # build + native Next Link regression in the Next demo
@@ -762,15 +766,24 @@ pnpm run quality    # PR gate: build, types, lint, format, coverage, package + b
 ```
 
 The library, declaration build, Next.js demo and standalone TypeScript checks
-use native **TypeScript 7.0.2**. Svelte component diagnostics also use it through
-`svelte-check --tsgo`. Three framework tools still need **TypeScript 6.0.3**:
+use native **TypeScript 7.0.2**, the latest stable release. Svelte component
+diagnostics also use it through `svelte-check --tsgo`. TypeScript 7.1 is in beta.
+Three framework tools still need **TypeScript 6.0.3**.
 
 - Vue Router and Nuxt share the Nuxt workspace's `vue-tsc` installation.
   Version 3.3.14 loads `typescript/lib/tsc`, which TypeScript 7.0 does not export.
-- `svelte-kit sync` in SvelteKit 3.2.0 reads the tsconfig through the JavaScript
+- `svelte-kit sync` in SvelteKit 3.4.0 reads the tsconfig through the JavaScript
   Compiler API. The SvelteKit demo installs both compilers.
 - Astro's template checker rejects TypeScript 7.0. `pnpm typecheck:astro`
   runs the template check on 6 and checks the demo's TypeScript source on 7.
+
+Both `pnpm run check` and `pnpm run quality` run Oxlint's tsrs-backed TypeScript
+diagnostics alongside the existing project and framework checks.
+`@stylistic/eslint-plugin` enforces blank lines after imports and blocks, around
+declaration groups and functions, and before control-flow statements.
+
+The Solid demos use Solid 1.9.20 and Solid Router 1.0.3 while the stable
+TanStack Solid Router and Vite plugin require Solid 1.
 
 The package is built with **Vite 8** in library mode with thirteen entry points
 (`.`, `./core`, `./vue-router`, `./react-router`, `./solid-router`,

@@ -78,28 +78,36 @@ export const attachGlyphnav = (
     // Relative targets must resolve against the real path, even if a previous
     // run currently owns the address bar. Cross-origin URLs stay unanimated.
     controller.cancel();
+
     const href = String(to);
     let path = href;
+
     if (typeof window !== 'undefined') {
       const url = new URL(href, window.location.href);
+
       if (url.origin === window.location.origin) path = url.pathname + url.search + url.hash;
     }
+
     return controller.run(path, () => astroNavigate(href, extras));
   };
 
   const onClick = ((event: MouseEvent): void => {
     const anchor = eligibleAnchor(event);
+
     // Astro's explicit hard-reload links must retain their native behavior.
     if (!anchor || anchor.hasAttribute('data-astro-reload')) return;
     // Resolve relative hrefs after restoring any in-flight scrambled path.
     controller.cancel();
+
     const href = anchor.href;
     const history = anchor.dataset.astroHistory === 'replace' ? 'replace' : 'auto';
+
     event.preventDefault();
     void navigate(href, { history, sourceElement: anchor }).catch(reportNavigationError);
   }) as EventListener;
 
   if (intercept === 'links') root?.addEventListener('click', onClick, true);
+
   if (animatePopState) controller.enableHistoryAnimation();
 
   return {
@@ -107,15 +115,19 @@ export const attachGlyphnav = (
     navigate,
     link(node) {
       node.addEventListener('click', onClick);
+
       const cleanup = (): void => {
         node.removeEventListener('click', onClick);
         linkCleanups.delete(cleanup);
       };
+
       linkCleanups.add(cleanup);
+
       return cleanup;
     },
     detach() {
       if (intercept === 'links') root?.removeEventListener('click', onClick, true);
+
       for (const cleanup of linkCleanups) cleanup();
       controller.destroy();
     },

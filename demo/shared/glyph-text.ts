@@ -51,6 +51,7 @@ export function createGlyphText(el: HTMLElement): GlyphText {
       if (prefersReducedMotion()) {
         player.cancel();
         el.textContent = target;
+
         return;
       }
 
@@ -63,14 +64,17 @@ export function createGlyphText(el: HTMLElement): GlyphText {
         effect,
         preserveLeadingSlash: false,
       });
+
       if (frames.length === 0) {
         el.textContent = target;
+
         return;
       }
 
       // The exact per-frame delay the address-bar controller uses: the total
       // duration spread over the frames, never below MIN_FRAME_MS.
       const step = Math.max(MIN_FRAME_MS, duration / Math.max(1, frames.length - 1));
+
       await player.play(frames.length, step, (i) => {
         el.textContent = frames[i]!.text;
       });

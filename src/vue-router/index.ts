@@ -86,10 +86,13 @@ export const attachGlyphnav = (
 export const glyphnav = {
   install(app: App, options: VueGlyphnavOptions & { router: Router }): void {
     const { router, ...rest } = options;
+
     if (!router) {
       throw new Error('[glyphnav] the Vue plugin requires a `router` option.');
     }
+
     const instance = attachGlyphnav(router, rest);
+
     app.provide(GLYPHNAV_KEY, instance.controller);
     app.provide(GLYPHNAV_ROUTER_KEY, instance);
     // Vue 3.5+ provides an app-level cleanup hook. Earlier versions can call
@@ -106,6 +109,7 @@ export const glyphnav = {
  */
 export const useGlyphnav = (): GlyphnavController => {
   const controller = inject(GLYPHNAV_KEY, null);
+
   if (!controller) {
     throw new Error(
       '[glyphnav] useGlyphnav() called without installing the plugin (app.use(glyphnav, { router })).',
@@ -124,6 +128,7 @@ export const useGlyphnav = (): GlyphnavController => {
  */
 export const useGlyphnavRouter = (): GlyphnavVueInstance => {
   const instance = inject(GLYPHNAV_ROUTER_KEY, null);
+
   if (!instance) {
     throw new Error(
       '[glyphnav] useGlyphnavRouter() called without installing the plugin (app.use(glyphnav, { router })).',

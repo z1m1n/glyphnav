@@ -45,6 +45,7 @@ function showPath(value: string, resolving: boolean): void {
 }
 
 const toggleHistory = createHistoryToggle(() => glyph.controller.enableHistoryAnimation());
+
 function apply(): void {
   const state = {
     charset: charset.value,
@@ -54,6 +55,7 @@ function apply(): void {
     scope: scope.value as AnimateScope,
     backForward: backForward.checked,
   };
+
   ms.textContent = `${state.duration}ms`;
   duration.setAttribute('aria-valuetext', ms.textContent);
   glyph.controller.update(glyphnavOptions(state, showPath));
@@ -75,8 +77,11 @@ initWordmark();
 // persisted mount before each swap, and carry the selected theme to the new root.
 document.addEventListener('astro:before-swap', (event) => {
   const next = (event as TransitionBeforeSwapEvent).newDocument;
+
   next.documentElement.dataset.theme = document.documentElement.dataset.theme;
+
   const overlays = document.querySelector('[data-overlays]')!;
+
   for (const node of document.querySelectorAll('body > .theme-toggle, body > .glyph-tooltip')) {
     overlays.append(node);
   }

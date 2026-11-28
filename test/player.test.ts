@@ -21,6 +21,7 @@ describe('createPlayer', () => {
     const player = createPlayer();
     const tick = vi.fn();
     const done = player.play(0, 10, tick);
+
     await expect(done).resolves.toBe('completed');
     expect(tick).not.toHaveBeenCalled();
   });
@@ -35,6 +36,7 @@ describe('createPlayer', () => {
     await expect(done).resolves.toBe('cancelled');
 
     const seen = ticks.length;
+
     await vi.advanceTimersByTimeAsync(200);
     expect(ticks.length).toBe(seen); // no further ticks after cancel
     expect(player.running).toBe(false);
@@ -68,6 +70,7 @@ describe('createPlayer', () => {
     const player = createPlayer(scheduler);
     const error = new Error('frame failed');
     let outcome: unknown = 'pending';
+
     void player
       .play(3, 10, () => {
         throw error;
@@ -82,6 +85,7 @@ describe('createPlayer', () => {
     } catch {
       /* assertion below captures the leak */
     }
+
     await Promise.resolve();
 
     expect(outcome).toBe(error);
@@ -97,6 +101,7 @@ describe('createPlayer', () => {
     const first = player.play(1, 0, () => {
       second = player.play(2, 10, (index) => ticks.push(index));
     });
+
     scheduler.step(0);
 
     await expect(first).resolves.toBe('cancelled');
@@ -110,11 +115,14 @@ describe('createPlayer', () => {
     let callback!: FrameRequestCallback;
     const raf = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((next) => {
       callback = next;
+
       return 1;
     });
     const now = vi.spyOn(performance, 'now').mockReturnValue(1000);
+
     try {
       const tick = vi.fn();
+
       defaultScheduler.requestFrame(tick);
       callback(100);
       expect(tick).toHaveBeenCalledWith(defaultScheduler.now());

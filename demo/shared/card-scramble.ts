@@ -41,17 +41,20 @@ export function initCardScramble(selector = '.card'): void {
 
   for (const card of document.querySelectorAll<HTMLElement>(selector)) {
     const name = card.querySelector<HTMLElement>('.card-name');
+
     if (!name) continue;
 
     // The real name is static markup; capture it once so every run resolves back
     // to it, no matter which frame a previous run left on screen.
     const target = (name.textContent ?? '').trim();
+
     if (!target) continue;
 
     // One animator per card: createGlyphText reuses a single Player, so a fresh
     // run() on re-entry cleanly cancels the previous one — rapid in/out never
     // overlaps writes, and leaving mid-run still lands on the real name.
     const glyph = createGlyphText(name);
+
     card.addEventListener('pointerenter', () => {
       void glyph.run(target, CARD_EFFECT);
     });

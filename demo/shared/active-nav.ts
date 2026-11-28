@@ -70,6 +70,7 @@ const currentHref = (): string => location.pathname + location.search + location
 function sameUrl(a: string, b: string): boolean {
   const ua = new URL(a, location.href);
   const ub = new URL(b, location.href);
+
   return (
     normalize(ua.pathname) + ua.search + ua.hash === normalize(ub.pathname) + ub.search + ub.hash
   );
@@ -103,6 +104,7 @@ export function syncActiveNav(): void {
         ? normalize(a.pathname) + a.search + a.hash === refFull
         : normalize(a.pathname) === refPath);
     const mark = chip ? 'true' : 'page';
+
     // Write only on a real change: the MutationObserver in initActiveNav
     // watches this attribute, and idempotent writes are what keep the
     // observe → sync → observe cycle from feeding itself.
@@ -127,7 +129,9 @@ function onNavClick(event: MouseEvent): void {
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return;
   }
+
   const a = (event.target as Element | null)?.closest<HTMLAnchorElement>(LINKS);
+
   if (!a || a.origin !== location.origin) return;
   pendingHref = a.pathname + a.search + a.hash;
   syncActiveNav();
@@ -158,11 +162,13 @@ export function initActiveNav(): () => void {
 
   const controller = new AbortController();
   const { signal } = controller;
+
   document.addEventListener('click', onNavClick, { capture: true, signal });
   window.addEventListener('popstate', onTraversal, { signal });
   window.addEventListener('hashchange', onTraversal, { signal });
 
   const observer = new MutationObserver(syncActiveNav);
+
   for (const nav of document.querySelectorAll(NAVS)) {
     observer.observe(nav, {
       subtree: true,

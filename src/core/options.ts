@@ -28,6 +28,7 @@ const positiveInt = (value: number | undefined, fallback: number): number => {
   if (value == null || !Number.isFinite(value)) return fallback;
 
   const n = Math.floor(value);
+
   return n >= 1 ? n : fallback;
 };
 

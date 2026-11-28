@@ -4,14 +4,17 @@ import { createBrowserRouter, redirect, RouterProvider, useLocation } from 'reac
 import { GlyphnavLink, GlyphnavProvider, useGlyphnavNavigate } from 'glyphnav/react-router';
 
 window.glyphResults = [];
+
 const hooks = { onComplete: (_context, result) => window.glyphResults.push(result) };
 
 function Page() {
   const location = useLocation();
   const navigate = useGlyphnavNavigate();
+
   useEffect(() => {
     window.navigateGlyph = navigate;
   }, [navigate]);
+
   return (
     <>
       <output id="route">{location.pathname + location.search + location.hash}</output>
@@ -46,9 +49,11 @@ const router = createBrowserRouter([
     path: '/redirect',
     loader: async () => {
       await delay();
+
       return redirect('/landed?via=redirect');
     },
     element: page,
   },
 ]);
+
 createRoot(document.getElementById('root')).render(<RouterProvider router={router} />);

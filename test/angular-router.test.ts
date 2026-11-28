@@ -53,6 +53,7 @@ describe('angular adapter', () => {
     });
 
     const run = nav.navigateByUrl('/test');
+
     await vi.advanceTimersByTimeAsync(200);
     await run;
 
@@ -70,6 +71,7 @@ describe('angular adapter', () => {
     });
 
     const run = nav.navigate(['users', 42]);
+
     await vi.advanceTimersByTimeAsync(200);
     await run;
 
@@ -94,6 +96,7 @@ describe('angular adapter', () => {
     );
 
     const run = nav.navigateByUrl('/test');
+
     await vi.advanceTimersByTimeAsync(500);
     await run;
 
@@ -105,6 +108,7 @@ describe('angular adapter', () => {
 
   it('provideGlyphnav returns a useFactory provider bound to the GLYPHNAV token', () => {
     const providers = provideGlyphnav({ charset: 'q' });
+
     expect(providers).toHaveLength(1);
 
     const provider = providers[0] as {
@@ -116,12 +120,14 @@ describe('angular adapter', () => {
         destroyRef: { onDestroy: (cleanup: () => void) => void },
       ) => { controller: unknown; navigateByUrl: unknown; detach: () => void };
     };
+
     expect(provider.provide).toBe(GLYPHNAV);
     expect(provider.deps).toHaveLength(3); // Router + Location + DestroyRef
 
     const location = { prepareExternalUrl: (url: string) => url };
     const onDestroy = vi.fn();
     const nav = provider.useFactory(makeRouter(), location, { onDestroy });
+
     expect(nav.controller).toBeDefined();
     expect(typeof nav.navigateByUrl).toBe('function');
     expect(onDestroy).toHaveBeenCalledWith(nav.detach);

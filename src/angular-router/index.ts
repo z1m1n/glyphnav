@@ -72,6 +72,7 @@ export const createGlyphnavNavigator = (
     },
     navigateByUrl(url, extras) {
       const target = typeof url === 'string' ? url : router.serializeUrl(url);
+
       return controller.run(
         prepareUrl(target),
         () => router.navigateByUrl(url, extras) as Promise<unknown> as Promise<void>,
@@ -80,6 +81,7 @@ export const createGlyphnavNavigator = (
     navigate(commands, extras) {
       const tree = router.createUrlTree(commands, extras);
       const target = router.serializeUrl(tree);
+
       return controller.run(
         prepareUrl(target),
         () => router.navigateByUrl(tree, extras) as Promise<unknown> as Promise<void>,
@@ -114,7 +116,9 @@ export const provideGlyphnav = (options: AngularGlyphnavOptions = {}): Provider[
         const navigator = createGlyphnavNavigator(router, options, (url) =>
           location.prepareExternalUrl(url),
         );
+
         destroyRef.onDestroy(navigator.detach);
+
         return navigator;
       },
       deps: [Router, Location, DestroyRef],

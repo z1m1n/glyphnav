@@ -14,36 +14,30 @@ const run = (command, args, cwd = consumer) =>
 
 try {
   await mkdir(join(consumer, 'node_modules', 'glyphnav'), { recursive: true });
-  const [packed] = JSON.parse(
-    run(
-      'npm',
-      [
-        'pack',
-        '--ignore-scripts',
-        '--json',
-        '--cache',
-        join(temporary, 'npm-cache'),
-        '--pack-destination',
-        temporary,
-      ],
-      root,
-    ),
-  );
+
+  const tarball = join(temporary, 'glyphnav.tgz');
+
+  run('pnpm', ['pack', '--ignore-scripts', '--out', tarball], root);
+
   run('tar', [
     '-xzf',
-    join(temporary, packed.filename),
+    tarball,
     '--strip-components=1',
     '-C',
     join(consumer, 'node_modules', 'glyphnav'),
   ]);
+
   // Peers come from this workspace; glyphnav itself comes only from the tarball.
   for (const entry of await readdir(join(root, 'node_modules'))) {
     if (entry.startsWith('.') || entry === 'glyphnav') continue;
     await symlink(join(root, 'node_modules', entry), join(consumer, 'node_modules', entry), 'dir');
   }
+
   const entrypoints = Object.keys(manifest.exports).filter((entry) => entry !== './package.json');
+
   for (const entry of entrypoints) {
     const specifier = entry === '.' ? 'glyphnav' : `glyphnav/${entry.slice(2)}`;
+
     for (const [extension, declaration] of [
       ['mts', '.d.ts'],
       ['cts', '.d.cts'],
@@ -51,7 +45,9 @@ try {
       const fixture = join(consumer, `consumer.${extension}`);
       const expectedTypes =
         manifest.exports[entry][extension === 'mts' ? 'import' : 'require'].types;
+
       assert.ok(expectedTypes.endsWith(declaration), `${specifier}: wrong declaration format`);
+
       // Use a public member so unresolved internal types cannot silently turn
       // the imported API into any. Separate programs avoid router augmentations
       // from different TanStack frameworks colliding in their shared peer.
@@ -63,11 +59,14 @@ try {
             : ['./astro', './sveltekit', './vue-router', './nuxt'].includes(entry)
               ? 'attachGlyphnav'
               : 'GlyphnavLink';
+
       await writeFile(
         fixture,
         `import * as api from '${specifier}';\nconst member: typeof api.${member} = api.${member};\nvoid member;\n`,
       );
+
       const config = join(consumer, 'tsconfig.json');
+
       await writeFile(
         config,
         JSON.stringify({
@@ -84,6 +83,7 @@ try {
           files: [fixture],
         }),
       );
+
       try {
         run(join(root, 'node_modules', '.bin', 'tsc'), ['-p', config]);
       } catch (error) {
@@ -93,6 +93,7 @@ try {
         );
       }
     }
+
     const esm = join(consumer, 'runtime.mjs');
     const cjs = join(consumer, 'runtime.cjs');
     const solid = entry === './solid-router' || entry === './tanstack-router/solid';
@@ -103,6 +104,7 @@ try {
     // Solid's browser build schedules a persistent queue. These smoke checks
     // validate module loading only; the real-browser suite covers navigation.
     const browserCleanup = solid ? 'dom.window.close();\nprocess.exit(0);' : '';
+
     await writeFile(
       esm,
       `${browserSetup}${angularSetup}const api = await import('${specifier}');\nif (!Object.keys(api).length) throw new Error('Empty ESM entry');\n${browserCleanup}\n`,
@@ -111,6 +113,7 @@ try {
       cjs,
       `${solid ? "const { JSDOM } = require('jsdom');\nconst dom = new JSDOM('<!doctype html>', { url: 'http://localhost/' });\nglobalThis.window = dom.window;\nglobalThis.document = dom.window.document;\n" : ''}${entry === './angular-router' ? "require('@angular/compiler');\n" : ''}const api = require('${specifier}');\nif (!Object.keys(api).length) throw new Error('Empty CJS entry');\n${browserCleanup}\n`,
     );
+
     for (const fixture of [esm, cjs]) {
       try {
         run(process.execPath, [...(solid ? ['--conditions=browser'] : []), fixture]);
@@ -121,6 +124,7 @@ try {
         );
       }
     }
+
     console.log(`✓ ${specifier}: NodeNext ESM/CJS types, ESM runtime, CJS runtime`);
   }
 } finally {

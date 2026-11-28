@@ -63,13 +63,16 @@ export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigate
     async (to, navOptions) => {
       if (typeof to === 'number') {
         await navigate(to);
+
         return 'skipped';
       }
 
       let target = toPath(to);
       const path = typeof to === 'string' ? parsePath(to) : to;
+
       if (path.pathname?.startsWith('/')) {
         const resolved = resolvePath(to);
+
         // The root href carries BrowserRouter's basename or HashRouter's
         // fragment prefix. Root navigation keeps its exact trailing-slash form.
         target =
@@ -77,6 +80,7 @@ export const useGlyphnavNavigate = (options?: GlyphnavOptions): GlyphnavNavigate
             ? rootHref + resolved.search + resolved.hash
             : rootHref.replace(/\/$/, '') + createPath(resolved);
       }
+
       return controller.run(target, () => navigate(to, navOptions), options);
     },
     [navigate, controller, options, rootHref],
@@ -134,12 +138,16 @@ export const GlyphnavLink = ({
     (event: MouseEvent<HTMLAnchorElement>) => {
       if (reloadDocument) {
         onClick?.(event);
+
         return;
       }
+
       let destination = to;
+
       if (absolute) {
         const url = new URL(href, window.location.href);
         const base = rootHref.replace(/\/$/, '');
+
         // React Router's Link leaves same-origin URLs outside its basename to
         // the browser, and removes the basename before an internal navigation.
         if (
@@ -147,10 +155,13 @@ export const GlyphnavLink = ({
           (base && url.pathname !== base && !url.pathname.startsWith(base + '/'))
         ) {
           onClick?.(event);
+
           return;
         }
+
         destination = (url.pathname.slice(base.length) || '/') + url.search + url.hash;
       }
+
       runLinkClick(
         event,
         onClick,

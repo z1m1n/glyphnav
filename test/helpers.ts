@@ -10,9 +10,12 @@
  */
 export function seqRng(values: number[]): () => number {
   let i = 0;
+
   return () => {
     const v = values[i % values.length];
+
     i += 1;
+
     return v;
   };
 }

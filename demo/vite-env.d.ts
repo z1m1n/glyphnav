@@ -15,6 +15,7 @@ interface ImportMeta {
 // via next/image-types and reads `.src`; it doesn't use this declaration.)
 declare module '*.svg' {
   const src: string;
+
   export default src;
 }
 
@@ -22,5 +23,6 @@ declare module '*.svg' {
 // demo imports the project CHANGELOG.md this way to render it as markdown.
 declare module '*?raw' {
   const content: string;
+
   export default content;
 }

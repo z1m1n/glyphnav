@@ -27,6 +27,7 @@ export const clamp = (value: number, min: number, max: number): number =>
  */
 export function onViewportShift(handler: () => void, signal?: AbortSignal): void {
   const options = signal ? { signal } : undefined;
+
   window.addEventListener('scroll', handler, { capture: true, ...options });
   window.addEventListener('resize', handler, options);
 }

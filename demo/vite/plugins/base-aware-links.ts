@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { base } from '../paths';
+import { base } from '../paths.ts';
 
 /**
  * Prefix the demo's root-absolute navigation links (`/vanilla/`, `/`) with the
@@ -18,6 +18,7 @@ export function baseAwareLinks(): Plugin {
       order: 'pre',
       handler(html) {
         if (base === '/') return html;
+
         return html.replace(/href="\/(?!\/)/g, `href="${base}`);
       },
     },

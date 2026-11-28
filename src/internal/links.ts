@@ -61,6 +61,7 @@ export const currentPath = (): string => {
   if (typeof window === 'undefined' || !window.location) return '/';
 
   const { pathname, search, hash } = window.location;
+
   return pathname + search + hash;
 };
 
@@ -100,32 +101,44 @@ export const settleAfter = (
     const finish = (error?: unknown, failed = false): void => {
       if (settled) return;
       settled = true;
+
       if (timer !== undefined) clearTimeout(timer);
       signal?.removeEventListener('abort', abort);
+
       if (failed) reject(error);
       else resolve();
     };
+
     const abort = (): void => finish(new DOMException('Navigation cancelled', 'AbortError'), true);
+
     if (signal?.aborted) {
       abort();
+
       return;
     }
+
     signal?.addEventListener('abort', abort, { once: true });
 
     try {
       Promise.resolve(navigate()).then(
         () => {
           if (settled) return null;
+
           const start = Date.now();
           const tick = (): void => {
             if (settled) return;
+
             if (!browser || currentPath() !== before || Date.now() - start >= timeoutMs) {
               finish();
+
               return;
             }
+
             timer = setTimeout(tick, 16);
           };
+
           tick();
+
           return null;
         },
         (error: unknown) => finish(error, true),
@@ -156,22 +169,30 @@ export const eligibleAnchor = (
   respectOptOut = true,
 ): HTMLAnchorElement | null => {
   if (isModifiedClick(event)) return null;
+
   if (typeof window === 'undefined' || !window.location) return null;
 
   const target = event.target as Node | null;
   const element = target?.nodeType === 1 ? (target as Element) : target?.parentElement;
   const anchor = explicitAnchor ?? (element?.closest?.('a') as HTMLAnchorElement | null);
+
   if (!anchor || !anchor.getAttribute('href')) return null;
+
   const browsingTarget = anchor.target || anchor.ownerDocument.querySelector('base')?.target;
+
   if (browsingTarget && browsingTarget.toLowerCase() !== '_self') return null;
+
   if (anchor.hasAttribute('download')) return null;
+
   if (respectOptOut && anchor.dataset.glyphnav === 'off') return null;
 
   const rel = anchor.getAttribute('rel');
+
   if (rel && rel.toLowerCase().split(/\s+/).includes('external')) return null;
 
   try {
     const url = new URL(anchor.href, window.location.href);
+
     if (url.origin !== window.location.origin) return null;
   } catch {
     return null;

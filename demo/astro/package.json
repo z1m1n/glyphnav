@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@glyphnav-demo/shared": "workspace:*",
-    "astro": "7.4.10",
+    "astro": "7.4.13",
     "glyphnav": "workspace:*"
   },
   "devDependencies": {
@@ -20,7 +20,7 @@
     "typescript": "6.0.3"
   },
   "engines": {
-    "node": ">=22.22.0"
+    "node": ">=22.23.4"
   },
   "//typescript": "astro check requires the TypeScript 6 JavaScript Compiler API. The root typecheck:astro script also checks TypeScript source with native TypeScript 7."
 }

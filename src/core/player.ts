@@ -84,11 +84,13 @@ export const createPlayer = (scheduler: Scheduler = defaultScheduler): Player =>
     resolve: (result: PlayResult) => void;
     reject: (error: unknown) => void;
   }
+
   let active: Playback | null = null;
 
   const finish = (run: Playback, result: PlayResult): void => {
     if (active !== run) return;
     active = null;
+
     if (run.frame != null) scheduler.cancelFrame(run.frame);
     run.resolve(result);
   };
@@ -96,6 +98,7 @@ export const createPlayer = (scheduler: Scheduler = defaultScheduler): Player =>
   const fail = (run: Playback, error: unknown): void => {
     if (active !== run) return;
     active = null;
+
     if (run.frame != null) scheduler.cancelFrame(run.frame);
     run.reject(error);
   };
@@ -111,38 +114,49 @@ export const createPlayer = (scheduler: Scheduler = defaultScheduler): Player =>
 
       return new Promise<PlayResult>((resolve, reject) => {
         const run: Playback = { frame: null, resolve, reject };
+
         active = run;
+
         if (count <= 0) {
           finish(run, 'completed');
+
           return;
         }
+
         try {
           let next = 0;
           const start = scheduler.now();
           const loop = (now: number): void => {
             if (active !== run) return;
             run.frame = null;
+
             try {
               const due =
                 stepDuration <= 0
                   ? count - 1
                   : Math.min(count - 1, Math.floor((now - start) / stepDuration));
+
               if (due >= next) {
                 tick(due);
+
                 // A tick can cancel or replace playback. Never let this
                 // callback finish or schedule frames for its successor.
                 if (active !== run) return;
                 next = due + 1;
               }
+
               if (next >= count) {
                 finish(run, 'completed');
+
                 return;
               }
+
               run.frame = scheduler.requestFrame(loop);
             } catch (error) {
               fail(run, error);
             }
           };
+
           run.frame = scheduler.requestFrame(loop);
         } catch (error) {
           fail(run, error);

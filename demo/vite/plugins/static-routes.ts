@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
-import { DEMO_ROUTES } from '../apps';
-import { fromDemoRoot } from '../paths';
+import { DEMO_ROUTES } from '../apps.ts';
+import { fromDemoRoot } from '../paths.ts';
 
 /**
  * Give every client route a real file for GitHub Pages. Pages serves only static

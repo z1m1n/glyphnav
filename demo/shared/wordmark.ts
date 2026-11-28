@@ -55,6 +55,7 @@ function scramble(el: HTMLElement): void {
   el.dataset.glyphScrambled = '';
 
   const target = (el.textContent ?? '').trim();
+
   if (!target) return;
 
   // Every frame is a full-length run of random glyphs, but their widths vary;
@@ -63,6 +64,7 @@ function scramble(el: HTMLElement): void {
   // flickers.
   const reserved = el.getBoundingClientRect().width;
   const prevMinWidth = el.style.minWidth;
+
   if (reserved > 0) el.style.minWidth = `${reserved}px`;
 
   void createGlyphText(el)

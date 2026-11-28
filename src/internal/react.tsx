@@ -49,6 +49,7 @@ export const createControllerContext = (): ReactControllerContext => {
     ...options
   }: GlyphnavProviderProps): ReactNode => {
     const controller = useSharedController(options);
+
     useHistoryAnimation(controller, animatePopState);
 
     return createElement(GlyphnavContext.Provider, { value: controller }, children);
@@ -74,6 +75,7 @@ export const createControllerContext = (): ReactControllerContext => {
  */
 export const useSharedController = (options: GlyphnavOptions): GlyphnavController => {
   const [controller] = useState(() => new GlyphnavController(options));
+
   controller.update(options);
   useEffect(() => () => controller.destroy(), [controller]);
 
@@ -96,9 +98,12 @@ export const useFallbackController = (
   options?: GlyphnavOptions,
 ): GlyphnavController | null => {
   const [controller, setController] = useState<GlyphnavController | null>(null);
+
   if (enabled && controller === null) {
     const fallback = new GlyphnavController(options);
+
     setController(fallback);
+
     return fallback;
   }
 
@@ -149,6 +154,7 @@ export const runLinkClick = <
   glyphOptions?: GlyphnavOptions,
 ): void => {
   onClick?.(event);
+
   if (!eligibleAnchor(event, event.currentTarget)) return;
 
   event.preventDefault();

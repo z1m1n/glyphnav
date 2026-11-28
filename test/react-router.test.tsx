@@ -19,11 +19,13 @@ const fast = { charset: 'q', rng: () => 0, stepDuration: 5 } as const;
 
 function LocationLabel() {
   const location = useLocation();
+
   return <div data-testid="loc">{location.pathname}</div>;
 }
 
 function NavButton() {
   const navigate = useGlyphnavNavigate(fast);
+
   return (
     <button type="button" onClick={() => void navigate('/test')}>
       go
@@ -107,6 +109,7 @@ describe('react adapter', () => {
     { to: 'https://example.com/outside' },
   ])('leaves browser-owned anchor behavior intact: %j', async (props) => {
     const click = vi.fn();
+
     render(
       <MemoryRouter>
         <GlyphnavLink to="/other" {...props} onClick={click}>
@@ -115,7 +118,9 @@ describe('react adapter', () => {
         <LocationLabel />
       </MemoryRouter>,
     );
+
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+
     fireEvent(screen.getByText('other'), event);
     expect(event.defaultPrevented).toBe(false);
     expect(click).toHaveBeenCalledOnce();
@@ -127,6 +132,7 @@ describe('react adapter', () => {
 
   it('honors caller cancellation', async () => {
     const start = vi.fn();
+
     render(
       <MemoryRouter>
         <GlyphnavProvider {...fast} hooks={{ onStart: start }}>
@@ -148,31 +154,39 @@ describe('react adapter', () => {
   it('awaits a data-router loader and redirect, then animates after the source unmounts', async () => {
     const frames: string[] = [];
     let navigate!: ReturnType<typeof useGlyphnavNavigate>;
+
     function Source() {
       const value = useGlyphnavNavigate({
         ...fast,
         hooks: { onFrame: (frame) => frames.push(frame.path) },
       });
+
       useEffect(() => {
         navigate = value;
       }, [value]);
+
       return <div>source</div>;
     }
+
     const router = createBrowserRouter([
       { path: '/', Component: Source },
       {
         path: '/delayed',
         loader: async () => {
           await new Promise((resolve) => setTimeout(resolve, 80));
+
           return redirect('/landed');
         },
         element: <div>unused</div>,
       },
       { path: '/landed', element: <div>landed</div> },
     ]);
+
     try {
       render(<RouterProvider router={router} />);
+
       let result!: ReturnType<typeof navigate>;
+
       await act(async () => {
         result = navigate('/delayed');
       });
@@ -196,6 +210,7 @@ describe('react adapter', () => {
 
   it('uses per-link overrides under a provider and preserves basename and query', async () => {
     window.history.replaceState(null, '', '/app/');
+
     const frames: string[] = [];
     const router = createBrowserRouter(
       [
@@ -220,6 +235,7 @@ describe('react adapter', () => {
       ],
       { basename: '/app' },
     );
+
     try {
       render(<RouterProvider router={router} />);
       expect(screen.getByText('other').getAttribute('href')).toBe('/app/other?q=glyphnav#result');
@@ -239,24 +255,32 @@ describe('react adapter', () => {
   it('does not animate a navigation blocked by the router', async () => {
     const frames: string[] = [];
     let navigate!: ReturnType<typeof useGlyphnavNavigate>;
+
     function Source() {
       useBlocker(true);
+
       const value = useGlyphnavNavigate({
         ...fast,
         hooks: { onFrame: (frame) => frames.push(frame.path) },
       });
+
       useEffect(() => {
         navigate = value;
       }, [value]);
+
       return <div>source</div>;
     }
+
     const router = createBrowserRouter([
       { path: '/', Component: Source },
       { path: '/test', element: <div>landed</div> },
     ]);
+
     try {
       render(<RouterProvider router={router} />);
+
       let result!: ReturnType<typeof navigate>;
+
       await act(async () => {
         result = navigate('/test');
       });
@@ -272,8 +296,10 @@ describe('react adapter', () => {
     'animates rooted imperative destinations with basename: %j',
     async (to) => {
       window.history.replaceState(null, '', '/app/');
+
       const frames: string[] = [];
       let navigate!: ReturnType<typeof useGlyphnavNavigate>;
+
       function Source() {
         const value = useGlyphnavNavigate({
           ...fast,
@@ -281,11 +307,14 @@ describe('react adapter', () => {
           maxFrames: 2,
           hooks: { onFrame: (frame) => frames.push(frame.path) },
         });
+
         useEffect(() => {
           navigate = value;
         }, [value]);
+
         return <div>source</div>;
       }
+
       const router = createBrowserRouter(
         [
           { path: '/', Component: Source },
@@ -293,9 +322,12 @@ describe('react adapter', () => {
         ],
         { basename: '/app' },
       );
+
       try {
         render(<RouterProvider router={router} />);
+
         let done!: ReturnType<typeof navigate>;
+
         await act(async () => {
           done = navigate(to);
         });
@@ -316,6 +348,7 @@ describe('react adapter', () => {
 
   it('preserves link path-relative resolution and router navigation options', async () => {
     window.history.replaceState(null, '', '/app/parent/child/grandchild');
+
     const state = { from: 'glyphnav' };
     const router = createBrowserRouter(
       [
@@ -340,6 +373,7 @@ describe('react adapter', () => {
       { basename: '/app' },
     );
     const navigate = vi.spyOn(router, 'navigate');
+
     try {
       render(<RouterProvider router={router} />);
       expect(screen.getByText('parent').getAttribute('href')).toBe('/app/parent/child');
@@ -371,6 +405,7 @@ describe('react adapter', () => {
       const onClick = vi.fn((event: { preventDefault: () => void }) => {
         if (cancelled) event.preventDefault();
       });
+
       try {
         render(
           <MemoryRouter>
@@ -379,7 +414,9 @@ describe('react adapter', () => {
             </GlyphnavLink>
           </MemoryRouter>,
         );
+
         const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+
         fireEvent(screen.getByText('reload'), event);
         expect(event.defaultPrevented).toBe(cancelled);
         expect(onClick).toHaveBeenCalledOnce();

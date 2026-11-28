@@ -168,11 +168,13 @@ export class AppComponent {
     initTheme();
     initTooltips();
     initCodeBlocks();
+
     // The framework menu and the nav's exact-match active pill hook into the
     // rendered template, so they must wait for it (the other inits are
     // DOM-independent or delegated); both inject into this component's DOM, so
     // they unhook on destroy.
     const destroyRef = inject(DestroyRef);
+
     afterNextRender(() => {
       destroyRef.onDestroy(initFwMenu());
       destroyRef.onDestroy(initActiveNav());
@@ -240,6 +242,7 @@ export class AppComponent {
 
   onBackForward(event: Event): void {
     const on = (event.target as HTMLInputElement).checked;
+
     this.backForward.set(on);
     this.toggleHistory(on);
     this.persist();

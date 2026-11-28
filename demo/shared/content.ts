@@ -119,6 +119,7 @@ export function glyphnavOptions(
  */
 export function createHistoryToggle(enable: () => () => void): (on: boolean) => void {
   let stop: (() => void) | null = null;
+
   return (on) => {
     if (on && !stop) {
       stop = enable();
@@ -142,8 +143,10 @@ const STORE_PREFIX = 'glyphnav-demo:';
  */
 export function loadToolbar<T extends object>(key: string, defaults: T): T {
   if (typeof localStorage === 'undefined') return defaults;
+
   try {
     const raw = localStorage.getItem(STORE_PREFIX + key);
+
     return raw ? { ...defaults, ...(JSON.parse(raw) as Partial<T>) } : defaults;
   } catch {
     return defaults;
@@ -159,6 +162,7 @@ export function loadToolbar<T extends object>(key: string, defaults: T): T {
  */
 export function saveToolbar(key: string, state: object): void {
   if (typeof localStorage === 'undefined') return;
+
   try {
     localStorage.setItem(STORE_PREFIX + key, JSON.stringify(state));
   } catch {

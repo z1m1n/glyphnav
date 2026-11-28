@@ -76,8 +76,11 @@ function play(frames: FrameInfo[], speed: number, done: () => void): void {
 
   const tick = (): void => {
     if (navigating) return;
+
     if (i >= frames.length) return done();
+
     const f = frames[i++];
+
     el.textContent = f.path;
     bar.classList.toggle('resolving', f.phase === 'resolve');
     setTimeout(tick, speed);
@@ -98,4 +101,5 @@ function loop(): void {
     setTimeout(loop, 1200);
   });
 }
+
 loop();
